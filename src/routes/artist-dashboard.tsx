@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Upload, TrendingUp, DollarSign, Users, BarChart3 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/use-auth";
 
 export const Route = createFileRoute("/artist-dashboard")({
   head: () => ({
