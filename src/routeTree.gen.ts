@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtistDashboardRouteImport } from './routes/artist-dashboard'
 import { Route as AlbumsRouteImport } from './routes/albums'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -44,6 +45,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtistDashboardRoute = ArtistDashboardRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
+  '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
+  '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
+  '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/albums'
     | '/artist-dashboard'
+    | '/auth'
     | '/browse'
     | '/checkout'
     | '/contact'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/albums'
     | '/artist-dashboard'
+    | '/auth'
     | '/browse'
     | '/checkout'
     | '/contact'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/albums'
     | '/artist-dashboard'
+    | '/auth'
     | '/browse'
     | '/checkout'
     | '/contact'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AlbumsRoute: typeof AlbumsRoute
   ArtistDashboardRoute: typeof ArtistDashboardRoute
+  AuthRoute: typeof AuthRoute
   BrowseRoute: typeof BrowseRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/browse'
       fullPath: '/browse'
       preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artist-dashboard': {
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AlbumsRoute: AlbumsRoute,
   ArtistDashboardRoute: ArtistDashboardRoute,
+  AuthRoute: AuthRoute,
   BrowseRoute: BrowseRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
@@ -271,3 +292,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
