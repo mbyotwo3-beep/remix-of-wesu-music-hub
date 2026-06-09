@@ -14,7 +14,18 @@ export const Route = createFileRoute("/artist-dashboard")({
 });
 
 function ArtistDashboardPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/auth" });
+    }
+  }, [user, loading, navigate]);
+
   const [activeTab, setActiveTab] = useState<"overview" | "upload" | "analytics">("overview");
+
+  if (loading) return null;
 
   const revenueStats = [
     { label: "Total Revenue", value: "ZMW 4,820.00", icon: DollarSign, change: "+12%" },
