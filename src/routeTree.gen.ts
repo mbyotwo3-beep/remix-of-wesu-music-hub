@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as AlbumsRouteImport } from './routes/albums'
 import { Route as IndexRouteImport } from './routes/index'
@@ -19,6 +20,11 @@ import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrowseRoute = BrowseRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/albums': typeof AlbumsRoute
   '/browse': typeof BrowseRoute
+  '/checkout': typeof CheckoutRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/albums': typeof AlbumsRoute
   '/browse': typeof BrowseRoute
+  '/checkout': typeof CheckoutRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists': typeof ArtistsIndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/albums': typeof AlbumsRoute
   '/browse': typeof BrowseRoute
+  '/checkout': typeof CheckoutRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/albums'
     | '/browse'
+    | '/checkout'
     | '/subscriptions'
     | '/artists/$id'
     | '/artists/'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/albums'
     | '/browse'
+    | '/checkout'
     | '/subscriptions'
     | '/artists/$id'
     | '/artists'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/albums'
     | '/browse'
+    | '/checkout'
     | '/subscriptions'
     | '/artists/$id'
     | '/artists/'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlbumsRoute: typeof AlbumsRoute
   BrowseRoute: typeof BrowseRoute
+  CheckoutRoute: typeof CheckoutRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/browse': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlbumsRoute: AlbumsRoute,
   BrowseRoute: BrowseRoute,
+  CheckoutRoute: CheckoutRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   ArtistsIdRoute: ArtistsIdRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
