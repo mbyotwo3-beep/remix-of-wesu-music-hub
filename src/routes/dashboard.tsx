@@ -1,5 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Headphones, Heart, ListMusic, Clock } from "lucide-react";
+import { useEffect } from "react";
+import { useAuth } from "../hooks/use-auth";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
