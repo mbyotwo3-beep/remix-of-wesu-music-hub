@@ -14,6 +14,17 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/auth" });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) return null;
+
   const stats = [
     { label: "Total Users", value: "12,450", icon: Users, color: "text-blue-400" },
     { label: "Total Songs", value: "8,230", icon: Music, color: "text-purple-400" },
