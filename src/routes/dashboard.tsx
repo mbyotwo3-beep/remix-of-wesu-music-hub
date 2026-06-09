@@ -14,6 +14,17 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate({ to: "/auth" });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) return null;
+
   const stats = [
     { label: "Songs Played", value: "1,248", icon: Headphones },
     { label: "Favorites", value: "86", icon: Heart },
