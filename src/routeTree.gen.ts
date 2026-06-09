@@ -10,9 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as ArtistDashboardRouteImport } from './routes/artist-dashboard'
 import { Route as AlbumsRouteImport } from './routes/albums'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
@@ -20,6 +24,16 @@ import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -32,9 +46,19 @@ const BrowseRoute = BrowseRouteImport.update({
   path: '/browse',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtistDashboardRoute = ArtistDashboardRouteImport.update({
+  id: '/artist-dashboard',
+  path: '/artist-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlbumsRoute = AlbumsRouteImport.update({
   id: '/albums',
   path: '/albums',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,18 +79,26 @@ const ArtistsIdRoute = ArtistsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
+  '/artist-dashboard': typeof ArtistDashboardRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
+  '/artist-dashboard': typeof ArtistDashboardRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists': typeof ArtistsIndexRoute
@@ -74,9 +106,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
+  '/artist-dashboard': typeof ArtistDashboardRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
+  '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
@@ -85,27 +121,39 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/albums'
+    | '/artist-dashboard'
     | '/browse'
     | '/checkout'
+    | '/contact'
+    | '/dashboard'
     | '/subscriptions'
     | '/artists/$id'
     | '/artists/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/albums'
+    | '/artist-dashboard'
     | '/browse'
     | '/checkout'
+    | '/contact'
+    | '/dashboard'
     | '/subscriptions'
     | '/artists/$id'
     | '/artists'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/albums'
+    | '/artist-dashboard'
     | '/browse'
     | '/checkout'
+    | '/contact'
+    | '/dashboard'
     | '/subscriptions'
     | '/artists/$id'
     | '/artists/'
@@ -113,9 +161,13 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AlbumsRoute: typeof AlbumsRoute
+  ArtistDashboardRoute: typeof ArtistDashboardRoute
   BrowseRoute: typeof BrowseRoute
   CheckoutRoute: typeof CheckoutRoute
+  ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
@@ -128,6 +180,20 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -144,11 +210,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artist-dashboard': {
+      id: '/artist-dashboard'
+      path: '/artist-dashboard'
+      fullPath: '/artist-dashboard'
+      preLoaderRoute: typeof ArtistDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/albums': {
       id: '/albums'
       path: '/albums'
       fullPath: '/albums'
       preLoaderRoute: typeof AlbumsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -177,9 +257,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AlbumsRoute: AlbumsRoute,
+  ArtistDashboardRoute: ArtistDashboardRoute,
   BrowseRoute: BrowseRoute,
   CheckoutRoute: CheckoutRoute,
+  ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   ArtistsIdRoute: ArtistsIdRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
@@ -187,13 +271,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
