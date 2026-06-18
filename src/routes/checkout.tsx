@@ -1,29 +1,59 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { CreditCard, Smartphone, Check } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { useState, useEffect } from "react";
+import { CreditCard, Smartphone, Check, Loader2 } from "lucide-react";
+import { getPaymentMethods, getSubscriptionPlans } from "@/lib/music.functions";
+import { initiatePayment } from "@/lib/payments.functions";
+import { useAuth } from "@/hooks/use-auth";
+
+const methodsQO = queryOptions({ queryKey: ["methods"], queryFn: () => getPaymentMethods() });
+const plansQO = queryOptions({ queryKey: ["plans"], queryFn: () => getSubscriptionPlans() });
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Checkout — Wesu+" },
-      { name: "description", content: "Complete your purchase on Wesu+ Music Streaming." },
+      { name: "description", content: "Complete your purchase on Wesu+." },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>) => ({ plan: typeof s.plan === "string" ? s.plan : "premium_monthly" }),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(methodsQO);
+    context.queryClient.ensureQueryData(plansQO);
+  },
   component: CheckoutPage,
+  errorComponent: ({ error }) => <div className="p-12 text-center">Failed: {error.message}</div>,
+  notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
 
-type PaymentMethod = "mtn" | "airtel" | "zamtel" | "card";
-
 function CheckoutPage() {
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("mtn");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const { plan: planCode } = Route.useSearch();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+  const { data: methods } = useSuspenseQuery(methodsQO);
+  const { data: plans } = useSuspenseQuery(plansQO);
 
-  const methods: { id: PaymentMethod; label: string; color: string; bg: string }[] = [
-    { id: "mtn", label: "MTN MoMo", color: "text-yellow-500", bg: "bg-yellow-500" },
-    { id: "airtel", label: "Airtel Money", color: "text-red-500", bg: "bg-red-500" },
-    { id: "zamtel", label: "Zamtel Kwacha", color: "text-green-500", bg: "bg-green-500" },
-    { id: "card", label: "Visa / Mastercard", color: "text-foreground", bg: "bg-white/20" },
-  ];
+  const plan = plans.find((p) => p.code === planCode) ?? plans[0];
+  const [selectedMethodCode, setSelectedMethodCode] = useState(methods[0]?.code ?? "");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [resultMsg, setResultMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/auth" });
+  }, [user, loading, navigate]);
+
+  const payFn = useServerFn(initiatePayment);
+  const mutation = useMutation({
+    mutationFn: payFn,
+    onSuccess: (res) => setResultMsg(res.message),
+    onError: (e: Error) => setResultMsg(e.message),
+  });
+
+  if (loading || !user || !plan) return null;
+
+  const selectedMethod = methods.find((m) => m.code === selectedMethodCode);
+  const isCard = selectedMethod?.category === "card";
 
   return (
     <div className="min-h-screen pb-24">
@@ -31,46 +61,40 @@ function CheckoutPage() {
         <h1 className="text-3xl font-bold mb-2">Checkout</h1>
         <p className="text-muted-foreground mb-8">Complete your purchase securely</p>
 
-        {/* Order Summary */}
         <div className="bg-card border border-white/5 rounded-2xl p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
           <div className="flex justify-between items-center py-3 border-b border-white/5">
-            <span className="text-muted-foreground">Wesu+ Premium Monthly</span>
-            <span className="font-semibold">ZMW 45.00</span>
+            <span className="text-muted-foreground">Wesu+ {plan.name}</span>
+            <span className="font-semibold">ZMW {Number(plan.price_zmw).toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center py-3">
             <span className="font-semibold">Total</span>
-            <span className="text-xl font-bold text-primary">ZMW 45.00</span>
+            <span className="text-xl font-bold text-primary">ZMW {Number(plan.price_zmw).toFixed(2)}</span>
           </div>
         </div>
 
-        {/* Payment Method */}
         <div className="bg-card border border-white/5 rounded-2xl p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Payment Method</h2>
           <div className="grid grid-cols-2 gap-4 mb-6">
             {methods.map((m) => (
               <button
                 key={m.id}
-                onClick={() => setSelectedMethod(m.id)}
+                onClick={() => setSelectedMethodCode(m.code)}
                 className={`p-4 rounded-xl border text-left transition-all ${
-                  selectedMethod === m.id
+                  selectedMethodCode === m.code
                     ? "border-primary bg-primary/10"
                     : "border-white/10 hover:border-white/20 bg-white/5"
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {m.id === "card" ? (
-                    <CreditCard className={`size-5 ${m.color}`} />
-                  ) : (
-                    <Smartphone className={`size-5 ${m.color}`} />
-                  )}
+                  {m.category === "card" ? <CreditCard className="size-5" /> : <Smartphone className="size-5" />}
                   <span className="font-medium text-sm">{m.label}</span>
                 </div>
               </button>
             ))}
           </div>
 
-          {selectedMethod !== "card" ? (
+          {!isCard ? (
             <div className="space-y-4">
               <label className="block text-sm font-medium">Mobile Money Number</label>
               <input
@@ -78,47 +102,42 @@ function CheckoutPage() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="e.g. 0977 123 456"
-                className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground"
+                className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50"
               />
               <p className="text-xs text-muted-foreground">
                 You will receive a prompt on your phone to authorize this payment.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Card Number</label>
-                <input
-                  type="text"
-                  placeholder="0000 0000 0000 0000"
-                  className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Expiry Date</label>
-                  <input
-                    type="text"
-                    placeholder="MM/YY"
-                    className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">CVV</label>
-                  <input
-                    type="text"
-                    placeholder="123"
-                    className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground"
-                  />
-                </div>
-              </div>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Card payments are processed securely by DPO Pay. You'll be redirected after confirming.
+            </p>
           )}
         </div>
 
-        <button className="w-full py-4 bg-primary text-obsidian rounded-2xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2">
-          <Check className="size-4" />
-          Pay ZMW 45.00
+        {resultMsg && (
+          <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 text-sm">
+            {resultMsg}
+          </div>
+        )}
+
+        <button
+          disabled={mutation.isPending || !selectedMethodCode}
+          onClick={() =>
+            mutation.mutate({
+              data: {
+                amount: Number(plan.price_zmw),
+                method_code: selectedMethodCode,
+                item_type: "subscription",
+                item_id: plan.id,
+                phone: phoneNumber || undefined,
+              },
+            })
+          }
+          className="w-full py-4 bg-primary text-obsidian rounded-2xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+          Pay ZMW {Number(plan.price_zmw).toFixed(2)}
         </button>
       </div>
     </div>
