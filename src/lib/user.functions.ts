@@ -70,12 +70,15 @@ export const getMyArtistOverview = createServerFn({ method: "GET" })
     const songIds = (songRowsAll ?? []).map((s) => s.id);
     const albumIds = (albumRows ?? []).map((a) => a.id);
 
+    // Revenue requires admin client — purchases RLS scopes per-user.
+    // We're authorized because the caller proved ownership of this artist row.
     let sales: { data: { amount: number }[] | null } = { data: [] };
     if (songIds.length || albumIds.length) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const filters: string[] = [];
       if (songIds.length) filters.push(`song_id.in.(${songIds.join(",")})`);
       if (albumIds.length) filters.push(`album_id.in.(${albumIds.join(",")})`);
-      const r = await supabase
+      const r = await supabaseAdmin
         .from("purchases")
         .select("amount")
         .or(filters.join(","));
