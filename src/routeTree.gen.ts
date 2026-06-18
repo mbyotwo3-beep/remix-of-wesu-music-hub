@@ -21,6 +21,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
+import { Route as ApiPublicDpoWebhookRouteImport } from './routes/api/public/dpo-webhook'
 
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
@@ -82,6 +83,11 @@ const ArtistsIdRoute = ArtistsIdRouteImport.update({
   path: '/artists/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDpoWebhookRoute = ApiPublicDpoWebhookRouteImport.update({
+  id: '/api/public/dpo-webhook',
+  path: '/api/public/dpo-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
+  '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists': typeof ArtistsIndexRoute
+  '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/subscriptions': typeof SubscriptionsRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
+  '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/artists/$id'
     | '/artists/'
+    | '/api/public/dpo-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/artists/$id'
     | '/artists'
+    | '/api/public/dpo-webhook'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/artists/$id'
     | '/artists/'
+    | '/api/public/dpo-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   SubscriptionsRoute: typeof SubscriptionsRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
+  ApiPublicDpoWebhookRoute: typeof ApiPublicDpoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/dpo-webhook': {
+      id: '/api/public/dpo-webhook'
+      path: '/api/public/dpo-webhook'
+      fullPath: '/api/public/dpo-webhook'
+      preLoaderRoute: typeof ApiPublicDpoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubscriptionsRoute: SubscriptionsRoute,
   ArtistsIdRoute: ArtistsIdRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
+  ApiPublicDpoWebhookRoute: ApiPublicDpoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
