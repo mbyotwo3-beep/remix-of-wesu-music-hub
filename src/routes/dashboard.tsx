@@ -1,48 +1,58 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Headphones, Heart, ListMusic, Clock } from "lucide-react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { Headphones, Heart, ListMusic, ShoppingBag } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
+import { getMyOverview } from "@/lib/user.functions";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
-    meta: [
-      { title: "My Dashboard — Wesu+" },
-      { name: "description", content: "Your personal music dashboard on Wesu+." },
-    ],
+    meta: [{ title: "My Dashboard — Wesu+" }],
   }),
   component: DashboardPage,
+  errorComponent: ({ error }) => <div className="p-12 text-center">Failed: {error.message}</div>,
+  notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
 
 function DashboardPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const fetchOverview = useServerFn(getMyOverview);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate({ to: "/auth" });
-    }
+    if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
 
-  if (loading) return null;
+  const { data, isLoading } = useQuery({
+    queryKey: ["my-overview", user?.id],
+    queryFn: () => fetchOverview(),
+    enabled: !!user,
+  });
+
+  if (loading || !user) return null;
+  if (isLoading || !data) return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
 
   const stats = [
-    { label: "Songs Played", value: "1,248", icon: Headphones },
-    { label: "Favorites", value: "86", icon: Heart },
-    { label: "Playlists", value: "12", icon: ListMusic },
-    { label: "Hours Listened", value: "142h", icon: Clock },
+    { label: "Playlists", value: data.stats.playlists, icon: ListMusic },
+    { label: "Purchases", value: data.stats.purchases, icon: ShoppingBag },
+    { label: "Plan", value: data.subscription?.plan ?? "Free", icon: Headphones },
+    { label: "Liked", value: 0, icon: Heart },
   ];
 
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
-        <p className="text-muted-foreground mb-8">Welcome back to your music hub.</p>
+        <p className="text-muted-foreground mb-8">
+          Welcome back{data.profile?.full_name ? `, ${data.profile.full_name}` : ""}.
+        </p>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {stats.map((stat) => (
             <div key={stat.label} className="bg-card border border-white/5 rounded-2xl p-6">
               <stat.icon className="size-5 text-primary mb-3" />
-              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-2xl font-bold">{String(stat.value)}</p>
               <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
             </div>
           ))}
@@ -50,36 +60,51 @@ function DashboardPage() {
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="bg-card border border-white/5 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4">Recently Played</h2>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
-                  <div className="size-10 rounded bg-secondary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">Track Title {i}</p>
-                    <p className="text-xs text-muted-foreground">Artist Name</p>
+            <h2 className="text-lg font-semibold mb-4">My Playlists</h2>
+            {data.playlists.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No playlists yet. Create one from the browse page.</p>
+            ) : (
+              <div className="space-y-3">
+                {data.playlists.map((p) => (
+                  <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                    <div className="size-10 rounded bg-secondary flex items-center justify-center">
+                      <ListMusic className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">{p.is_public ? "Public" : "Private"}</p>
+                    </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">3:2{i}</span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="bg-card border border-white/5 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4">My Playlists</h2>
-            <div className="space-y-3">
-              {["Zed Vibes", "Late Night", "Workout Mix", "Sunday Chill", "Road Trip"].map((name) => (
-                <div key={name} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
-                  <div className="size-10 rounded bg-secondary shrink-0 flex items-center justify-center">
-                    <ListMusic className="size-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{name}</p>
-                    <p className="text-xs text-muted-foreground">24 songs</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h2 className="text-lg font-semibold mb-4">Recent Purchases</h2>
+            {data.recentPurchases.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No purchases yet.{" "}
+                <Link to="/browse" className="text-primary hover:underline">
+                  Browse music →
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {data.recentPurchases.map((p) => {
+                  const title =
+                    (p.song as { title?: string } | null)?.title ??
+                    (p.album as { title?: string } | null)?.title ??
+                    "Item";
+                  return (
+                    <div key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5">
+                      <p className="text-sm font-medium truncate">{title}</p>
+                      <span className="text-primary text-sm font-bold">K{Number(p.amount).toFixed(2)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
