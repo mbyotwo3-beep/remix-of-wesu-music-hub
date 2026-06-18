@@ -56,17 +56,33 @@ export const getMyArtistOverview = createServerFn({ method: "GET" })
       return { artist: null, topSongs: [], totalSongs: 0, totalPlays: 0, totalRevenueZmw: 0 };
     }
 
-    const [songs, sales] = await Promise.all([
-      supabase
-        .from("songs")
-        .select("id,title,play_count,price,created_at")
-        .eq("artist_id", artist.id)
-        .order("play_count", { ascending: false }),
-      supabase
+    const { data: songRowsAll } = await supabase
+      .from("songs")
+      .select("id,title,play_count,price,created_at")
+      .eq("artist_id", artist.id)
+      .order("play_count", { ascending: false });
+
+    const { data: albumRows } = await supabase
+      .from("albums")
+      .select("id")
+      .eq("artist_id", artist.id);
+
+    const songIds = (songRowsAll ?? []).map((s) => s.id);
+    const albumIds = (albumRows ?? []).map((a) => a.id);
+
+    let sales: { data: { amount: number }[] | null } = { data: [] };
+    if (songIds.length || albumIds.length) {
+      const filters: string[] = [];
+      if (songIds.length) filters.push(`song_id.in.(${songIds.join(",")})`);
+      if (albumIds.length) filters.push(`album_id.in.(${albumIds.join(",")})`);
+      const r = await supabase
         .from("purchases")
-        .select("amount,song_id,album_id")
-        .or(`song_id.in.(select id from songs where artist_id.eq.${artist.id}),album_id.in.(select id from albums where artist_id.eq.${artist.id})`),
-    ]);
+        .select("amount")
+        .or(filters.join(","));
+      sales = { data: r.data ?? [] };
+    }
+
+    const songs = { data: songRowsAll };
 
     const songRows = songs.data ?? [];
     const totalPlays = songRows.reduce((s, r) => s + (r.play_count ?? 0), 0);
