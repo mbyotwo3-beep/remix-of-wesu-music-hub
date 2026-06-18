@@ -20,6 +20,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           description: string | null
+          featured: boolean
           genre: string | null
           id: string
           price: number | null
@@ -31,6 +32,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          featured?: boolean
           genre?: string | null
           id?: string
           price?: number | null
@@ -42,6 +44,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string | null
+          featured?: boolean
           genre?: string | null
           id?: string
           price?: number | null
@@ -65,6 +68,7 @@ export type Database = {
           created_at: string
           genre: string | null
           id: string
+          monthly_listeners: number
           name: string
           updated_at: string
           user_id: string
@@ -76,6 +80,7 @@ export type Database = {
           created_at?: string
           genre?: string | null
           id?: string
+          monthly_listeners?: number
           name: string
           updated_at?: string
           user_id: string
@@ -87,10 +92,95 @@ export type Database = {
           created_at?: string
           genre?: string | null
           id?: string
+          monthly_listeners?: number
           name?: string
           updated_at?: string
           user_id?: string
           verified?: boolean
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          label: string
+          logo_url: string | null
+          sort_order: number
+        }
+        Insert: {
+          category?: string
+          code: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          label: string
+          logo_url?: string | null
+          sort_order?: number
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          label?: string
+          logo_url?: string | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          item_id: string | null
+          item_type: string
+          metadata: Json
+          method_code: string
+          provider: string
+          provider_ref: string | null
+          provider_token: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string | null
+          item_type: string
+          metadata?: Json
+          method_code: string
+          provider?: string
+          provider_ref?: string | null
+          provider_token?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          item_id?: string | null
+          item_type?: string
+          metadata?: Json
+          method_code?: string
+          provider?: string
+          provider_ref?: string | null
+          provider_token?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -168,6 +258,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          current_subscription_id: string | null
           full_name: string | null
           id: string
           location: string | null
@@ -178,6 +269,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          current_subscription_id?: string | null
           full_name?: string | null
           id?: string
           location?: string | null
@@ -188,6 +280,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          current_subscription_id?: string | null
           full_name?: string | null
           id?: string
           location?: string | null
@@ -258,6 +351,7 @@ export type Database = {
           explicit: boolean
           genre: string | null
           id: string
+          is_trending: boolean
           play_count: number
           price: number | null
           title: string
@@ -272,6 +366,7 @@ export type Database = {
           explicit?: boolean
           genre?: string | null
           id?: string
+          is_trending?: boolean
           play_count?: number
           price?: number | null
           title: string
@@ -286,6 +381,7 @@ export type Database = {
           explicit?: boolean
           genre?: string | null
           id?: string
+          is_trending?: boolean
           play_count?: number
           price?: number | null
           title?: string
@@ -306,6 +402,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          interval: string
+          is_active: boolean
+          name: string
+          price_zmw: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          interval?: string
+          is_active?: boolean
+          name: string
+          price_zmw?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          interval?: string
+          is_active?: boolean
+          name?: string
+          price_zmw?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
