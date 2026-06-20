@@ -45,14 +45,16 @@ function DashboardPage() {
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2">My Library</h1>
         <p className="text-muted-foreground mb-8">
           Welcome back{data.profile?.full_name ? `, ${data.profile.full_name}` : ""}.
         </p>
 
+        <SuperadminBootstrapCard />
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {stats.map((stat) => (
-            <div key={stat.label} className="bg-card border border-white/5 rounded-2xl p-6">
+            <div key={stat.label} className="bg-card border border-border rounded-2xl p-6">
               <stat.icon className="size-5 text-primary mb-3" />
               <p className="text-2xl font-bold">{String(stat.value)}</p>
               <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
