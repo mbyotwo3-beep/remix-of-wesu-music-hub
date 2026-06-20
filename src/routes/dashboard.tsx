@@ -63,14 +63,14 @@ function DashboardPage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          <div className="bg-card border border-white/5 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-4">My Playlists</h2>
             {data.playlists.length === 0 ? (
               <p className="text-sm text-muted-foreground">No playlists yet. Create one from the browse page.</p>
             ) : (
               <div className="space-y-3">
                 {data.playlists.map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+                  <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                     <div className="size-10 rounded bg-secondary flex items-center justify-center">
                       <ListMusic className="size-4 text-muted-foreground" />
                     </div>
@@ -84,7 +84,7 @@ function DashboardPage() {
             )}
           </div>
 
-          <div className="bg-card border border-white/5 rounded-2xl p-6">
+          <div className="bg-card border border-border rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-4">Recent Purchases</h2>
             {data.recentPurchases.length === 0 ? (
               <div className="text-sm text-muted-foreground">
@@ -101,7 +101,7 @@ function DashboardPage() {
                     (p.album as { title?: string } | null)?.title ??
                     "Item";
                   return (
-                    <div key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5">
+                    <div key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent">
                       <p className="text-sm font-medium truncate">{title}</p>
                       <span className="text-primary text-sm font-bold">K{Number(p.amount).toFixed(2)}</span>
                     </div>
