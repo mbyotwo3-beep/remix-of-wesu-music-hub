@@ -13,6 +13,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "../components/Navbar";
 import { PlayerBar } from "../components/PlayerBar";
+import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
+
 
 function NotFoundComponent() {
   return (
