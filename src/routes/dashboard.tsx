@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Headphones, Heart, ListMusic, ShoppingBag } from "lucide-react";
+import { Headphones, Heart, ListMusic, ShoppingBag, Shield } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
+import { useUserRoles } from "../hooks/use-roles";
 import { getMyOverview } from "@/lib/user.functions";
+import { claimFirstSuperadmin } from "@/lib/superadmin.functions";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
