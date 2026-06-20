@@ -1,14 +1,19 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", {
-    _user_id: userId,
-    _role: "admin",
-  });
+async function assertStaff(supabase: any, userId: string) {
+  const { data, error } = await supabase.rpc("is_staff", { _user_id: userId });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden");
 }
+
+async function audit(actorId: string, action: string, target_type?: string, target_id?: string, meta: any = {}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await supabaseAdmin.from("audit_log").insert({ actor_id: actorId, action, target_type, target_id, meta });
+}
+
+// Back-compat: admin functions previously used assertAdmin checking 'admin'. Now allow staff (admin OR superadmin).
+async function assertAdmin(supabase: any, userId: string) { await assertStaff(supabase, userId); }
 
 export const getPlatformStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
