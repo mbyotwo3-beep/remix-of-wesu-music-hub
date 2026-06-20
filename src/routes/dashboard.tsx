@@ -115,3 +115,31 @@ function DashboardPage() {
     </div>
   );
 }
+
+function SuperadminBootstrapCard() {
+  const { isSuperAdmin, loading } = useUserRoles();
+  const claim = useServerFn(claimFirstSuperadmin);
+  const m = useMutation({
+    mutationFn: claim,
+    onSuccess: () => window.location.reload(),
+  });
+
+  if (loading || isSuperAdmin) return null;
+  return (
+    <div className="mb-8 bg-card border border-border rounded-2xl p-5 flex items-center gap-4">
+      <Shield className="size-6 text-primary shrink-0" />
+      <div className="flex-1 text-sm">
+        <p className="font-semibold">First-time setup</p>
+        <p className="text-muted-foreground">If no superadmin exists yet, claim the role for this account. Only works once.</p>
+        {m.error ? <p className="text-destructive mt-1">{(m.error as Error).message}</p> : null}
+      </div>
+      <button
+        disabled={m.isPending}
+        onClick={() => m.mutate({})}
+        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
+      >
+        {m.isPending ? "Claiming…" : "Claim superadmin"}
+      </button>
+    </div>
+  );
+}
