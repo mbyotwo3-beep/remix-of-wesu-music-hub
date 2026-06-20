@@ -1,137 +1,173 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Users, Music, CreditCard, Shield, BarChart3 } from "lucide-react";
-import { useEffect } from "react";
-import { useAuth } from "../hooks/use-auth";
-import { getPlatformStats, getRecentActivity } from "@/lib/admin.functions";
+import { Users, Music, CreditCard, Shield, BarChart3, Check, X } from "lucide-react";
+import { useState } from "react";
+import { RoleGate } from "@/components/RoleGate";
+import {
+  getPlatformStats, getRecentActivity,
+  listPendingSongs, moderateSong,
+  listPendingArtists, moderateArtist,
+} from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({
-    meta: [{ title: "Admin Panel — Wesu+" }],
-  }),
-  component: AdminPage,
+  head: () => ({ meta: [{ title: "Admin Panel — Wesu+" }] }),
+  component: () => <RoleGate require="admin"><AdminPage /></RoleGate>,
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
 
+type Tab = "overview" | "songs" | "artists";
+
 function AdminPage() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const statsFn = useServerFn(getPlatformStats);
-  const activityFn = useServerFn(getRecentActivity);
-
-  useEffect(() => {
-    if (!loading && !user) navigate({ to: "/auth" });
-  }, [user, loading, navigate]);
-
-  const statsQ = useQuery({
-    queryKey: ["admin-stats", user?.id],
-    queryFn: () => statsFn(),
-    enabled: !!user,
-    retry: false,
-  });
-
-  const activityQ = useQuery({
-    queryKey: ["admin-activity", user?.id],
-    queryFn: () => activityFn(),
-    enabled: !!user,
-    retry: false,
-  });
-
-  if (loading || !user) return null;
-
-  if (statsQ.error) {
-    return (
-      <div className="max-w-md mx-auto p-12 text-center">
-        <Shield className="size-12 mx-auto mb-4 text-muted-foreground" />
-        <h1 className="text-xl font-bold mb-2">Admin access required</h1>
-        <p className="text-sm text-muted-foreground">Only users with the admin role can view this page.</p>
-      </div>
-    );
-  }
-
-  const stats = statsQ.data
-    ? [
-        { label: "Total Users", value: statsQ.data.totalUsers.toLocaleString(), icon: Users, color: "text-blue-400" },
-        { label: "Total Songs", value: statsQ.data.totalSongs.toLocaleString(), icon: Music, color: "text-purple-400" },
-        { label: "Premium Subs", value: statsQ.data.premiumSubscribers.toLocaleString(), icon: CreditCard, color: "text-green-400" },
-        { label: "Revenue (30d)", value: `ZMW ${statsQ.data.monthlyRevenueZmw.toFixed(2)}`, icon: BarChart3, color: "text-primary" },
-      ]
-    : null;
+  const [tab, setTab] = useState<Tab>("overview");
 
   return (
     <div className="min-h-screen pb-24">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex items-center gap-3 mb-8">
           <Shield className="size-6 text-primary" />
-          <h1 className="text-3xl font-bold">Admin Panel</h1>
+          <h1 className="text-3xl font-bold">Admin</h1>
         </div>
+        <div className="flex gap-2 mb-8 border-b border-border pb-3">
+          {(["overview", "songs", "artists"] as Tab[]).map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
+                tab === t ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"
+              }`}>
+              {t}
+            </button>
+          ))}
+        </div>
+        {tab === "overview" && <Overview />}
+        {tab === "songs" && <SongMod />}
+        {tab === "artists" && <ArtistMod />}
+      </div>
+    </div>
+  );
+}
 
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            {stats.map((stat) => (
-              <div key={stat.label} className="bg-card border border-white/5 rounded-2xl p-6">
-                <stat.icon className={`size-5 ${stat.color} mb-3`} />
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        )}
+function Overview() {
+  const statsFn = useServerFn(getPlatformStats);
+  const activityFn = useServerFn(getRecentActivity);
+  const statsQ = useQuery({ queryKey: ["admin-stats"], queryFn: () => statsFn(), retry: false });
+  const activityQ = useQuery({ queryKey: ["admin-activity"], queryFn: () => activityFn(), retry: false });
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          <div className="bg-card border border-white/5 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4">Recent Uploads</h2>
-            {!activityQ.data || activityQ.data.recentSongs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No uploads yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {activityQ.data.recentSongs.map((s) => (
-                  <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-                    <Music className="size-4 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{s.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {(s.artist as { name?: string } | null)?.name ?? "Unknown"}
-                      </p>
-                    </div>
+  const stats = statsQ.data
+    ? [
+        { label: "Total Users", value: statsQ.data.totalUsers.toLocaleString(), icon: Users },
+        { label: "Total Songs", value: statsQ.data.totalSongs.toLocaleString(), icon: Music },
+        { label: "Premium Subs", value: statsQ.data.premiumSubscribers.toLocaleString(), icon: CreditCard },
+        { label: "Revenue 30d", value: `ZMW ${statsQ.data.monthlyRevenueZmw.toFixed(2)}`, icon: BarChart3 },
+      ]
+    : null;
+
+  return (
+    <>
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-card border border-border rounded-2xl p-6">
+              <s.icon className="size-5 text-primary mb-3" />
+              <p className="text-2xl font-bold">{s.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="grid lg:grid-cols-2 gap-8">
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h2 className="text-lg font-semibold mb-4">Recent Uploads</h2>
+          {!activityQ.data || activityQ.data.recentSongs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No uploads yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {activityQ.data.recentSongs.map((s) => (
+                <li key={s.id} className="flex items-center gap-3 p-2 rounded-lg bg-accent">
+                  <Music className="size-4 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{s.title}</p>
+                    <p className="text-xs text-muted-foreground">{(s.artist as { name?: string } | null)?.name ?? "Unknown"}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="bg-card border border-white/5 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
-            {!activityQ.data || activityQ.data.recentTransactions.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No transactions yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {activityQ.data.recentTransactions.map((t) => (
-                  <div key={t.id} className="flex items-center justify-between p-2 rounded-lg bg-white/5">
-                    <div>
-                      <p className="text-sm font-medium">ZMW {Number(t.amount).toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">{t.method_code}</p>
-                    </div>
-                    <span
-                      className={`text-xs font-bold px-2 py-1 rounded ${
-                        t.status === "completed"
-                          ? "bg-green-500/20 text-green-400"
-                          : t.status === "pending"
-                          ? "bg-yellow-500/20 text-yellow-400"
-                          : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {t.status}
-                    </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
+          {!activityQ.data || activityQ.data.recentTransactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No transactions yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {activityQ.data.recentTransactions.map((t) => (
+                <li key={t.id} className="flex items-center justify-between p-2 rounded-lg bg-accent">
+                  <div>
+                    <p className="text-sm font-medium">ZMW {Number(t.amount).toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">{t.method_code}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <span className="text-xs font-bold px-2 py-1 rounded bg-primary/15 text-primary">{t.status}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
+    </>
+  );
+}
+
+function SongMod() {
+  const qc = useQueryClient();
+  const list = useServerFn(listPendingSongs);
+  const mod = useServerFn(moderateSong);
+  const { data } = useQuery({ queryKey: ["pending-songs"], queryFn: () => list(), retry: false });
+  const m = useMutation({ mutationFn: mod, onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-songs"] }) });
+  if (!data) return <div className="text-muted-foreground">Loading…</div>;
+  if (data.length === 0) return <p className="text-muted-foreground">No songs awaiting moderation.</p>;
+  return (
+    <div className="space-y-3">
+      {data.map((s: any) => (
+        <div key={s.id} className="bg-card border border-border rounded-xl p-4 flex justify-between items-center">
+          <div>
+            <p className="font-medium">{s.title}</p>
+            <p className="text-xs text-muted-foreground">{s.artist?.name ?? "Unknown"}</p>
+          </div>
+          <div className="flex gap-2">
+            <button disabled={m.isPending} onClick={() => m.mutate({ data: { id: s.id, status: "approved" } })} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-primary/15 text-primary"><Check className="size-3" /> Approve</button>
+            <button disabled={m.isPending} onClick={() => m.mutate({ data: { id: s.id, status: "rejected" } })} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-destructive/15 text-destructive"><X className="size-3" /> Reject</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ArtistMod() {
+  const qc = useQueryClient();
+  const list = useServerFn(listPendingArtists);
+  const mod = useServerFn(moderateArtist);
+  const { data } = useQuery({ queryKey: ["pending-artists"], queryFn: () => list(), retry: false });
+  const m = useMutation({ mutationFn: mod, onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-artists"] }) });
+  if (!data) return <div className="text-muted-foreground">Loading…</div>;
+  if (data.length === 0) return <p className="text-muted-foreground">No artist applications awaiting review.</p>;
+  return (
+    <div className="space-y-3">
+      {data.map((a: any) => (
+        <div key={a.id} className="bg-card border border-border rounded-xl p-4">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="font-medium">{a.name}</p>
+              <p className="text-xs text-muted-foreground">{a.genre ?? "—"}</p>
+              {a.bio && <p className="text-sm mt-2 text-muted-foreground">{a.bio}</p>}
+            </div>
+            <div className="flex gap-2">
+              <button disabled={m.isPending} onClick={() => m.mutate({ data: { id: a.id, status: "approved", verified: true } })} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-primary/15 text-primary"><Check className="size-3" /> Approve</button>
+              <button disabled={m.isPending} onClick={() => m.mutate({ data: { id: a.id, status: "rejected" } })} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-destructive/15 text-destructive"><X className="size-3" /> Reject</button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

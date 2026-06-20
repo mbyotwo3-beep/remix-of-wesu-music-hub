@@ -13,6 +13,8 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "../components/Navbar";
 import { PlayerBar } from "../components/PlayerBar";
+import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
+
 
 function NotFoundComponent() {
   return (
@@ -106,8 +108,9 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="font-sans">
+      <body className="font-sans bg-background text-foreground">
         {children}
         <Scripts />
       </body>
@@ -120,11 +123,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Navbar />
-      <main className="min-h-screen">
-        <Outlet />
-      </main>
-      <PlayerBar />
+      <ThemeProvider>
+        <Navbar />
+        <main className="min-h-screen">
+          <Outlet />
+        </main>
+        <PlayerBar />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

@@ -9,12 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as BecomeArtistRouteImport } from './routes/become-artist'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ArtistStudioRouteImport } from './routes/artist-studio'
 import { Route as ArtistDashboardRouteImport } from './routes/artist-dashboard'
 import { Route as AlbumsRouteImport } from './routes/albums'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -23,9 +27,19 @@ import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 import { Route as ApiPublicDpoWebhookRouteImport } from './routes/api/public/dpo-webhook'
 
+const SuperadminRoute = SuperadminRouteImport.update({
+  id: '/superadmin',
+  path: '/superadmin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -48,9 +62,19 @@ const BrowseRoute = BrowseRouteImport.update({
   path: '/browse',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BecomeArtistRoute = BecomeArtistRouteImport.update({
+  id: '/become-artist',
+  path: '/become-artist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtistStudioRoute = ArtistStudioRouteImport.update({
+  id: '/artist-studio',
+  path: '/artist-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtistDashboardRoute = ArtistDashboardRouteImport.update({
@@ -94,12 +118,16 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
+  '/artist-studio': typeof ArtistStudioRoute
   '/auth': typeof AuthRoute
+  '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
@@ -109,12 +137,16 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
+  '/artist-studio': typeof ArtistStudioRoute
   '/auth': typeof AuthRoute
+  '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists': typeof ArtistsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
@@ -125,12 +157,16 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
+  '/artist-studio': typeof ArtistStudioRoute
   '/auth': typeof AuthRoute
+  '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
@@ -142,12 +178,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/albums'
     | '/artist-dashboard'
+    | '/artist-studio'
     | '/auth'
+    | '/become-artist'
     | '/browse'
     | '/checkout'
     | '/contact'
     | '/dashboard'
+    | '/profile'
     | '/subscriptions'
+    | '/superadmin'
     | '/artists/$id'
     | '/artists/'
     | '/api/public/dpo-webhook'
@@ -157,12 +197,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/albums'
     | '/artist-dashboard'
+    | '/artist-studio'
     | '/auth'
+    | '/become-artist'
     | '/browse'
     | '/checkout'
     | '/contact'
     | '/dashboard'
+    | '/profile'
     | '/subscriptions'
+    | '/superadmin'
     | '/artists/$id'
     | '/artists'
     | '/api/public/dpo-webhook'
@@ -172,12 +216,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/albums'
     | '/artist-dashboard'
+    | '/artist-studio'
     | '/auth'
+    | '/become-artist'
     | '/browse'
     | '/checkout'
     | '/contact'
     | '/dashboard'
+    | '/profile'
     | '/subscriptions'
+    | '/superadmin'
     | '/artists/$id'
     | '/artists/'
     | '/api/public/dpo-webhook'
@@ -188,12 +236,16 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AlbumsRoute: typeof AlbumsRoute
   ArtistDashboardRoute: typeof ArtistDashboardRoute
+  ArtistStudioRoute: typeof ArtistStudioRoute
   AuthRoute: typeof AuthRoute
+  BecomeArtistRoute: typeof BecomeArtistRoute
   BrowseRoute: typeof BrowseRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
+  ProfileRoute: typeof ProfileRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
+  SuperadminRoute: typeof SuperadminRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
   ApiPublicDpoWebhookRoute: typeof ApiPublicDpoWebhookRoute
@@ -201,11 +253,25 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/superadmin': {
+      id: '/superadmin'
+      path: '/superadmin'
+      fullPath: '/superadmin'
+      preLoaderRoute: typeof SuperadminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subscriptions': {
       id: '/subscriptions'
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -236,11 +302,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/become-artist': {
+      id: '/become-artist'
+      path: '/become-artist'
+      fullPath: '/become-artist'
+      preLoaderRoute: typeof BecomeArtistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artist-studio': {
+      id: '/artist-studio'
+      path: '/artist-studio'
+      fullPath: '/artist-studio'
+      preLoaderRoute: typeof ArtistStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artist-dashboard': {
@@ -300,12 +380,16 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AlbumsRoute: AlbumsRoute,
   ArtistDashboardRoute: ArtistDashboardRoute,
+  ArtistStudioRoute: ArtistStudioRoute,
   AuthRoute: AuthRoute,
+  BecomeArtistRoute: BecomeArtistRoute,
   BrowseRoute: BrowseRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
+  ProfileRoute: ProfileRoute,
   SubscriptionsRoute: SubscriptionsRoute,
+  SuperadminRoute: SuperadminRoute,
   ArtistsIdRoute: ArtistsIdRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
   ApiPublicDpoWebhookRoute: ApiPublicDpoWebhookRoute,
