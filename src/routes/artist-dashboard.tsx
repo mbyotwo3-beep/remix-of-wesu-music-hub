@@ -62,19 +62,9 @@ function ArtistDashboardPage() {
             <p className="text-muted-foreground">Artist Dashboard</p>
           </div>
           <div className="flex gap-2">
-            {(["overview", "upload", "analytics"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                  activeTab === tab
-                    ? "bg-primary text-obsidian"
-                    : "bg-card border border-white/10 text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+            <a href="/artist-studio" className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground inline-flex items-center gap-2">
+              <Upload className="size-4" /> Open Studio
+            </a>
           </div>
         </div>
 
