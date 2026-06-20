@@ -68,64 +68,38 @@ function ArtistDashboardPage() {
           </div>
         </div>
 
-        {activeTab === "overview" && (
-          <>
-            <div className="grid md:grid-cols-3 gap-4 mb-12">
-              {stats.map((stat) => (
-                <div key={stat.label} className="bg-card border border-white/5 rounded-2xl p-6">
-                  <stat.icon className="size-5 text-primary mb-4" />
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+        <div className="grid md:grid-cols-3 gap-4 mb-12">
+          {stats.map((stat) => (
+            <div key={stat.label} className="bg-card border border-border rounded-2xl p-6">
+              <stat.icon className="size-5 text-primary mb-4" />
+              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <BarChart3 className="size-5" />
+            Top Tracks
+          </h2>
+          {data.topSongs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No tracks yet. Open Studio to upload your first song.</p>
+          ) : (
+            <div className="space-y-2">
+              {data.topSongs.map((track, i) => (
+                <div key={track.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent transition-colors">
+                  <span className="w-6 text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{track.title}</p>
+                    <p className="text-xs text-muted-foreground">{(track.play_count ?? 0).toLocaleString()} streams</p>
+                  </div>
+                  <span className="text-sm font-medium">ZMW {Number(track.price ?? 0).toFixed(2)}</span>
                 </div>
               ))}
             </div>
-
-            <div className="bg-card border border-white/5 rounded-2xl p-6">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 className="size-5" />
-                Top Tracks
-              </h2>
-              {data.topSongs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No tracks yet. Upload your first song from the Upload tab.</p>
-              ) : (
-                <div className="space-y-2">
-                  {data.topSongs.map((track, i) => (
-                    <div key={track.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                      <span className="w-6 text-sm text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{track.title}</p>
-                        <p className="text-xs text-muted-foreground">{(track.play_count ?? 0).toLocaleString()} streams</p>
-                      </div>
-                      <span className="text-sm font-medium">ZMW {Number(track.price ?? 0).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {activeTab === "upload" && (
-          <div className="bg-card border border-white/5 rounded-2xl p-8 max-w-2xl">
-            <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-              <Upload className="size-5 text-primary" />
-              Upload Music
-            </h2>
-            <p className="text-muted-foreground mb-6 text-sm">
-              Drag & drop your audio file. Files are uploaded directly to secure storage; metadata is saved to the database.
-            </p>
-            <div className="p-8 border-2 border-dashed border-white/10 rounded-2xl text-center text-muted-foreground text-sm">
-              Upload UI coming next. The backend storage bucket <code className="text-xs">song-audio</code> is ready and only you can write to your own folder.
-            </div>
-          </div>
-        )}
-
-        {activeTab === "analytics" && (
-          <div className="bg-card border border-white/5 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-4">Detailed Analytics</h2>
-            <p className="text-muted-foreground text-sm">Coming soon — listener demographics, geo data, and revenue breakdowns.</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
