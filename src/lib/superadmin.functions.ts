@@ -88,7 +88,7 @@ export const updateSettings = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("platform_settings")
-      .upsert({ key: data.key, value: data.value, updated_by: context.userId, updated_at: new Date().toISOString() });
+      .upsert({ key: data.key, value: data.value as any, updated_by: context.userId, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
     await audit(context.userId, "settings.update", "setting", data.key, data.value);
     return { ok: true };
