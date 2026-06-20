@@ -1,104 +1,105 @@
-## Goal
+# Light/Dark Mode + Full Role Workflows
 
-Replace every piece of hardcoded music/album/artist/stats data with real data read from the database, and prepare the storage + payment slots so when you send the DPO Pay keys + design mockups we just plug them in.
+## 1. Theming (light + dark)
 
-## What's hardcoded today (will be removed)
+- Add light-mode token values to `src/styles.css` `:root` (currently `:root` and `.dark` are identical — both dark).
+- Move the current dark palette into `.dark` only; design a true light palette for `:root` (warm off-white bg, deep ink foreground, same gold primary).
+- Add a `ThemeProvider` (`src/hooks/use-theme.tsx`) that:
+  - Reads `localStorage('wesu-theme')` → `'light' | 'dark' | 'system'` (default `system`).
+  - Toggles `.dark` class on `<html>`.
+  - Listens to `prefers-color-scheme` when `system`.
+- Add a `ThemeToggle` icon-button in `Navbar` (sun/moon).
+- Mount provider in `__root.tsx` and add a small inline script in `<head>` to set the class before hydration (avoid flash).
 
-| File | Hardcoded data |
-|---|---|
-| `src/routes/index.tsx` | `recentReleases`, `trending` arrays |
-| `src/routes/browse.tsx` | mock song/genre lists |
-| `src/routes/albums.tsx` | mock album grid |
-| `src/routes/artists.index.tsx` | mock artist list |
-| `src/routes/artists.$id.tsx` | mock artist profile + discography |
-| `src/routes/dashboard.tsx` | mock user stats |
-| `src/routes/artist-dashboard.tsx` | `revenueStats` mock |
-| `src/routes/admin.tsx` | `stats`, `pendingApprovals` mock |
-| `src/routes/subscriptions.tsx` | `freeFeatures`, `premiumFeatures` (kept — static plan copy) |
-| `src/components/PlayerBar.tsx` | mock now-playing track |
+## 2. Roles
 
-Subscription **feature bullet lists** stay in code (marketing copy, not data). Subscription **plans, prices, MoMo providers** move to the DB.
+Add a 4th role `superadmin` on top of existing `admin / artist / user`. Superadmin can do everything admin can, plus manage admins and platform config.
 
-## Backend work
+DB migration:
+- Extend `app_role` enum with `superadmin`.
+- Add helper `is_admin_or_super(uid)` security-definer fn.
+- Update existing admin RLS policies to accept both roles.
+- New table `platform_settings` (singleton key/value) — superadmin-only writes.
+- New table `audit_log` (actor_id, action, target_type, target_id, meta jsonb) — admin+ read, system insert.
+- Seed: first user with email matching `SUPERADMIN_EMAIL` env (or manual grant flow).
 
-### 1. Storage buckets
-- `song-audio` (private — signed URLs only, premium gating)
-- `album-art` (public)
-- `artist-images` (public)
-- `user-avatars` (public)
+## 3. Workflows by role
 
-### 2. New tables
-- `subscription_plans` — name, price_zmw, interval, features[], is_active
-- `payment_methods` — code (mtn_momo, airtel, zamtel, visa, mastercard), label, logo_url, is_enabled
-- `payment_transactions` — user_id, amount, currency, method, provider_ref (DPO token), status, item_type (song/album/subscription), item_id
-- `platform_stats` view — counts for the admin dashboard
-- `artist_revenue` view — per-artist sales/streams for the artist dashboard
+### Superadmin (`/superadmin`)
+- Dashboard: platform stats (already exists) + revenue chart, MRR, churn.
+- **Manage admins**: list users, grant/revoke `admin` and `artist` roles, ban user.
+- **Manage subscription plans**: CRUD on `subscription_plans` (name, price, features, active).
+- **Manage payment methods**: toggle MTN/Airtel/Zamtel/Visa active, set fees.
+- **Platform settings**: site name, support email, DPO mode (sandbox/live), commission %.
+- **Audit log** viewer with filters.
 
-### 3. Schema tweaks to existing tables
-- `songs`: add `play_count`, `is_trending` (computed via cron later)
-- `albums`: confirm `release_date`, add `featured` boolean for the homepage
-- `artists`: add `verified`, `monthly_listeners`
-- `profiles`: add `current_subscription_id`
+### Admin (`/admin` — already partially built)
+- Existing stats + recent activity stays.
+- Add: moderate songs (approve/reject/take down), moderate artists (verify badge), view all transactions with refund action, view all users (read-only).
 
-### 4. RLS
-- Public read on artists/albums/songs metadata (anon SELECT)
-- Audio URLs: signed via server function — never expose storage path directly
-- Purchases / transactions / subscriptions: user-owned only
-- Admin views: gated by `has_role(uid, 'admin')`
+### Artist (`/artist-dashboard` — already partially built)
+- Existing overview stays.
+- Add: **Upload song** (audio file → `song-audio` bucket, cover → `album-art`, set title/price/album/genre).
+- **Create album** form.
+- **Edit artist profile** (bio, image → `artist-images`, social links).
+- **Withdraw earnings** request (creates payout row, pending superadmin approval).
+- "Become an artist" application flow at `/become-artist` for logged-in users → creates pending `artists` row → admin approves.
 
-### 5. Server functions (`src/lib/*.functions.ts`)
-- `getFeaturedAlbums`, `getTrendingSongs`, `getNewReleases`
-- `getArtistById`, `searchSongs`, `getAlbumWithSongs`
-- `getMySubscription`, `getMyPurchases`, `getMyPlaylists`
-- `getArtistRevenue` (artist-only), `getPlatformStats` (admin-only)
-- `uploadSong` (artist upload portal — accepts file via signed-upload URL)
-- `getSignedAudioUrl(songId)` — checks ownership/subscription before returning URL
+### Listener / User (`/dashboard` — already partially built)
+- Existing overview stays.
+- Add: **Create/edit playlist**, add songs to playlist, like/unlike song.
+- **Manage subscription** (upgrade/cancel) → goes to `/checkout`.
+- **Purchase history** with re-download links (signed URLs).
+- **Profile editor** (avatar upload → `user-avatars`, display name).
 
-### 6. Payment integration scaffolding (DPO Pay)
-- `payment_methods` table seeded with MTN MoMo, Airtel Money, Zamtel, Visa, Mastercard
-- Checkout page reads providers from DB
-- Stub `initiatePayment` server function + `/api/public/dpo-webhook` route — both return "not configured" until you give me the DPO keys
-- When you send the DPO sandbox keys, we add `DPO_COMPANY_TOKEN` + `DPO_SERVICE_TYPE` via the secret tool and fill in the bodies
+### Public (no auth)
+- Browse, search, artist pages stay. Add "Sign in to play full track / purchase / subscribe" CTAs.
 
-## Frontend work
+## 4. New routes
 
-Each page becomes a thin shell over a server function loaded with TanStack Query:
-
-```text
-Route loader → ensureQueryData → server fn → DB
-Component → useSuspenseQuery → render
 ```
+src/routes/
+  _authenticated/
+    superadmin.tsx
+    superadmin.users.tsx
+    superadmin.plans.tsx
+    superadmin.payments.tsx
+    superadmin.settings.tsx
+    superadmin.audit.tsx
+    artist-dashboard.upload.tsx
+    artist-dashboard.albums.new.tsx
+    artist-dashboard.profile.tsx
+    artist-dashboard.payouts.tsx
+    dashboard.playlists.$id.tsx
+    dashboard.profile.tsx
+    dashboard.purchases.tsx
+    become-artist.tsx
+```
+(Existing top-level `admin.tsx`, `artist-dashboard.tsx`, `dashboard.tsx` get moved under `_authenticated/` so the integration gate protects them.)
 
-Empty states render when DB tables are empty (no fake fallback). Skeleton loaders during fetch.
+## 5. Server functions (new files)
 
-PlayerBar reads the currently-playing track from a Zustand store fed by user clicks — no mock track on first load.
+- `src/lib/superadmin.functions.ts` — `listUsers`, `grantRole`, `revokeRole`, `upsertPlan`, `togglePaymentMethod`, `updateSettings`, `listAudit`, `approvePayout`.
+- `src/lib/admin.functions.ts` — extend with `moderateSong`, `verifyArtist`, `refundTransaction`.
+- `src/lib/artist.functions.ts` — `uploadSong`, `createAlbum`, `updateArtistProfile`, `requestPayout`, `applyAsArtist`.
+- `src/lib/listener.functions.ts` — `createPlaylist`, `addToPlaylist`, `likeSong`, `updateProfile`, `signedAudioUrl`.
 
-## Order of execution
+All write fns insert into `audit_log`.
 
-1. Migration: new tables, columns, RLS, views, storage buckets, seed payment_methods + 2 default subscription plans
-2. Server functions for public reads (home, browse, artists, albums)
-3. Wire public pages to those server functions; delete hardcoded arrays
-4. Server functions for protected reads (dashboards, purchases)
-5. Wire dashboards (user / artist / admin)
-6. Artist upload portal → storage + DB insert
-7. Checkout → DB-driven payment provider list + stub DPO call
-8. **Pause here** — wait for you to send DPO Pay sandbox keys + design mockups/logo/splash
-9. Plug DPO keys into `initiatePayment` + webhook, swap placeholder branding for your logo/splash
+## 6. Order of work
 
-## What I need from you eventually
+1. Migration (enum + tables + policies).
+2. Theme tokens + ThemeProvider + toggle.
+3. Move protected routes under `_authenticated/`, add role-guards in their loaders.
+4. Superadmin section (full).
+5. Admin moderation additions.
+6. Artist upload + profile + payouts.
+7. Listener playlists + profile + purchases.
+8. "Become an artist" + role grant.
 
-- DPO Pay **Company Token** and **Service Type** (sandbox first, prod later)
-- Logo (PNG/SVG, transparent)
-- Splash screen artwork (recommended 2732×2732 for Capacitor)
-- App icon (1024×1024)
-- Any mockup screenshots showing the design direction you want for the mobile app
+## Out of scope (still waiting on you)
+- Actual DPO Pay API calls — stubs remain until you send keys.
+- Mobile (Capacitor) screens — separate pass.
+- Branding swap (logo/splash/icon) — separate pass when you send assets.
 
-You don't need to send these now — just whenever you have them.
-
-## Out of scope for this pass
-
-- DPO Pay actual API calls (stubbed until keys arrive)
-- Mobile (Capacitor) screens — separate work, will branch on `usePlatform()`
-- Background audio playback plugin (separate Capacitor task)
-
-Reply **approve** to start with the migration, or tell me what to change.
+Want me to proceed with all of this in one go, or stop after the migration + theming for review?
