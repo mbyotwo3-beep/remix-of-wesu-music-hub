@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -23,6 +24,11 @@ import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 import { Route as ApiPublicDpoWebhookRouteImport } from './routes/api/public/dpo-webhook'
 
+const SuperadminRoute = SuperadminRouteImport.update({
+  id: '/superadmin',
+  path: '/superadmin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists': typeof ArtistsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/subscriptions': typeof SubscriptionsRoute
+  '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/artists/': typeof ArtistsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/subscriptions'
+    | '/superadmin'
     | '/artists/$id'
     | '/artists/'
     | '/api/public/dpo-webhook'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/subscriptions'
+    | '/superadmin'
     | '/artists/$id'
     | '/artists'
     | '/api/public/dpo-webhook'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/subscriptions'
+    | '/superadmin'
     | '/artists/$id'
     | '/artists/'
     | '/api/public/dpo-webhook'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
+  SuperadminRoute: typeof SuperadminRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
   ApiPublicDpoWebhookRoute: typeof ApiPublicDpoWebhookRoute
@@ -201,6 +214,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/superadmin': {
+      id: '/superadmin'
+      path: '/superadmin'
+      fullPath: '/superadmin'
+      preLoaderRoute: typeof SuperadminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/subscriptions': {
       id: '/subscriptions'
       path: '/subscriptions'
@@ -306,6 +326,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   SubscriptionsRoute: SubscriptionsRoute,
+  SuperadminRoute: SuperadminRoute,
   ArtistsIdRoute: ArtistsIdRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
   ApiPublicDpoWebhookRoute: ApiPublicDpoWebhookRoute,
