@@ -19,7 +19,7 @@ function ArtistDashboardPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const fetchOverview = useServerFn(getMyArtistOverview);
-  const [activeTab, setActiveTab] = useState<"overview" | "upload" | "analytics">("overview");
+  
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
