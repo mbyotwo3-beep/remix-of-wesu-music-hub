@@ -15,6 +15,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as BecomeArtistRouteImport } from './routes/become-artist'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtistDashboardRouteImport } from './routes/artist-dashboard'
 import { Route as AlbumsRouteImport } from './routes/albums'
@@ -52,6 +53,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BecomeArtistRoute = BecomeArtistRouteImport.update({
+  id: '/become-artist',
+  path: '/become-artist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
   '/auth': typeof AuthRoute
+  '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
   '/auth': typeof AuthRoute
+  '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/albums': typeof AlbumsRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
   '/auth': typeof AuthRoute
+  '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
   '/contact': typeof ContactRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/albums'
     | '/artist-dashboard'
     | '/auth'
+    | '/become-artist'
     | '/browse'
     | '/checkout'
     | '/contact'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/albums'
     | '/artist-dashboard'
     | '/auth'
+    | '/become-artist'
     | '/browse'
     | '/checkout'
     | '/contact'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/albums'
     | '/artist-dashboard'
     | '/auth'
+    | '/become-artist'
     | '/browse'
     | '/checkout'
     | '/contact'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   AlbumsRoute: typeof AlbumsRoute
   ArtistDashboardRoute: typeof ArtistDashboardRoute
   AuthRoute: typeof AuthRoute
+  BecomeArtistRoute: typeof BecomeArtistRoute
   BrowseRoute: typeof BrowseRoute
   CheckoutRoute: typeof CheckoutRoute
   ContactRoute: typeof ContactRoute
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/browse'
       fullPath: '/browse'
       preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/become-artist': {
+      id: '/become-artist'
+      path: '/become-artist'
+      fullPath: '/become-artist'
+      preLoaderRoute: typeof BecomeArtistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -321,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlbumsRoute: AlbumsRoute,
   ArtistDashboardRoute: ArtistDashboardRoute,
   AuthRoute: AuthRoute,
+  BecomeArtistRoute: BecomeArtistRoute,
   BrowseRoute: BrowseRoute,
   CheckoutRoute: CheckoutRoute,
   ContactRoute: ContactRoute,
