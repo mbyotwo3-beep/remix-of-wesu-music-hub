@@ -40,8 +40,9 @@ function ArtistDashboardPage() {
         <Music className="size-12 mx-auto mb-4 text-muted-foreground" />
         <h1 className="text-2xl font-bold mb-2">You're not an artist yet</h1>
         <p className="text-muted-foreground mb-6">
-          Create an artist profile from the Admin panel or contact support to enable music uploads.
+          Apply for an artist account to start uploading music. An admin will review your application.
         </p>
+        <a href="/become-artist" className="inline-block px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold">Apply now</a>
       </div>
     );
   }
