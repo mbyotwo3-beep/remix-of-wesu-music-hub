@@ -1,0 +1,147 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+async function assertSuperadmin(supabase: any, userId: string) {
+  const { data, error } = await supabase.rpc("is_superadmin", { _user_id: userId });
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("Forbidden: superadmin only");
+}
+
+async function audit(actorId: string, action: string, target_type?: string, target_id?: string, meta: any = {}) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  await supabaseAdmin.from("audit_log").insert({ actor_id: actorId, action, target_type, target_id, meta });
+}
+
+export const listUsers = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [{ data: profiles }, { data: roles }] = await Promise.all([
+      supabaseAdmin.from("profiles").select("user_id, full_name, avatar_url, created_at").order("created_at", { ascending: false }).limit(200),
+      supabaseAdmin.from("user_roles").select("user_id, role"),
+    ]);
+    const rolesByUser = new Map<string, string[]>();
+    (roles ?? []).forEach((r: any) => {
+      const arr = rolesByUser.get(r.user_id) ?? [];
+      arr.push(r.role);
+      rolesByUser.set(r.user_id, arr);
+    });
+    return (profiles ?? []).map((p: any) => ({ ...p, roles: rolesByUser.get(p.user_id) ?? [] }));
+  });
+
+export const grantRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { user_id: string; role: "user" | "artist" | "admin" | "superadmin" }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("user_roles").upsert({ user_id: data.user_id, role: data.role }, { onConflict: "user_id,role" });
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "role.grant", "user", data.user_id, { role: data.role });
+    return { ok: true };
+  });
+
+export const revokeRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { user_id: string; role: string }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id).eq("role", data.role);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "role.revoke", "user", data.user_id, { role: data.role });
+    return { ok: true };
+  });
+
+export const upsertPlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id?: string; name: string; price_zmw: number; description?: string; is_active?: boolean }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const row: any = { name: data.name, price_zmw: data.price_zmw, description: data.description ?? null, is_active: data.is_active ?? true };
+    if (data.id) row.id = data.id;
+    const { error } = await supabaseAdmin.from("subscription_plans").upsert(row);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "plan.upsert", "plan", data.id ?? "new", { name: data.name });
+    return { ok: true };
+  });
+
+export const togglePaymentMethod = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { code: string; is_active: boolean }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("payment_methods").update({ is_active: data.is_active }).eq("code", data.code);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "payment_method.toggle", "payment_method", data.code, { is_active: data.is_active });
+    return { ok: true };
+  });
+
+export const updateSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { key: string; value: Record<string, unknown> }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("platform_settings")
+      .upsert({ key: data.key, value: data.value, updated_by: context.userId, updated_at: new Date().toISOString() });
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "settings.update", "setting", data.key, data.value);
+    return { ok: true };
+  });
+
+export const listAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("audit_log")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const listPayouts = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isStaff } = await context.supabase.rpc("is_staff", { _user_id: context.userId });
+    if (!isStaff) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("payouts")
+      .select("*, artist:artists(name)")
+      .order("requested_at", { ascending: false });
+    return data ?? [];
+  });
+
+export const decidePayout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; decision: "approved" | "rejected"; notes?: string }) => d)
+  .handler(async ({ context, data }) => {
+    const { data: isStaff } = await context.supabase.rpc("is_staff", { _user_id: context.userId });
+    if (!isStaff) throw new Error("Forbidden");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("payouts").update({
+      status: data.decision,
+      notes: data.notes ?? null,
+      processed_at: new Date().toISOString(),
+      processed_by: context.userId,
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, `payout.${data.decision}`, "payout", data.id, { notes: data.notes });
+    return { ok: true };
+  });
+
+export const getSettings = createServerFn({ method: "GET" })
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("platform_settings").select("key, value");
+    const out: Record<string, any> = {};
+    (data ?? []).forEach((r: any) => { out[r.key] = r.value; });
+    return out;
+  });
