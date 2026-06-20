@@ -70,13 +70,13 @@ export const upsertPlan = createServerFn({ method: "POST" })
 
 export const togglePaymentMethod = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { code: string; is_active: boolean }) => d)
+  .inputValidator((d: { code: string; is_enabled: boolean }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("payment_methods").update({ is_active: data.is_active }).eq("code", data.code);
+    const { error } = await supabaseAdmin.from("payment_methods").update({ is_enabled: data.is_enabled }).eq("code", data.code);
     if (error) throw new Error(error.message);
-    await audit(context.userId, "payment_method.toggle", "payment_method", data.code, { is_active: data.is_active });
+    await audit(context.userId, "payment_method.toggle", "payment_method", data.code, { is_enabled: data.is_enabled });
     return { ok: true };
   });
 
