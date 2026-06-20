@@ -70,6 +70,8 @@ export type Database = {
           id: string
           monthly_listeners: number
           name: string
+          social_links: Json
+          status: string
           updated_at: string
           user_id: string
           verified: boolean
@@ -82,6 +84,8 @@ export type Database = {
           id?: string
           monthly_listeners?: number
           name: string
+          social_links?: Json
+          status?: string
           updated_at?: string
           user_id: string
           verified?: boolean
@@ -94,9 +98,41 @@ export type Database = {
           id?: string
           monthly_listeners?: number
           name?: string
+          social_links?: Json
+          status?: string
           updated_at?: string
           user_id?: string
           verified?: boolean
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          meta: Json
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          meta?: Json
+          target_id?: string | null
+          target_type?: string | null
         }
         Relationships: []
       }
@@ -181,6 +217,74 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      payouts: {
+        Row: {
+          amount: number
+          artist_id: string
+          destination: string
+          id: string
+          method_code: string
+          notes: string | null
+          processed_at: string | null
+          processed_by: string | null
+          requested_at: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          artist_id: string
+          destination: string
+          id?: string
+          method_code: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          artist_id?: string
+          destination?: string
+          id?: string
+          method_code?: string
+          notes?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          requested_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
         }
         Relationships: []
       }
@@ -340,6 +444,32 @@ export type Database = {
           },
         ]
       }
+      song_likes: {
+        Row: {
+          created_at: string
+          song_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          song_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          song_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "song_likes_song_id_fkey"
+            columns: ["song_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       songs: {
         Row: {
           album_id: string | null
@@ -354,6 +484,7 @@ export type Database = {
           is_trending: boolean
           play_count: number
           price: number | null
+          status: string
           title: string
         }
         Insert: {
@@ -369,6 +500,7 @@ export type Database = {
           is_trending?: boolean
           play_count?: number
           price?: number | null
+          status?: string
           title: string
         }
         Update: {
@@ -384,6 +516,7 @@ export type Database = {
           is_trending?: boolean
           play_count?: number
           price?: number | null
+          status?: string
           title?: string
         }
         Relationships: [
@@ -511,6 +644,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_superadmin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "artist" | "user" | "superadmin"
