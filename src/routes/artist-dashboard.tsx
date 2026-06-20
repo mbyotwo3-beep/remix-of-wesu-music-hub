@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Upload, TrendingUp, DollarSign, Music, BarChart3 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { getMyArtistOverview } from "@/lib/user.functions";
 
