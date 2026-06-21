@@ -2,14 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import { Shield, Users, Settings as SettingsIcon, CreditCard, FileText, Wallet, Check, X } from "lucide-react";
+import { Shield, Users, Settings as SettingsIcon, CreditCard, FileText, Wallet, Check, X, Star, Building2 } from "lucide-react";
 import { RoleGate } from "@/components/RoleGate";
 import {
   listUsers, grantRole, revokeRole,
   upsertPlan, togglePaymentMethod, updateSettings, listAudit,
-  listPayouts, decidePayout, getSettings,
+  listPayouts, decidePayout, getSettings, markTransactionPaid, setPlatformCommission,
 } from "@/lib/superadmin.functions";
 import { getPlatformStats } from "@/lib/admin.functions";
+import { listAllFeaturedAdmin, upsertFeaturedSlot, removeFeaturedSlot } from "@/lib/features.functions";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/superadmin")({
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/superadmin")({
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
 
-type Tab = "overview" | "users" | "plans" | "payments" | "settings" | "payouts" | "audit";
+type Tab = "overview" | "users" | "plans" | "payments" | "settings" | "payouts" | "labels" | "featured" | "audit";
 
 function SuperadminPage() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -29,6 +30,8 @@ function SuperadminPage() {
     { id: "plans", label: "Plans", icon: CreditCard },
     { id: "payments", label: "Payment Methods", icon: CreditCard },
     { id: "payouts", label: "Payouts", icon: Wallet },
+    { id: "labels", label: "Labels", icon: Building2 },
+    { id: "featured", label: "Featured", icon: Star },
     { id: "settings", label: "Settings", icon: SettingsIcon },
     { id: "audit", label: "Audit Log", icon: FileText },
   ];

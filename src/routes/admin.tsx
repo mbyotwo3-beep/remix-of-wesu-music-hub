@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Users, Music, CreditCard, Shield, BarChart3, Check, X } from "lucide-react";
+import { Users, Music, CreditCard, Shield, BarChart3, Check, X, Building2 } from "lucide-react";
 import { useState } from "react";
 import { RoleGate } from "@/components/RoleGate";
 import {
   getPlatformStats, getRecentActivity,
   listPendingSongs, moderateSong,
   listPendingArtists, moderateArtist,
+  listPendingLabels, moderateLabel,
 } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/admin")({
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
 
-type Tab = "overview" | "songs" | "artists";
+type Tab = "overview" | "songs" | "artists" | "labels";
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -30,7 +31,7 @@ function AdminPage() {
           <h1 className="text-3xl font-bold">Admin</h1>
         </div>
         <div className="flex gap-2 mb-8 border-b border-border pb-3">
-          {(["overview", "songs", "artists"] as Tab[]).map((t) => (
+          {(["overview", "songs", "artists", "labels"] as Tab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
                 tab === t ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:text-foreground"
@@ -42,10 +43,39 @@ function AdminPage() {
         {tab === "overview" && <Overview />}
         {tab === "songs" && <SongMod />}
         {tab === "artists" && <ArtistMod />}
+        {tab === "labels" && <LabelMod />}
       </div>
     </div>
   );
 }
+
+function LabelMod() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listPendingLabels);
+  const modFn = useServerFn(moderateLabel);
+  const { data } = useQuery({ queryKey: ["pending-labels"], queryFn: () => listFn(), retry: false });
+  const m = useMutation({ mutationFn: modFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-labels"] }) });
+  if (!data) return <div className="text-muted-foreground">Loading…</div>;
+  if (data.length === 0) return <p className="text-muted-foreground">No label applications.</p>;
+  return (
+    <div className="space-y-3">
+      {data.map((l: any) => (
+        <div key={l.id} className="bg-card border border-border rounded-xl p-4 flex justify-between items-start gap-4">
+          <div>
+            <div className="flex items-center gap-2"><Building2 className="size-4" /><p className="font-medium">{l.name}</p></div>
+            <p className="text-xs text-muted-foreground">{l.contact_email ?? "—"}</p>
+            {l.bio && <p className="text-sm mt-2 text-muted-foreground max-w-2xl">{l.bio}</p>}
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <button disabled={m.isPending} onClick={() => m.mutate({ data: { id: l.id, status: "approved" } })} className="text-xs inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/15 text-primary"><Check className="size-3" /> Approve</button>
+            <button disabled={m.isPending} onClick={() => m.mutate({ data: { id: l.id, status: "rejected" } })} className="text-xs inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-destructive/15 text-destructive"><X className="size-3" /> Reject</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 
 function Overview() {
   const statsFn = useServerFn(getPlatformStats);
