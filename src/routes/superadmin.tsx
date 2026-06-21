@@ -64,8 +64,96 @@ function SuperadminPage() {
         {tab === "plans" && <PlansTab />}
         {tab === "payments" && <PaymentsTab />}
         {tab === "payouts" && <PayoutsTab />}
+        {tab === "labels" && <LabelsTab />}
+        {tab === "featured" && <FeaturedTab />}
         {tab === "settings" && <SettingsTab />}
         {tab === "audit" && <AuditTab />}
+      </div>
+    </div>
+  );
+}
+
+function LabelsTab() {
+  const [rows, setRows] = useState<any[]>([]);
+  useQuery({
+    queryKey: ["super-labels"],
+    queryFn: async () => {
+      const { data } = await supabase.from("labels").select("*").order("created_at", { ascending: false });
+      setRows(data ?? []);
+      return data ?? [];
+    },
+  });
+  return (
+    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      <table className="w-full text-sm">
+        <thead className="bg-secondary text-muted-foreground"><tr><th className="text-left p-3">Label</th><th className="text-left p-3">Status</th><th className="text-left p-3">Commission %</th><th className="text-left p-3">Created</th></tr></thead>
+        <tbody>
+          {rows.map((l) => (
+            <tr key={l.id} className="border-t border-border">
+              <td className="p-3 font-medium">{l.name}</td>
+              <td className="p-3"><span className="text-xs">{l.status}</span></td>
+              <td className="p-3">{l.commission_pct}%</td>
+              <td className="p-3 text-xs text-muted-foreground">{new Date(l.created_at).toLocaleDateString()}</td>
+            </tr>
+          ))}
+          {rows.length === 0 && <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">No labels yet.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function FeaturedTab() {
+  const qc = useQueryClient();
+  const listFn = useServerFn(listAllFeaturedAdmin);
+  const upsertFn = useServerFn(upsertFeaturedSlot);
+  const removeFn = useServerFn(removeFeaturedSlot);
+  const { data } = useQuery({ queryKey: ["super-featured"], queryFn: () => listFn(), retry: false });
+  const upsertM = useMutation({ mutationFn: upsertFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["super-featured"] }) });
+  const removeM = useMutation({ mutationFn: removeFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["super-featured"] }) });
+  const [form, setForm] = useState({ slot_type: "home_hero", target_type: "song", target_id: "", position: 0, title: "", subtitle: "", image_url: "" });
+  return (
+    <div className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); upsertM.mutate({ data: form }); }} className="bg-card border border-border rounded-2xl p-6 space-y-3">
+        <h3 className="font-semibold">Promote content</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <select className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.slot_type} onChange={(e) => setForm({ ...form, slot_type: e.target.value })}>
+            <option value="home_hero">Home hero</option>
+            <option value="home_trending">Home trending</option>
+            <option value="home_artist">Home artist</option>
+            <option value="genre_top">Genre top</option>
+            <option value="editorial">Editorial</option>
+          </select>
+          <select className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.target_type} onChange={(e) => setForm({ ...form, target_type: e.target.value })}>
+            <option value="song">Song</option><option value="album">Album</option><option value="artist">Artist</option><option value="label">Label</option><option value="playlist">Playlist</option>
+          </select>
+        </div>
+        <input required placeholder="Target ID (uuid)" className="w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.target_id} onChange={(e) => setForm({ ...form, target_id: e.target.value })} />
+        <div className="grid grid-cols-2 gap-3">
+          <input placeholder="Headline" className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+          <input placeholder="Subtitle" className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
+        </div>
+        <input type="number" placeholder="Position" className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.position} onChange={(e) => setForm({ ...form, position: Number(e.target.value) })} />
+        <input placeholder="Image URL (optional)" className="w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+        {upsertM.error && <p className="text-sm text-destructive">{(upsertM.error as Error).message}</p>}
+        <button disabled={upsertM.isPending || !form.target_id} className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold">Add slot</button>
+      </form>
+      <div className="bg-card border border-border rounded-2xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-secondary text-muted-foreground"><tr><th className="text-left p-3">Slot</th><th className="text-left p-3">Target</th><th className="text-left p-3">Pos</th><th className="text-left p-3">Active</th><th></th></tr></thead>
+          <tbody>
+            {(data ?? []).map((s: any) => (
+              <tr key={s.id} className="border-t border-border">
+                <td className="p-3">{s.slot_type}</td>
+                <td className="p-3 text-xs">{s.target_type}:{s.target_id.slice(0, 8)}…</td>
+                <td className="p-3">{s.position}</td>
+                <td className="p-3">{s.active ? "Yes" : "No"}</td>
+                <td className="p-3"><button onClick={() => removeM.mutate({ data: { id: s.id } })} className="text-xs text-destructive">Remove</button></td>
+              </tr>
+            ))}
+            {(data ?? []).length === 0 && <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No featured slots configured.</td></tr>}
+          </tbody>
+        </table>
       </div>
     </div>
   );
