@@ -12,9 +12,9 @@ const labelQuery = (slug: string) => queryOptions({
 });
 
 export const Route = createFileRoute("/labels/$slug")({
-  head: ({ loaderData }) => ({ meta: [
-    { title: loaderData?.label ? `${(loaderData.label as any).name} — Wesu+` : "Label — Wesu+" },
-    { name: "description", content: (loaderData?.label as any)?.bio ?? "Record label on Wesu+." },
+  head: ({ loaderData }: { loaderData: any }) => ({ meta: [
+    { title: loaderData?.label ? `${loaderData.label.name} — Wesu+` : "Label — Wesu+" },
+    { name: "description", content: loaderData?.label?.bio ?? "Record label on Wesu+." },
   ] }),
   loader: ({ context, params }) => context.queryClient.ensureQueryData(labelQuery(params.slug)),
   component: LabelPage,

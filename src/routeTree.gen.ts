@@ -12,18 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as LabelDashboardRouteImport } from './routes/label-dashboard'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CollabsRouteImport } from './routes/collabs'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as BecomeArtistRouteImport } from './routes/become-artist'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArtistStudioRouteImport } from './routes/artist-studio'
 import { Route as ArtistDashboardRouteImport } from './routes/artist-dashboard'
+import { Route as ApplyLabelRouteImport } from './routes/apply-label'
 import { Route as AlbumsRouteImport } from './routes/albums'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LabelsIndexRouteImport } from './routes/labels.index'
 import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
+import { Route as LabelsSlugRouteImport } from './routes/labels.$slug'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 import { Route as ApiPublicDpoWebhookRouteImport } from './routes/api/public/dpo-webhook'
 
@@ -42,6 +47,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabelDashboardRoute = LabelDashboardRouteImport.update({
+  id: '/label-dashboard',
+  path: '/label-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -50,6 +60,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollabsRoute = CollabsRouteImport.update({
+  id: '/collabs',
+  path: '/collabs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CheckoutRoute = CheckoutRouteImport.update({
@@ -82,6 +97,11 @@ const ArtistDashboardRoute = ArtistDashboardRouteImport.update({
   path: '/artist-dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApplyLabelRoute = ApplyLabelRouteImport.update({
+  id: '/apply-label',
+  path: '/apply-label',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AlbumsRoute = AlbumsRouteImport.update({
   id: '/albums',
   path: '/albums',
@@ -97,9 +117,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabelsIndexRoute = LabelsIndexRouteImport.update({
+  id: '/labels/',
+  path: '/labels/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ArtistsIndexRoute = ArtistsIndexRouteImport.update({
   id: '/artists/',
   path: '/artists/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabelsSlugRoute = LabelsSlugRouteImport.update({
+  id: '/labels/$slug',
+  path: '/labels/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtistsIdRoute = ArtistsIdRouteImport.update({
@@ -117,38 +147,48 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
+  '/apply-label': typeof ApplyLabelRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
   '/artist-studio': typeof ArtistStudioRoute
   '/auth': typeof AuthRoute
   '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
+  '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/label-dashboard': typeof LabelDashboardRoute
   '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
+  '/labels/$slug': typeof LabelsSlugRoute
   '/artists/': typeof ArtistsIndexRoute
+  '/labels/': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
+  '/apply-label': typeof ApplyLabelRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
   '/artist-studio': typeof ArtistStudioRoute
   '/auth': typeof AuthRoute
   '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
+  '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/label-dashboard': typeof LabelDashboardRoute
   '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
+  '/labels/$slug': typeof LabelsSlugRoute
   '/artists': typeof ArtistsIndexRoute
+  '/labels': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
 export interface FileRoutesById {
@@ -156,19 +196,24 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/albums': typeof AlbumsRoute
+  '/apply-label': typeof ApplyLabelRoute
   '/artist-dashboard': typeof ArtistDashboardRoute
   '/artist-studio': typeof ArtistStudioRoute
   '/auth': typeof AuthRoute
   '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
   '/checkout': typeof CheckoutRoute
+  '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/label-dashboard': typeof LabelDashboardRoute
   '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
+  '/labels/$slug': typeof LabelsSlugRoute
   '/artists/': typeof ArtistsIndexRoute
+  '/labels/': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
 export interface FileRouteTypes {
@@ -177,57 +222,72 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/albums'
+    | '/apply-label'
     | '/artist-dashboard'
     | '/artist-studio'
     | '/auth'
     | '/become-artist'
     | '/browse'
     | '/checkout'
+    | '/collabs'
     | '/contact'
     | '/dashboard'
+    | '/label-dashboard'
     | '/profile'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
+    | '/labels/$slug'
     | '/artists/'
+    | '/labels/'
     | '/api/public/dpo-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/albums'
+    | '/apply-label'
     | '/artist-dashboard'
     | '/artist-studio'
     | '/auth'
     | '/become-artist'
     | '/browse'
     | '/checkout'
+    | '/collabs'
     | '/contact'
     | '/dashboard'
+    | '/label-dashboard'
     | '/profile'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
+    | '/labels/$slug'
     | '/artists'
+    | '/labels'
     | '/api/public/dpo-webhook'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/albums'
+    | '/apply-label'
     | '/artist-dashboard'
     | '/artist-studio'
     | '/auth'
     | '/become-artist'
     | '/browse'
     | '/checkout'
+    | '/collabs'
     | '/contact'
     | '/dashboard'
+    | '/label-dashboard'
     | '/profile'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
+    | '/labels/$slug'
     | '/artists/'
+    | '/labels/'
     | '/api/public/dpo-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -235,19 +295,24 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AlbumsRoute: typeof AlbumsRoute
+  ApplyLabelRoute: typeof ApplyLabelRoute
   ArtistDashboardRoute: typeof ArtistDashboardRoute
   ArtistStudioRoute: typeof ArtistStudioRoute
   AuthRoute: typeof AuthRoute
   BecomeArtistRoute: typeof BecomeArtistRoute
   BrowseRoute: typeof BrowseRoute
   CheckoutRoute: typeof CheckoutRoute
+  CollabsRoute: typeof CollabsRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
+  LabelDashboardRoute: typeof LabelDashboardRoute
   ProfileRoute: typeof ProfileRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   SuperadminRoute: typeof SuperadminRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
+  LabelsSlugRoute: typeof LabelsSlugRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
+  LabelsIndexRoute: typeof LabelsIndexRoute
   ApiPublicDpoWebhookRoute: typeof ApiPublicDpoWebhookRoute
 }
 
@@ -274,6 +339,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/label-dashboard': {
+      id: '/label-dashboard'
+      path: '/label-dashboard'
+      fullPath: '/label-dashboard'
+      preLoaderRoute: typeof LabelDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -286,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collabs': {
+      id: '/collabs'
+      path: '/collabs'
+      fullPath: '/collabs'
+      preLoaderRoute: typeof CollabsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checkout': {
@@ -330,6 +409,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/apply-label': {
+      id: '/apply-label'
+      path: '/apply-label'
+      fullPath: '/apply-label'
+      preLoaderRoute: typeof ApplyLabelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/albums': {
       id: '/albums'
       path: '/albums'
@@ -351,11 +437,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/labels/': {
+      id: '/labels/'
+      path: '/labels'
+      fullPath: '/labels/'
+      preLoaderRoute: typeof LabelsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/artists/': {
       id: '/artists/'
       path: '/artists'
       fullPath: '/artists/'
       preLoaderRoute: typeof ArtistsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/labels/$slug': {
+      id: '/labels/$slug'
+      path: '/labels/$slug'
+      fullPath: '/labels/$slug'
+      preLoaderRoute: typeof LabelsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artists/$id': {
@@ -379,19 +479,24 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AlbumsRoute: AlbumsRoute,
+  ApplyLabelRoute: ApplyLabelRoute,
   ArtistDashboardRoute: ArtistDashboardRoute,
   ArtistStudioRoute: ArtistStudioRoute,
   AuthRoute: AuthRoute,
   BecomeArtistRoute: BecomeArtistRoute,
   BrowseRoute: BrowseRoute,
   CheckoutRoute: CheckoutRoute,
+  CollabsRoute: CollabsRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
+  LabelDashboardRoute: LabelDashboardRoute,
   ProfileRoute: ProfileRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   SuperadminRoute: SuperadminRoute,
   ArtistsIdRoute: ArtistsIdRoute,
+  LabelsSlugRoute: LabelsSlugRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
+  LabelsIndexRoute: LabelsIndexRoute,
   ApiPublicDpoWebhookRoute: ApiPublicDpoWebhookRoute,
 }
 export const routeTree = rootRouteImport
