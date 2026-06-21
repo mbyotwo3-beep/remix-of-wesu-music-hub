@@ -166,3 +166,35 @@ export const claimFirstSuperadmin = createServerFn({ method: "POST" })
     await audit(context.userId, "superadmin.bootstrap", "user", context.userId);
     return { ok: true };
   });
+
+/**
+ * Manually mark a payment_transaction as paid. Useful for testing the split
+ * pipeline before DPO Pay is wired. Triggers compute_revenue_splits().
+ */
+export const markTransactionPaid = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { transaction_id: string }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("payment_transactions")
+      .update({ status: "paid" })
+      .eq("id", data.transaction_id);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, "tx.mark_paid", "transaction", data.transaction_id);
+    return { ok: true };
+  });
+
+export const setPlatformCommission = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { pct: number }) => d)
+  .handler(async ({ context, data }) => {
+    await assertSuperadmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("platform_settings").upsert({
+      key: "commission_pct", value: data.pct as any, updated_by: context.userId, updated_at: new Date().toISOString(),
+    });
+    await audit(context.userId, "commission.set", "setting", "commission_pct", { pct: data.pct });
+    return { ok: true };
+  });
