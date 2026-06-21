@@ -1,13 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Upload, Wallet, FolderPlus } from "lucide-react";
+import { Upload, Wallet, FolderPlus, Users, Building2, Star } from "lucide-react";
 import { RoleGate } from "@/components/RoleGate";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadFileToBucket } from "@/lib/storage";
-import { uploadSong, createAlbum, listMyAlbums, requestPayout, listMyPayouts } from "@/lib/artist.functions";
+import {
+  uploadSong, createAlbum, listMyAlbums, requestPayout, listMyPayouts,
+  setCollabPrefs, leaveLabel, listMyLabelInvites, listMySongs,
+} from "@/lib/artist.functions";
 import { getMyArtistOverview } from "@/lib/user.functions";
+import { inviteCollaborator } from "@/lib/collabs.functions";
+import { respondToLabelInvite } from "@/lib/labels.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/artist-studio")({
   head: () => ({ meta: [{ title: "Artist Studio — Wesu+" }] }),
@@ -16,19 +22,22 @@ export const Route = createFileRoute("/artist-studio")({
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
 
-type Tab = "upload" | "album" | "payouts";
+type Tab = "upload" | "album" | "collabs" | "label" | "features" | "payouts";
 
 function Page() {
   const [tab, setTab] = useState<Tab>("upload");
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: "upload", label: "Upload Song", icon: Upload },
     { id: "album", label: "Albums", icon: FolderPlus },
+    { id: "collabs", label: "Collaborators", icon: Users },
+    { id: "label", label: "Label", icon: Building2 },
+    { id: "features", label: "Features", icon: Star },
     { id: "payouts", label: "Payouts", icon: Wallet },
   ];
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold mb-6">Artist Studio</h1>
-      <div className="flex gap-2 mb-8 border-b border-border pb-3">
+      <div className="flex flex-wrap gap-2 mb-8 border-b border-border pb-3">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
@@ -40,10 +49,120 @@ function Page() {
       </div>
       {tab === "upload" && <UploadTab />}
       {tab === "album" && <AlbumTab />}
+      {tab === "collabs" && <CollabsTab />}
+      {tab === "label" && <LabelTab />}
+      {tab === "features" && <FeaturesTab />}
       {tab === "payouts" && <PayoutTab />}
     </div>
   );
 }
+
+function CollabsTab() {
+  const songsFn = useServerFn(listMySongs);
+  const inviteFn = useServerFn(inviteCollaborator);
+  const { data: songs } = useQuery({ queryKey: ["my-songs"], queryFn: () => songsFn(), retry: false });
+  const m = useMutation({ mutationFn: inviteFn });
+  const [form, setForm] = useState({ song_id: "", artist_id: "", role: "featured" as any, split_pct: 10 });
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState<any[]>([]);
+  async function find() {
+    const { data } = await supabase.from("artists").select("id, name").ilike("name", `%${search}%`).eq("status", "approved").limit(8);
+    setResults(data ?? []);
+  }
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">Invite collaborators to one of your songs and assign a revenue split. Total splits cannot exceed 100%.</p>
+      <form onSubmit={(e) => { e.preventDefault(); m.mutate({ data: form }); }} className="bg-card border border-border rounded-2xl p-6 space-y-3">
+        <select required className="w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.song_id} onChange={(e) => setForm({ ...form, song_id: e.target.value })}>
+          <option value="">— Select your song —</option>
+          {(songs ?? []).map((s: any) => <option key={s.id} value={s.id}>{s.title}</option>)}
+        </select>
+        <div className="flex gap-2">
+          <input className="flex-1 px-3 py-2 rounded-lg bg-secondary border border-border" placeholder="Search artist by name" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <button type="button" onClick={find} className="px-4 py-2 rounded-full bg-secondary border border-border text-sm">Search</button>
+        </div>
+        {results.length > 0 && (
+          <select className="w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.artist_id} onChange={(e) => setForm({ ...form, artist_id: e.target.value })}>
+            <option value="">— Pick artist —</option>
+            {results.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+          </select>
+        )}
+        <div className="grid grid-cols-2 gap-3">
+          <select className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as any })}>
+            <option value="featured">Featured</option>
+            <option value="producer">Producer</option>
+            <option value="writer">Writer</option>
+            <option value="remixer">Remixer</option>
+          </select>
+          <input type="number" min={0} max={100} className="px-3 py-2 rounded-lg bg-secondary border border-border" value={form.split_pct} onChange={(e) => setForm({ ...form, split_pct: Number(e.target.value) })} />
+        </div>
+        {m.error && <p className="text-sm text-destructive">{(m.error as Error).message}</p>}
+        {m.isSuccess && <p className="text-sm text-primary">Invite sent.</p>}
+        <button disabled={m.isPending || !form.song_id || !form.artist_id} className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold">Send invite</button>
+      </form>
+      <Link to="/collabs" className="text-sm text-primary underline">See your incoming &amp; outgoing invites →</Link>
+    </div>
+  );
+}
+
+function LabelTab() {
+  const qc = useQueryClient();
+  const fn = useServerFn(listMyLabelInvites);
+  const respondFn = useServerFn(respondToLabelInvite);
+  const leaveFn = useServerFn(leaveLabel);
+  const { data } = useQuery({ queryKey: ["my-label-invites"], queryFn: () => fn(), retry: false });
+  const respondM = useMutation({ mutationFn: respondFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["my-label-invites"] }) });
+  const leaveM = useMutation({ mutationFn: leaveFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["my-label-invites"] }) });
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h3 className="font-semibold mb-2">Your label</h3>
+        {(data as any)?.current?.label_id ? (
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">You're signed to a label.</span>
+            <button onClick={() => leaveM.mutate(undefined as any)} className="text-xs text-destructive">Leave label</button>
+          </div>
+        ) : <p className="text-sm text-muted-foreground">You're independent. Labels can invite you below.</p>}
+      </div>
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <h3 className="font-semibold mb-3">Pending invites</h3>
+        {!data || data.invites.length === 0 ? <p className="text-sm text-muted-foreground">No invites.</p> : (
+          <ul className="space-y-2">
+            {data.invites.map((i: any) => (
+              <li key={i.id} className="flex justify-between items-center text-sm">
+                <span>{i.labels?.name} — {i.royalty_pct}% royalty to you</span>
+                <div className="flex gap-2">
+                  <button onClick={() => respondM.mutate({ data: { id: i.id, accept: true } })} className="text-xs px-3 py-1 rounded-full bg-primary text-primary-foreground">Accept</button>
+                  <button onClick={() => respondM.mutate({ data: { id: i.id, accept: false } })} className="text-xs px-3 py-1 rounded-full bg-secondary border border-border">Decline</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FeaturesTab() {
+  const fn = useServerFn(setCollabPrefs);
+  const m = useMutation({ mutationFn: fn });
+  const [form, setForm] = useState({ accepts_collabs: true, allow_features: false, feature_rate: 0 });
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); m.mutate({ data: form }); }} className="bg-card border border-border rounded-2xl p-6 space-y-3 max-w-md">
+      <h3 className="font-semibold">Feature availability</h3>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.accepts_collabs} onChange={(e) => setForm({ ...form, accepts_collabs: e.target.checked })} /> Accept collaboration invites from other artists</label>
+      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.allow_features} onChange={(e) => setForm({ ...form, allow_features: e.target.checked })} /> Available to be featured on fan-requested tracks</label>
+      <label className="block text-sm">Feature rate (ZMW)
+        <input type="number" min={0} step="0.01" className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.feature_rate} onChange={(e) => setForm({ ...form, feature_rate: Number(e.target.value) })} />
+      </label>
+      {m.isSuccess && <p className="text-sm text-primary">Saved.</p>}
+      <button disabled={m.isPending} className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold">Save</button>
+    </form>
+  );
+}
+
 
 function UploadTab() {
   const { user } = useAuth();
