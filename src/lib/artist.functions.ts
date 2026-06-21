@@ -139,6 +139,54 @@ export const listMyPayouts = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+// ---------- New: collab prefs, feature toggle, label join/leave, song list ----------
+
+export const setCollabPrefs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { accepts_collabs?: boolean; allow_features?: boolean; feature_rate?: number }) => d)
+  .handler(async ({ context, data }) => {
+    const patch: any = {};
+    if (data.accepts_collabs !== undefined) patch.accepts_collabs = data.accepts_collabs;
+    if (data.allow_features !== undefined) patch.available_for_features = data.allow_features;
+    if (data.feature_rate !== undefined) patch.feature_rate = data.feature_rate;
+    const { error } = await context.supabase.from("artists").update(patch).eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const leaveLabel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: artist } = await context.supabase.from("artists").select("id").eq("user_id", context.userId).maybeSingle();
+    if (!artist) throw new Error("Artist profile required");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("artists").update({ label_id: null }).eq("id", (artist as any).id);
+    await supabaseAdmin.from("label_artists").update({ status: "left" }).eq("artist_id", (artist as any).id).eq("status", "active");
+    return { ok: true };
+  });
+
+export const listMyLabelInvites = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: artist } = await context.supabase.from("artists").select("id, label_id").eq("user_id", context.userId).maybeSingle();
+    if (!artist) return { current: null, invites: [] };
+    const { data: invites } = await context.supabase
+      .from("label_artists")
+      .select("id, royalty_pct, status, labels!inner(id, name, logo_url)")
+      .eq("artist_id", (artist as any).id)
+      .eq("status", "invited");
+    return { current: artist, invites: invites ?? [] };
+  });
+
+export const listMySongs = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: artist } = await context.supabase.from("artists").select("id").eq("user_id", context.userId).maybeSingle();
+    if (!artist) return [];
+    const { data } = await context.supabase.from("songs").select("id, title, status, cover_url").eq("artist_id", (artist as any).id).order("created_at", { ascending: false });
+    return data ?? [];
+  });
+
 // ---------- Storage signing ----------
 
 export const signUpload = createServerFn({ method: "POST" })

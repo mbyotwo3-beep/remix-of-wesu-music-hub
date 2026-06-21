@@ -132,3 +132,43 @@ export const moderateArtist = createServerFn({ method: "POST" })
     await audit(context.userId, `artist.${data.status}`, "artist", data.id, { verified: data.verified });
     return { ok: true };
   });
+
+// ---------- Labels moderation ----------
+
+export const listPendingLabels = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("labels")
+      .select("id, name, slug, bio, contact_email, status, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+    return data ?? [];
+  });
+
+export const moderateLabel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string; status: "approved" | "rejected" }) => d)
+  .handler(async ({ context, data }) => {
+    await assertStaff(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("labels").update({ status: data.status }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await audit(context.userId, `label.${data.status}`, "label", data.id);
+    return { ok: true };
+  });
+
+export const listAllSplits = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("revenue_splits")
+      .select("id, amount, pct, payee_role, created_at, transaction_id")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    return data ?? [];
+  });

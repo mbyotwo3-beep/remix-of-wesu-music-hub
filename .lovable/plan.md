@@ -1,105 +1,110 @@
-# Light/Dark Mode + Full Role Workflows
+# Labels, Splits, Collaborations & Features
 
-## 1. Theming (light + dark)
+Building on the existing roles (superadmin / admin / artist / user), this plan adds **labels**, **revenue splits**, **collaborations**, and **featured artists** — and finishes every role's workflow end-to-end. DPO Pay stays stubbed; payouts and purchases still flow, just marked `pending` until keys arrive.
 
-- Add light-mode token values to `src/styles.css` `:root` (currently `:root` and `.dark` are identical — both dark).
-- Move the current dark palette into `.dark` only; design a true light palette for `:root` (warm off-white bg, deep ink foreground, same gold primary).
-- Add a `ThemeProvider` (`src/hooks/use-theme.tsx`) that:
-  - Reads `localStorage('wesu-theme')` → `'light' | 'dark' | 'system'` (default `system`).
-  - Toggles `.dark` class on `<html>`.
-  - Listens to `prefers-color-scheme` when `system`.
-- Add a `ThemeToggle` icon-button in `Navbar` (sun/moon).
-- Mount provider in `__root.tsx` and add a small inline script in `<head>` to set the class before hydration (avoid flash).
+## 1. Database
 
-## 2. Roles
+New tables (all with GRANTs + RLS):
 
-Add a 4th role `superadmin` on top of existing `admin / artist / user`. Superadmin can do everything admin can, plus manage admins and platform config.
+- **labels** — `id, name, slug, owner_user_id, bio, logo_url, contact_email, status (pending/approved/rejected), commission_pct (default 15), created_at`. Owner can edit; staff approves.
+- **label_artists** — `label_id, artist_id, status (invited/active/left), royalty_pct (default 80), joined_at`. Unique `(label_id, artist_id)`.
+- **song_collaborators** — `song_id, artist_id, role (main/featured/producer/writer), split_pct, accepted (bool default false)`. Sum of `split_pct` per song ≤ 100; trigger enforces.
+- **song_credits_view** (SQL view) — denormalised credits for display.
+- **featured_slots** — `id, slot_type (home_hero/home_artist/genre_top), target_type (song/album/artist/playlist), target_id, position, starts_at, ends_at, active`. Superadmin/admin manage.
+- **invitations** — `id, kind (label_invite_artist/collab_invite/label_apply), from_user_id, to_user_id, to_email, payload jsonb, status (pending/accepted/declined), created_at`.
+- **revenue_splits** (computed log) — `transaction_id, payee_user_id, payee_role (artist/label/platform/collaborator), amount, created_at`. Written by trigger on `payment_transactions` when status flips to `paid`.
 
-DB migration:
-- Extend `app_role` enum with `superadmin`.
-- Add helper `is_admin_or_super(uid)` security-definer fn.
-- Update existing admin RLS policies to accept both roles.
-- New table `platform_settings` (singleton key/value) — superadmin-only writes.
-- New table `audit_log` (actor_id, action, target_type, target_id, meta jsonb) — admin+ read, system insert.
-- Seed: first user with email matching `SUPERADMIN_EMAIL` env (or manual grant flow).
+Extend existing:
+- `artists` → add `label_id` (nullable), `accepts_collabs` (bool), `available_for_features` (bool).
+- `songs` → add `label_id` (cached from artist), `allow_collab_requests` (bool).
+- `payouts` → add `period_start, period_end, gross_amount, platform_fee, label_fee, net_amount`.
 
-## 3. Workflows by role
+Security-definer helpers:
+- `is_label_owner(_uid, _label_id)`, `is_song_collaborator(_uid, _song_id)`, `artist_user_id(_artist_id)`.
 
-### Superadmin (`/superadmin`)
-- Dashboard: platform stats (already exists) + revenue chart, MRR, churn.
-- **Manage admins**: list users, grant/revoke `admin` and `artist` roles, ban user.
-- **Manage subscription plans**: CRUD on `subscription_plans` (name, price, features, active).
-- **Manage payment methods**: toggle MTN/Airtel/Zamtel/Visa active, set fees.
-- **Platform settings**: site name, support email, DPO mode (sandbox/live), commission %.
-- **Audit log** viewer with filters.
+Split trigger: on `payment_transactions.status = 'paid'`, compute splits — platform commission (from `platform_settings.commission_pct`), then label cut if song has `label_id`, remainder distributed across `song_collaborators.split_pct` (defaulting 100% main artist if none set). Insert one row per payee into `revenue_splits`.
 
-### Admin (`/admin` — already partially built)
-- Existing stats + recent activity stays.
-- Add: moderate songs (approve/reject/take down), moderate artists (verify badge), view all transactions with refund action, view all users (read-only).
+## 2. Server functions
 
-### Artist (`/artist-dashboard` — already partially built)
-- Existing overview stays.
-- Add: **Upload song** (audio file → `song-audio` bucket, cover → `album-art`, set title/price/album/genre).
-- **Create album** form.
-- **Edit artist profile** (bio, image → `artist-images`, social links).
-- **Withdraw earnings** request (creates payout row, pending superadmin approval).
-- "Become an artist" application flow at `/become-artist` for logged-in users → creates pending `artists` row → admin approves.
+New `src/lib/labels.functions.ts`:
+- `applyForLabel`, `updateLabel`, `listMyLabel`, `inviteArtistToLabel`, `respondToLabelInvite`, `setArtistRoyalty`, `removeArtistFromLabel`, `listLabelRoster`, `listLabelRevenue`, `requestLabelPayout`.
 
-### Listener / User (`/dashboard` — already partially built)
-- Existing overview stays.
-- Add: **Create/edit playlist**, add songs to playlist, like/unlike song.
-- **Manage subscription** (upgrade/cancel) → goes to `/checkout`.
-- **Purchase history** with re-download links (signed URLs).
-- **Profile editor** (avatar upload → `user-avatars`, display name).
+New `src/lib/collabs.functions.ts`:
+- `inviteCollaborator(song_id, artist_id|email, role, split_pct)`, `respondToCollabInvite`, `listMyCollabInvites`, `listSongCollaborators`, `removeCollaborator`.
 
-### Public (no auth)
-- Browse, search, artist pages stay. Add "Sign in to play full track / purchase / subscribe" CTAs.
+New `src/lib/features.functions.ts` (superadmin/admin):
+- `listFeaturedSlots`, `upsertFeaturedSlot`, `removeFeaturedSlot`, `reorderSlots`.
 
-## 4. New routes
+Extend `artist.functions.ts`:
+- `joinLabel`, `leaveLabel`, `setCollabPrefs`, `setFeatureAvailability`.
 
-```
-src/routes/
-  _authenticated/
-    superadmin.tsx
-    superadmin.users.tsx
-    superadmin.plans.tsx
-    superadmin.payments.tsx
-    superadmin.settings.tsx
-    superadmin.audit.tsx
-    artist-dashboard.upload.tsx
-    artist-dashboard.albums.new.tsx
-    artist-dashboard.profile.tsx
-    artist-dashboard.payouts.tsx
-    dashboard.playlists.$id.tsx
-    dashboard.profile.tsx
-    dashboard.purchases.tsx
-    become-artist.tsx
-```
-(Existing top-level `admin.tsx`, `artist-dashboard.tsx`, `dashboard.tsx` get moved under `_authenticated/` so the integration gate protects them.)
+Extend `superadmin.functions.ts`:
+- `moderateLabel(approve/reject)`, `setPlatformCommission`, `approvePayout`, `forcePayoutRecalc`.
 
-## 5. Server functions (new files)
+Extend `admin.functions.ts`:
+- `listLabels`, `listAllSplits`, `listFeatureRequests`.
 
-- `src/lib/superadmin.functions.ts` — `listUsers`, `grantRole`, `revokeRole`, `upsertPlan`, `togglePaymentMethod`, `updateSettings`, `listAudit`, `approvePayout`.
-- `src/lib/admin.functions.ts` — extend with `moderateSong`, `verifyArtist`, `refundTransaction`.
-- `src/lib/artist.functions.ts` — `uploadSong`, `createAlbum`, `updateArtistProfile`, `requestPayout`, `applyAsArtist`.
-- `src/lib/listener.functions.ts` — `createPlaylist`, `addToPlaylist`, `likeSong`, `updateProfile`, `signedAudioUrl`.
+Extend `listener.functions.ts`:
+- `requestFeatureFromArtist` (fan-funded features: stub creates pending transaction + invitation).
 
-All write fns insert into `audit_log`.
+All write functions append to `audit_log`.
 
-## 6. Order of work
+## 3. Routes (all under `_authenticated/` for protected)
 
-1. Migration (enum + tables + policies).
-2. Theme tokens + ThemeProvider + toggle.
-3. Move protected routes under `_authenticated/`, add role-guards in their loaders.
-4. Superadmin section (full).
-5. Admin moderation additions.
-6. Artist upload + profile + payouts.
-7. Listener playlists + profile + purchases.
-8. "Become an artist" + role grant.
+- `labels.index.tsx` (public) — browse labels.
+- `labels.$slug.tsx` (public) — label page with roster + releases.
+- `_authenticated/label-dashboard.tsx` — owner dashboard: roster, invites, revenue, payouts, settings.
+- `_authenticated/apply-label.tsx` — create a label.
+- `_authenticated/collabs.tsx` — incoming + outgoing collab invites.
+- `_authenticated/artist-studio.tsx` → add tabs: **Collaborators**, **Label**, **Features**.
+- `_authenticated/superadmin.tsx` → add tabs: **Labels**, **Featured slots**, **Commission**.
+- `_authenticated/admin.tsx` → add **Labels moderation** tab.
+- Home `index.tsx` reads from `featured_slots` instead of hardcoded "featured" booleans.
 
-## Out of scope (still waiting on you)
-- Actual DPO Pay API calls — stubs remain until you send keys.
-- Mobile (Capacitor) screens — separate pass.
-- Branding swap (logo/splash/icon) — separate pass when you send assets.
+## 4. UI surfaces per role
 
-Want me to proceed with all of this in one go, or stop after the migration + theming for review?
+**Listener**: sees collaborator credits on song rows; can request a feature from an artist (paid stub); browses labels.
+
+**Artist**:
+- Studio → Collaborators tab: invite by artist handle or email, set split %, accept/decline incoming, live total-split bar (must ≤ 100%).
+- Studio → Label tab: apply to existing label / accept label invite / leave label / view royalty %.
+- Studio → Features tab: toggle `available_for_features`, accept fan feature requests, set rate.
+- Dashboard earnings now split into: streams, sales, features, collab share, label deductions.
+
+**Label owner** (`/label-dashboard`):
+- Overview: roster size, monthly revenue, pending invites.
+- Roster: invite/remove artists, set per-artist royalty %, view per-artist revenue.
+- Releases: all songs/albums under the label.
+- Revenue: split breakdown table, period filter.
+- Payouts: request label payout to MoMo/bank.
+
+**Admin**: moderate labels (approve/reject), view all splits, see all collab invites.
+
+**Superadmin**: everything admin sees + edit `platform_settings.commission_pct`, manage `featured_slots`, force split recalc, ban label.
+
+## 5. Featured content pipeline
+
+`home.featured` query reads `featured_slots` where `active = true AND now() between starts_at and ends_at`, ordered by `position`, joined to target table. Replaces current `albums.featured` / `songs.is_trending` direct flags (those stay but become inputs the superadmin can promote into slots).
+
+## 6. Payments without DPO
+
+`initiatePayment` stays a stub that writes `pending`. Add `markTransactionPaid(transaction_id)` superadmin-only function so the full split + payout pipeline can be tested today. Webhook at `/api/public/dpo-webhook` already wired — once keys land it flips status and the trigger fires automatically.
+
+## 7. Order of work
+
+1. Migration (tables, columns, helpers, split trigger, GRANTs, RLS).
+2. Server fns: labels → collabs → features → extensions.
+3. Label dashboard + apply flow + public label pages.
+4. Artist Studio new tabs (Collaborators, Label, Features).
+5. Collabs inbox route.
+6. Superadmin/admin new tabs.
+7. Home `featured_slots` rewrite.
+8. Manual `markTransactionPaid` test → verify splits + payout math.
+
+## Out of scope (still waiting)
+
+- Real DPO Pay call in `initiatePayment` (need Company Token + Service Type).
+- Branding swap (logo/splash/icon).
+- Capacitor mobile-specific screens for these new flows.
+
+Approve and I'll execute top to bottom in one pass, or say "stop after migration" to review the schema first.
