@@ -12,11 +12,11 @@ const labelQuery = (slug: string) => queryOptions({
 });
 
 export const Route = createFileRoute("/labels/$slug")({
-  head: ({ loaderData }: { loaderData: any }) => ({ meta: [
-    { title: loaderData?.label ? `${loaderData.label.name} — Wesu+` : "Label — Wesu+" },
-    { name: "description", content: loaderData?.label?.bio ?? "Record label on Wesu+." },
+  head: (ctx: any) => ({ meta: [
+    { title: ctx?.loaderData?.label ? `${ctx.loaderData.label.name} — Wesu+` : "Label — Wesu+" },
+    { name: "description", content: ctx?.loaderData?.label?.bio ?? "Record label on Wesu+." },
   ] }),
-  loader: ({ context, params }) => context.queryClient.ensureQueryData(labelQuery(params.slug)),
+  loader: ({ context, params }: any) => context.queryClient.ensureQueryData(labelQuery(params.slug)),
   component: LabelPage,
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Label not found</div>,
