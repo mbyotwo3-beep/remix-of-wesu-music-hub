@@ -10,13 +10,20 @@ import {
   listPendingArtists, moderateArtist,
   listPendingLabels, moderateLabel,
 } from "@/lib/admin.functions";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileAdmin } from "@/components/mobile/screens/MobileAdmin";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Panel — Wesu+" }] }),
-  component: () => <RoleGate require="admin"><AdminPage /></RoleGate>,
+  component: () => <RoleGate require="admin"><AdminRoute /></RoleGate>,
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function AdminRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileAdmin /> : <AdminPage />;
+}
 
 type Tab = "overview" | "songs" | "artists" | "labels";
 

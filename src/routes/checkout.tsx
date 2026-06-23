@@ -6,6 +6,8 @@ import { CreditCard, Smartphone, Check, Loader2 } from "lucide-react";
 import { getPaymentMethods, getSubscriptionPlans } from "@/lib/music.functions";
 import { initiatePayment } from "@/lib/payments.functions";
 import { useAuth } from "@/hooks/use-auth";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileCheckout } from "@/components/mobile/screens/MobileCheckout";
 
 const methodsQO = queryOptions({ queryKey: ["methods"], queryFn: () => getPaymentMethods() });
 const plansQO = queryOptions({ queryKey: ["plans"], queryFn: () => getSubscriptionPlans() });
@@ -22,10 +24,16 @@ export const Route = createFileRoute("/checkout")({
     context.queryClient.ensureQueryData(methodsQO);
     context.queryClient.ensureQueryData(plansQO);
   },
-  component: CheckoutPage,
+  component: CheckoutRoute,
   errorComponent: ({ error }) => <div className="p-12 text-center">Failed: {error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function CheckoutRoute() {
+  const platform = usePlatform();
+  const { plan: planCode } = Route.useSearch();
+  return platform === "native" ? <MobileCheckout planCode={planCode} /> : <CheckoutPage />;
+}
 
 function CheckoutPage() {
   const { plan: planCode } = Route.useSearch();

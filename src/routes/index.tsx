@@ -3,6 +3,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Play, TrendingUp, Upload, Crown, Headphones, ChevronRight } from "lucide-react";
 import { getNewReleases, getTrendingSongs, getFeaturedAlbums } from "@/lib/music.functions";
 import { usePlayer } from "@/stores/player";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileHome } from "@/components/mobile/screens/MobileHome";
 
 const newReleasesQO = queryOptions({
   queryKey: ["new-releases"],
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/")({
     context.queryClient.ensureQueryData(trendingQO);
     context.queryClient.ensureQueryData(featuredQO);
   },
-  component: HomePage,
+  component: IndexRoute,
   errorComponent: ({ error }) => (
     <div className="p-12 text-center text-muted-foreground">Failed to load: {error.message}</div>
   ),
@@ -50,6 +52,11 @@ function formatDuration(s?: number | null) {
   const m = Math.floor(s / 60);
   const r = s % 60;
   return `${m}:${r.toString().padStart(2, "0")}`;
+}
+
+function IndexRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileHome /> : <HomePage />;
 }
 
 function HomePage() {

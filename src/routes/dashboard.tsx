@@ -7,15 +7,22 @@ import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "../hooks/use-roles";
 import { getMyOverview } from "@/lib/user.functions";
 import { claimFirstSuperadmin } from "@/lib/superadmin.functions";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileLibrary } from "@/components/mobile/screens/MobileLibrary";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [{ title: "My Dashboard — Wesu+" }],
   }),
-  component: DashboardPage,
+  component: DashboardRoute,
   errorComponent: ({ error }) => <div className="p-12 text-center">Failed: {error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function DashboardRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileLibrary /> : <DashboardPage />;
+}
 
 function DashboardPage() {
   const { user, loading } = useAuth();

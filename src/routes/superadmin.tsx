@@ -12,13 +12,20 @@ import {
 import { getPlatformStats } from "@/lib/admin.functions";
 import { listAllFeaturedAdmin, upsertFeaturedSlot, removeFeaturedSlot } from "@/lib/features.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileAdmin } from "@/components/mobile/screens/MobileAdmin";
 
 export const Route = createFileRoute("/superadmin")({
   head: () => ({ meta: [{ title: "Superadmin — Wesu+" }] }),
-  component: () => <RoleGate require="superadmin"><SuperadminPage /></RoleGate>,
+  component: () => <RoleGate require="superadmin"><SuperadminRoute /></RoleGate>,
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function SuperadminRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileAdmin /> : <SuperadminPage />;
+}
 
 type Tab = "overview" | "users" | "plans" | "payments" | "settings" | "payouts" | "labels" | "featured" | "audit";
 

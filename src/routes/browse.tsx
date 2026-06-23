@@ -3,6 +3,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { searchSongs } from "@/lib/music.functions";
 import { usePlayer } from "@/stores/player";
 import { Play } from "lucide-react";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileBrowse } from "@/components/mobile/screens/MobileBrowse";
 
 const browseQO = queryOptions({
   queryKey: ["browse-songs"],
@@ -17,10 +19,15 @@ export const Route = createFileRoute("/browse")({
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(browseQO),
-  component: BrowsePage,
+  component: BrowseRoute,
   errorComponent: ({ error }) => <div className="p-12 text-center">Failed: {error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function BrowseRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileBrowse /> : <BrowsePage />;
+}
 
 function BrowsePage() {
   const { data: songs } = useSuspenseQuery(browseQO);

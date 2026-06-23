@@ -14,13 +14,20 @@ import { getMyArtistOverview } from "@/lib/user.functions";
 import { inviteCollaborator } from "@/lib/collabs.functions";
 import { respondToLabelInvite } from "@/lib/labels.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileArtistStudio } from "@/components/mobile/screens/MobileArtistStudio";
 
 export const Route = createFileRoute("/artist-studio")({
   head: () => ({ meta: [{ title: "Artist Studio — Wesu+" }] }),
-  component: () => <RoleGate require="artist"><Page /></RoleGate>,
+  component: () => <RoleGate require="artist"><ArtistStudioRoute /></RoleGate>,
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function ArtistStudioRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileArtistStudio /> : <Page />;
+}
 
 type Tab = "upload" | "album" | "collabs" | "label" | "features" | "payouts";
 
