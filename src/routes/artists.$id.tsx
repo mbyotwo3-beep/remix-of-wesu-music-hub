@@ -19,7 +19,10 @@ export const Route = createFileRoute("/artists/$id")({
   head: ({ loaderData }) => ({
     meta: [
       { title: `${loaderData?.artist?.name ?? "Artist"} — Wesu+` },
-      { name: "description", content: loaderData?.artist?.bio?.slice(0, 160) ?? "Artist profile on Wesu+" },
+      {
+        name: "description",
+        content: loaderData?.artist?.bio?.slice(0, 160) ?? "Artist profile on Wesu+",
+      },
     ],
   }),
   component: ArtistPage,
@@ -49,7 +52,9 @@ function ArtistPage() {
               {a.name}
               {a.verified && <CheckCircle2 className="size-6 text-primary" />}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">{a.genre ?? "—"} · {a.monthly_listeners ?? 0} monthly listeners</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              {a.genre ?? "—"} · {a.monthly_listeners ?? 0} monthly listeners
+            </p>
             {a.bio && <p className="text-sm mt-4 max-w-2xl">{a.bio}</p>}
           </div>
         </div>
@@ -63,7 +68,15 @@ function ArtistPage() {
               {data.topSongs.map((s, i) => (
                 <button
                   key={s.id}
-                  onClick={() => setTrack({ id: s.id, title: s.title, artistName: a.name, coverUrl: s.cover_url, durationSeconds: s.duration })}
+                  onClick={() =>
+                    setTrack({
+                      id: s.id,
+                      title: s.title,
+                      artistName: a.name,
+                      coverUrl: s.cover_url,
+                      durationSeconds: s.duration,
+                    })
+                  }
                   className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors text-left"
                 >
                   <span className="w-6 text-sm text-muted-foreground">{i + 1}</span>
@@ -71,7 +84,9 @@ function ArtistPage() {
                     <p className="font-semibold text-sm">{s.title}</p>
                     <p className="text-xs text-muted-foreground">{s.play_count ?? 0} plays</p>
                   </div>
-                  <span className="text-primary text-sm font-bold">K{Number(s.price ?? 0).toFixed(2)}</span>
+                  <span className="text-primary text-sm font-bold">
+                    K{Number(s.price ?? 0).toFixed(2)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -87,10 +102,18 @@ function ArtistPage() {
               {data.albums.map((al) => (
                 <Link key={al.id} to="/albums" className="group">
                   <div className="aspect-square rounded-xl overflow-hidden bg-card ring-1 ring-white/5 mb-2">
-                    {al.cover_url && <img src={al.cover_url} alt={al.title} className="w-full h-full object-cover" />}
+                    {al.cover_url && (
+                      <img
+                        src={al.cover_url}
+                        alt={al.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
                   <p className="font-semibold text-sm truncate">{al.title}</p>
-                  <p className="text-xs text-muted-foreground">K{Number(al.price ?? 0).toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    K{Number(al.price ?? 0).toFixed(2)}
+                  </p>
                 </Link>
               ))}
             </div>

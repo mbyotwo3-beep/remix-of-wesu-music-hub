@@ -21,11 +21,15 @@ export function RoleGate({ require, children }: Props) {
   if (!isUser) return null;
 
   const ok =
-    require === "user" ? true :
-    require === "artist" ? isArtist || isAdmin || isSuperAdmin :
-    require === "admin" ? isAdmin :
-    require === "superadmin" ? isSuperAdmin :
-    false;
+    require === "user"
+      ? true
+      : require === "artist"
+        ? isArtist || isAdmin || isSuperAdmin
+        : require === "admin"
+          ? isAdmin
+          : require === "superadmin"
+            ? isSuperAdmin
+            : false;
 
   if (!ok) {
     return (
@@ -33,7 +37,8 @@ export function RoleGate({ require, children }: Props) {
         <Shield className="size-12 mx-auto mb-4 text-muted-foreground" />
         <h1 className="text-xl font-bold mb-2">Access denied</h1>
         <p className="text-sm text-muted-foreground">
-          You need the <span className="font-semibold text-foreground">{require}</span> role to view this page.
+          You need the <span className="font-semibold text-foreground">{require}</span> role to view
+          this page.
         </p>
       </div>
     );

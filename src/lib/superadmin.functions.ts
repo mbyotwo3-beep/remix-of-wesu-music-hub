@@ -7,9 +7,17 @@ async function assertSuperadmin(supabase: any, userId: string) {
   if (!data) throw new Error("Forbidden: superadmin only");
 }
 
-async function audit(actorId: string, action: string, target_type?: string, target_id?: string, meta: any = {}) {
+async function audit(
+  actorId: string,
+  action: string,
+  target_type?: string,
+  target_id?: string,
+  meta: any = {},
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin.from("audit_log").insert({ actor_id: actorId, action, target_type, target_id, meta });
+  await supabaseAdmin
+    .from("audit_log")
+    .insert({ actor_id: actorId, action, target_type, target_id, meta });
 }
 
 export const listUsers = createServerFn({ method: "GET" })
@@ -18,7 +26,11 @@ export const listUsers = createServerFn({ method: "GET" })
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: profiles }, { data: roles }] = await Promise.all([
-      supabaseAdmin.from("profiles").select("user_id, full_name, avatar_url, created_at").order("created_at", { ascending: false }).limit(200),
+      supabaseAdmin
+        .from("profiles")
+        .select("user_id, full_name, avatar_url, created_at")
+        .order("created_at", { ascending: false })
+        .limit(200),
       supabaseAdmin.from("user_roles").select("user_id, role"),
     ]);
     const rolesByUser = new Map<string, string[]>();
@@ -36,7 +48,9 @@ export const grantRole = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").upsert({ user_id: data.user_id, role: data.role }, { onConflict: "user_id,role" });
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .upsert({ user_id: data.user_id, role: data.role }, { onConflict: "user_id,role" });
     if (error) throw new Error(error.message);
     await audit(context.userId, "role.grant", "user", data.user_id, { role: data.role });
     return { ok: true };
@@ -48,7 +62,11 @@ export const revokeRole = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id).eq("role", data.role);
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.user_id)
+      .eq("role", data.role);
     if (error) throw new Error(error.message);
     await audit(context.userId, "role.revoke", "user", data.user_id, { role: data.role });
     return { ok: true };
@@ -56,11 +74,24 @@ export const revokeRole = createServerFn({ method: "POST" })
 
 export const upsertPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id?: string; name: string; price_zmw: number; description?: string; is_active?: boolean }) => d)
+  .inputValidator(
+    (d: {
+      id?: string;
+      name: string;
+      price_zmw: number;
+      description?: string;
+      is_active?: boolean;
+    }) => d,
+  )
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const row: any = { name: data.name, price_zmw: data.price_zmw, description: data.description ?? null, is_active: data.is_active ?? true };
+    const row: any = {
+      name: data.name,
+      price_zmw: data.price_zmw,
+      description: data.description ?? null,
+      is_active: data.is_active ?? true,
+    };
     if (data.id) row.id = data.id;
     const { error } = await supabaseAdmin.from("subscription_plans").upsert(row);
     if (error) throw new Error(error.message);
@@ -74,9 +105,14 @@ export const togglePaymentMethod = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("payment_methods").update({ is_enabled: data.is_enabled }).eq("code", data.code);
+    const { error } = await supabaseAdmin
+      .from("payment_methods")
+      .update({ is_enabled: data.is_enabled })
+      .eq("code", data.code);
     if (error) throw new Error(error.message);
-    await audit(context.userId, "payment_method.toggle", "payment_method", data.code, { is_enabled: data.is_enabled });
+    await audit(context.userId, "payment_method.toggle", "payment_method", data.code, {
+      is_enabled: data.is_enabled,
+    });
     return { ok: true };
   });
 
@@ -86,9 +122,12 @@ export const updateSettings = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("platform_settings")
-      .upsert({ key: data.key, value: data.value as any, updated_by: context.userId, updated_at: new Date().toISOString() });
+    const { error } = await supabaseAdmin.from("platform_settings").upsert({
+      key: data.key,
+      value: data.value as any,
+      updated_by: context.userId,
+      updated_at: new Date().toISOString(),
+    });
     if (error) throw new Error(error.message);
     await audit(context.userId, "settings.update", "setting", data.key, data.value);
     return { ok: true };
@@ -126,25 +165,31 @@ export const decidePayout = createServerFn({ method: "POST" })
     const { data: isStaff } = await context.supabase.rpc("is_staff", { _user_id: context.userId });
     if (!isStaff) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("payouts").update({
-      status: data.decision,
-      notes: data.notes ?? null,
-      processed_at: new Date().toISOString(),
-      processed_by: context.userId,
-    }).eq("id", data.id);
+    const { error } = await supabaseAdmin
+      .from("payouts")
+      .update({
+        status: data.decision,
+        notes: data.notes ?? null,
+        processed_at: new Date().toISOString(),
+        processed_by: context.userId,
+      })
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
-    await audit(context.userId, `payout.${data.decision}`, "payout", data.id, { notes: data.notes });
+    await audit(context.userId, `payout.${data.decision}`, "payout", data.id, {
+      notes: data.notes,
+    });
     return { ok: true };
   });
 
-export const getSettings = createServerFn({ method: "GET" })
-  .handler(async () => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin.from("platform_settings").select("key, value");
-    const out: Record<string, any> = {};
-    (data ?? []).forEach((r: any) => { out[r.key] = r.value; });
-    return out;
+export const getSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("platform_settings").select("key, value");
+  const out: Record<string, any> = {};
+  (data ?? []).forEach((r: any) => {
+    out[r.key] = r.value;
   });
+  return out;
+});
 
 /**
  * Bootstrap: grant superadmin to the calling user ONLY if no superadmin exists yet.
@@ -158,10 +203,13 @@ export const claimFirstSuperadmin = createServerFn({ method: "POST" })
       .from("user_roles")
       .select("user_id", { count: "exact", head: true })
       .eq("role", "superadmin");
-    if ((count ?? 0) > 0) throw new Error("A superadmin already exists. Ask them to grant you the role.");
+    if ((count ?? 0) > 0)
+      throw new Error("A superadmin already exists. Ask them to grant you the role.");
     const { error } = await supabaseAdmin
       .from("user_roles")
-      .upsert({ user_id: context.userId, role: "superadmin" } as any, { onConflict: "user_id,role" });
+      .upsert({ user_id: context.userId, role: "superadmin" } as any, {
+        onConflict: "user_id,role",
+      });
     if (error) throw new Error(error.message);
     await audit(context.userId, "superadmin.bootstrap", "user", context.userId);
     return { ok: true };
@@ -193,7 +241,10 @@ export const setPlatformCommission = createServerFn({ method: "POST" })
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.from("platform_settings").upsert({
-      key: "commission_pct", value: data.pct as any, updated_by: context.userId, updated_at: new Date().toISOString(),
+      key: "commission_pct",
+      value: data.pct as any,
+      updated_by: context.userId,
+      updated_at: new Date().toISOString(),
     });
     await audit(context.userId, "commission.set", "setting", "commission_pct", { pct: data.pct });
     return { ok: true };

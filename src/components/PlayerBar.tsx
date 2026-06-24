@@ -29,7 +29,9 @@ export function PlayerBar() {
             <p className="text-xs text-muted-foreground truncate">{track.artistName}</p>
           </div>
           <button onClick={toggleLike} className="hidden sm:block">
-            <Heart className={`size-4 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+            <Heart
+              className={`size-4 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`}
+            />
           </button>
         </div>
 
@@ -51,9 +53,14 @@ export function PlayerBar() {
           <div className="w-full flex items-center gap-3">
             <span className="text-[10px] text-muted-foreground font-medium tabular-nums">0:00</span>
             <div className="flex-1 h-1 bg-muted rounded-full relative overflow-hidden">
-              <div className="absolute left-0 top-0 h-full rounded-full bg-primary" style={{ width: "0%" }} />
+              <div
+                className="absolute left-0 top-0 h-full rounded-full bg-primary"
+                style={{ width: "0%" }}
+              />
             </div>
-            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">{durLabel}</span>
+            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+              {durLabel}
+            </span>
           </div>
         </div>
 
