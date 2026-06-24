@@ -31,10 +31,14 @@ function SubscriptionsPage() {
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">Choose Your Sound</h1>
-          <p className="text-muted-foreground text-lg">Stream for free or support artists with Premium</p>
+          <p className="text-muted-foreground text-lg">
+            Stream for free or support artists with Premium
+          </p>
         </div>
 
-        <div className={`grid gap-8 max-w-5xl mx-auto ${plans.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+        <div
+          className={`grid gap-8 max-w-5xl mx-auto ${plans.length > 2 ? "md:grid-cols-3" : "md:grid-cols-2"}`}
+        >
           {plans.map((p, i) => {
             const featured = i === 1;
             const features = Array.isArray(p.features) ? (p.features as string[]) : [];
@@ -50,7 +54,9 @@ function SubscriptionsPage() {
                     Most Popular
                   </div>
                 )}
-                <div className={`text-sm font-bold uppercase tracking-wider mb-2 ${featured ? "text-primary" : "text-muted-foreground"}`}>
+                <div
+                  className={`text-sm font-bold uppercase tracking-wider mb-2 ${featured ? "text-primary" : "text-muted-foreground"}`}
+                >
                   {p.name}
                 </div>
                 <div className="text-5xl font-bold mb-6">
@@ -87,9 +93,14 @@ function SubscriptionsPage() {
           <h2 className="text-2xl font-bold text-center mb-8">Supported Payment Methods</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {methods.map((m) => (
-              <div key={m.id} className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col justify-end hover:bg-white/5 transition-colors">
+              <div
+                key={m.id}
+                className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col justify-end hover:bg-white/5 transition-colors"
+              >
                 <p className="font-bold text-sm">{m.label}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">{m.category.replace("_", " ")}</p>
+                <p className="text-[10px] text-muted-foreground uppercase">
+                  {m.category.replace("_", " ")}
+                </p>
               </div>
             ))}
           </div>

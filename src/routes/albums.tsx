@@ -36,7 +36,11 @@ function AlbumsPage() {
               <Link key={a.id} to="/albums" className="group">
                 <div className="aspect-square rounded-xl overflow-hidden bg-card ring-1 ring-white/5 mb-3 flex items-center justify-center">
                   {a.cover_url ? (
-                    <img src={a.cover_url} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img
+                      src={a.cover_url}
+                      alt={a.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
                   ) : (
                     <Disc className="size-10 text-muted-foreground" />
                   )}
@@ -45,7 +49,9 @@ function AlbumsPage() {
                 <p className="text-xs text-muted-foreground truncate">
                   {(a.artist as { name?: string } | null)?.name ?? "Unknown"}
                 </p>
-                <p className="text-xs text-primary font-bold mt-1">K{Number(a.price ?? 0).toFixed(2)}</p>
+                <p className="text-xs text-primary font-bold mt-1">
+                  K{Number(a.price ?? 0).toFixed(2)}
+                </p>
               </Link>
             ))}
           </div>

@@ -33,7 +33,8 @@ function DashboardPage() {
   });
 
   if (loading || !user) return null;
-  if (isLoading || !data) return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
+  if (isLoading || !data)
+    return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
 
   const stats = [
     { label: "Playlists", value: data.stats.playlists, icon: ListMusic },
@@ -66,17 +67,24 @@ function DashboardPage() {
           <div className="bg-card border border-border rounded-2xl p-6">
             <h2 className="text-lg font-semibold mb-4">My Playlists</h2>
             {data.playlists.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No playlists yet. Create one from the browse page.</p>
+              <p className="text-sm text-muted-foreground">
+                No playlists yet. Create one from the browse page.
+              </p>
             ) : (
               <div className="space-y-3">
                 {data.playlists.map((p) => (
-                  <div key={p.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
+                  <div
+                    key={p.id}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                  >
                     <div className="size-10 rounded bg-secondary flex items-center justify-center">
                       <ListMusic className="size-4 text-muted-foreground" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium">{p.name}</p>
-                      <p className="text-xs text-muted-foreground">{p.is_public ? "Public" : "Private"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {p.is_public ? "Public" : "Private"}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -101,9 +109,14 @@ function DashboardPage() {
                     (p.album as { title?: string } | null)?.title ??
                     "Item";
                   return (
-                    <div key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent">
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-accent"
+                    >
                       <p className="text-sm font-medium truncate">{title}</p>
-                      <span className="text-primary text-sm font-bold">K{Number(p.amount).toFixed(2)}</span>
+                      <span className="text-primary text-sm font-bold">
+                        K{Number(p.amount).toFixed(2)}
+                      </span>
                     </div>
                   );
                 })}
@@ -130,7 +143,9 @@ function SuperadminBootstrapCard() {
       <Shield className="size-6 text-primary shrink-0" />
       <div className="flex-1 text-sm">
         <p className="font-semibold">First-time setup</p>
-        <p className="text-muted-foreground">If no superadmin exists yet, claim the role for this account. Only works once.</p>
+        <p className="text-muted-foreground">
+          If no superadmin exists yet, claim the role for this account. Only works once.
+        </p>
         {m.error ? <p className="text-destructive mt-1">{(m.error as Error).message}</p> : null}
       </div>
       <button

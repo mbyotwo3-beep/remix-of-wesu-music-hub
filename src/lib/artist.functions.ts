@@ -1,9 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function audit(actorId: string, action: string, target_type?: string, target_id?: string, meta: any = {}) {
+async function audit(
+  actorId: string,
+  action: string,
+  target_type?: string,
+  target_id?: string,
+  meta: any = {},
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin.from("audit_log").insert({ actor_id: actorId, action, target_type, target_id, meta });
+  await supabaseAdmin
+    .from("audit_log")
+    .insert({ actor_id: actorId, action, target_type, target_id, meta });
 }
 
 // ---------- Artist application & profile ----------
@@ -13,13 +21,23 @@ export const applyAsArtist = createServerFn({ method: "POST" })
   .inputValidator((d: { name: string; bio?: string; genre?: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: existing } = await supabase.from("artists").select("id, status").eq("user_id", userId).maybeSingle();
+    const { data: existing } = await supabase
+      .from("artists")
+      .select("id, status")
+      .eq("user_id", userId)
+      .maybeSingle();
     if (existing) return { ok: true, status: existing.status, id: existing.id };
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
       .from("artists")
-      .insert({ user_id: userId, name: data.name, bio: data.bio ?? null, genre: data.genre ?? null, status: "pending" } as any)
+      .insert({
+        user_id: userId,
+        name: data.name,
+        bio: data.bio ?? null,
+        genre: data.genre ?? null,
+        status: "pending",
+      } as any)
       .select("id, status")
       .single();
     if (error) throw new Error(error.message);
@@ -29,7 +47,15 @@ export const applyAsArtist = createServerFn({ method: "POST" })
 
 export const updateArtistProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name?: string; bio?: string; genre?: string; avatar_url?: string; social_links?: Record<string, string> }) => d)
+  .inputValidator(
+    (d: {
+      name?: string;
+      bio?: string;
+      genre?: string;
+      avatar_url?: string;
+      social_links?: Record<string, string>;
+    }) => d,
+  )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patch: any = {};
@@ -47,32 +73,43 @@ export const updateArtistProfile = createServerFn({ method: "POST" })
 
 export const uploadSong = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
-    title: string;
-    audio_url: string;     // path inside song-audio bucket
-    cover_url?: string;    // path inside album-art bucket (optional)
-    duration?: number;
-    genre?: string;
-    price?: number;
-    album_id?: string | null;
-  }) => d)
+  .inputValidator(
+    (d: {
+      title: string;
+      audio_url: string; // path inside song-audio bucket
+      cover_url?: string; // path inside album-art bucket (optional)
+      duration?: number;
+      genre?: string;
+      price?: number;
+      album_id?: string | null;
+    }) => d,
+  )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: artist } = await supabase.from("artists").select("id, status").eq("user_id", userId).maybeSingle();
+    const { data: artist } = await supabase
+      .from("artists")
+      .select("id, status")
+      .eq("user_id", userId)
+      .maybeSingle();
     if (!artist) throw new Error("You must be an approved artist to upload");
-    if ((artist as any).status === "pending") throw new Error("Your artist application is pending approval");
+    if ((artist as any).status === "pending")
+      throw new Error("Your artist application is pending approval");
 
-    const { data: song, error } = await supabase.from("songs").insert({
-      title: data.title,
-      audio_url: data.audio_url,
-      cover_url: data.cover_url ?? null,
-      duration: data.duration ?? null,
-      genre: data.genre ?? null,
-      price: data.price ?? 0,
-      album_id: data.album_id ?? null,
-      artist_id: (artist as any).id,
-      status: "pending",
-    } as any).select("id").single();
+    const { data: song, error } = await supabase
+      .from("songs")
+      .insert({
+        title: data.title,
+        audio_url: data.audio_url,
+        cover_url: data.cover_url ?? null,
+        duration: data.duration ?? null,
+        genre: data.genre ?? null,
+        price: data.price ?? 0,
+        album_id: data.album_id ?? null,
+        artist_id: (artist as any).id,
+        status: "pending",
+      } as any)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     await audit(userId, "song.upload", "song", song!.id, { title: data.title });
     return { ok: true, id: song!.id };
@@ -82,20 +119,37 @@ export const uploadSong = createServerFn({ method: "POST" })
 
 export const createAlbum = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { title: string; cover_url?: string; release_date?: string; genre?: string; description?: string; price?: number }) => d)
+  .inputValidator(
+    (d: {
+      title: string;
+      cover_url?: string;
+      release_date?: string;
+      genre?: string;
+      description?: string;
+      price?: number;
+    }) => d,
+  )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: artist } = await supabase.from("artists").select("id").eq("user_id", userId).maybeSingle();
+    const { data: artist } = await supabase
+      .from("artists")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
     if (!artist) throw new Error("Artist profile required");
-    const { data: album, error } = await supabase.from("albums").insert({
-      title: data.title,
-      cover_url: data.cover_url ?? null,
-      release_date: data.release_date ?? null,
-      genre: data.genre ?? null,
-      description: data.description ?? null,
-      price: data.price ?? 0,
-      artist_id: (artist as any).id,
-    } as any).select("id").single();
+    const { data: album, error } = await supabase
+      .from("albums")
+      .insert({
+        title: data.title,
+        cover_url: data.cover_url ?? null,
+        release_date: data.release_date ?? null,
+        genre: data.genre ?? null,
+        description: data.description ?? null,
+        price: data.price ?? 0,
+        artist_id: (artist as any).id,
+      } as any)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     await audit(userId, "album.create", "album", album!.id, { title: data.title });
     return { ok: true, id: album!.id };
@@ -104,9 +158,17 @@ export const createAlbum = createServerFn({ method: "POST" })
 export const listMyAlbums = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: artist } = await context.supabase.from("artists").select("id").eq("user_id", context.userId).maybeSingle();
+    const { data: artist } = await context.supabase
+      .from("artists")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!artist) return [];
-    const { data } = await context.supabase.from("albums").select("id, title, cover_url, release_date").eq("artist_id", (artist as any).id).order("created_at", { ascending: false });
+    const { data } = await context.supabase
+      .from("albums")
+      .select("id, title, cover_url, release_date")
+      .eq("artist_id", (artist as any).id)
+      .order("created_at", { ascending: false });
     return data ?? [];
   });
 
@@ -117,7 +179,11 @@ export const requestPayout = createServerFn({ method: "POST" })
   .inputValidator((d: { amount: number; method_code: string; destination: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { data: artist } = await supabase.from("artists").select("id").eq("user_id", userId).maybeSingle();
+    const { data: artist } = await supabase
+      .from("artists")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
     if (!artist) throw new Error("Artist profile required");
     const { error } = await supabase.from("payouts").insert({
       artist_id: (artist as any).id,
@@ -133,9 +199,17 @@ export const requestPayout = createServerFn({ method: "POST" })
 export const listMyPayouts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: artist } = await context.supabase.from("artists").select("id").eq("user_id", context.userId).maybeSingle();
+    const { data: artist } = await context.supabase
+      .from("artists")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!artist) return [];
-    const { data } = await context.supabase.from("payouts").select("*").eq("artist_id", (artist as any).id).order("requested_at", { ascending: false });
+    const { data } = await context.supabase
+      .from("payouts")
+      .select("*")
+      .eq("artist_id", (artist as any).id)
+      .order("requested_at", { ascending: false });
     return data ?? [];
   });
 
@@ -143,13 +217,18 @@ export const listMyPayouts = createServerFn({ method: "GET" })
 
 export const setCollabPrefs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { accepts_collabs?: boolean; allow_features?: boolean; feature_rate?: number }) => d)
+  .inputValidator(
+    (d: { accepts_collabs?: boolean; allow_features?: boolean; feature_rate?: number }) => d,
+  )
   .handler(async ({ context, data }) => {
     const patch: any = {};
     if (data.accepts_collabs !== undefined) patch.accepts_collabs = data.accepts_collabs;
     if (data.allow_features !== undefined) patch.available_for_features = data.allow_features;
     if (data.feature_rate !== undefined) patch.feature_rate = data.feature_rate;
-    const { error } = await context.supabase.from("artists").update(patch).eq("user_id", context.userId);
+    const { error } = await context.supabase
+      .from("artists")
+      .update(patch)
+      .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -157,18 +236,33 @@ export const setCollabPrefs = createServerFn({ method: "POST" })
 export const leaveLabel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: artist } = await context.supabase.from("artists").select("id").eq("user_id", context.userId).maybeSingle();
+    const { data: artist } = await context.supabase
+      .from("artists")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!artist) throw new Error("Artist profile required");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("artists").update({ label_id: null }).eq("id", (artist as any).id);
-    await supabaseAdmin.from("label_artists").update({ status: "left" }).eq("artist_id", (artist as any).id).eq("status", "active");
+    await supabaseAdmin
+      .from("artists")
+      .update({ label_id: null })
+      .eq("id", (artist as any).id);
+    await supabaseAdmin
+      .from("label_artists")
+      .update({ status: "left" })
+      .eq("artist_id", (artist as any).id)
+      .eq("status", "active");
     return { ok: true };
   });
 
 export const listMyLabelInvites = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: artist } = await context.supabase.from("artists").select("id, label_id").eq("user_id", context.userId).maybeSingle();
+    const { data: artist } = await context.supabase
+      .from("artists")
+      .select("id, label_id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!artist) return { current: null, invites: [] };
     const { data: invites } = await context.supabase
       .from("label_artists")
@@ -181,9 +275,17 @@ export const listMyLabelInvites = createServerFn({ method: "GET" })
 export const listMySongs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: artist } = await context.supabase.from("artists").select("id").eq("user_id", context.userId).maybeSingle();
+    const { data: artist } = await context.supabase
+      .from("artists")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!artist) return [];
-    const { data } = await context.supabase.from("songs").select("id, title, status, cover_url").eq("artist_id", (artist as any).id).order("created_at", { ascending: false });
+    const { data } = await context.supabase
+      .from("songs")
+      .select("id, title, status, cover_url")
+      .eq("artist_id", (artist as any).id)
+      .order("created_at", { ascending: false });
     return data ?? [];
   });
 
@@ -191,10 +293,15 @@ export const listMySongs = createServerFn({ method: "GET" })
 
 export const signUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { bucket: "song-audio" | "album-art" | "artist-images" | "user-avatars"; path: string }) => d)
+  .inputValidator(
+    (d: { bucket: "song-audio" | "album-art" | "artist-images" | "user-avatars"; path: string }) =>
+      d,
+  )
   .handler(async ({ context, data }) => {
     const { supabase } = context;
-    const { data: signed, error } = await supabase.storage.from(data.bucket).createSignedUploadUrl(data.path);
+    const { data: signed, error } = await supabase.storage
+      .from(data.bucket)
+      .createSignedUploadUrl(data.path);
     if (error) throw new Error(error.message);
     return signed;
   });

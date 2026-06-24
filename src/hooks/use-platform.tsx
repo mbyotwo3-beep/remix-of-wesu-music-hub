@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-export type Platform = 'web' | 'native';
+export type Platform = "web" | "native";
 
 /**
  * Returns 'native' when running inside the Capacitor Android/iOS wrapper,
@@ -12,14 +12,14 @@ export type Platform = 'web' | 'native';
  *   return platform === 'native' ? <MobileHome /> : <WebHome />;
  */
 export function usePlatform(): Platform {
-  const [platform, setPlatform] = useState<Platform>('web');
+  const [platform, setPlatform] = useState<Platform>("web");
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     // Capacitor injects window.Capacitor when running inside the native shell.
     const w = window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } };
     if (w.Capacitor?.isNativePlatform?.()) {
-      setPlatform('native');
+      setPlatform("native");
     }
   }, []);
 
@@ -27,5 +27,5 @@ export function usePlatform(): Platform {
 }
 
 export function useIsNative() {
-  return usePlatform() === 'native';
+  return usePlatform() === "native";
 }

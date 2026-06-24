@@ -17,7 +17,9 @@ export const Route = createFileRoute("/checkout")({
       { name: "description", content: "Complete your purchase on Wesu+." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({ plan: typeof s.plan === "string" ? s.plan : "premium_monthly" }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    plan: typeof s.plan === "string" ? s.plan : "premium_monthly",
+  }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(methodsQO);
     context.queryClient.ensureQueryData(plansQO);
@@ -69,7 +71,9 @@ function CheckoutPage() {
           </div>
           <div className="flex justify-between items-center py-3">
             <span className="font-semibold">Total</span>
-            <span className="text-xl font-bold text-primary">ZMW {Number(plan.price_zmw).toFixed(2)}</span>
+            <span className="text-xl font-bold text-primary">
+              ZMW {Number(plan.price_zmw).toFixed(2)}
+            </span>
           </div>
         </div>
 
@@ -87,7 +91,11 @@ function CheckoutPage() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  {m.category === "card" ? <CreditCard className="size-5" /> : <Smartphone className="size-5" />}
+                  {m.category === "card" ? (
+                    <CreditCard className="size-5" />
+                  ) : (
+                    <Smartphone className="size-5" />
+                  )}
                   <span className="font-medium text-sm">{m.label}</span>
                 </div>
               </button>
@@ -110,7 +118,8 @@ function CheckoutPage() {
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Card payments are processed securely by DPO Pay. You'll be redirected after confirming.
+              Card payments are processed securely by DPO Pay. You'll be redirected after
+              confirming.
             </p>
           )}
         </div>
@@ -136,7 +145,11 @@ function CheckoutPage() {
           }
           className="w-full py-4 bg-primary text-obsidian rounded-2xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
-          {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+          {mutation.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Check className="size-4" />
+          )}
           Pay ZMW {Number(plan.price_zmw).toFixed(2)}
         </button>
       </div>

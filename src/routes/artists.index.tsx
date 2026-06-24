@@ -33,10 +33,19 @@ function ArtistsPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {artists.map((a) => (
-              <Link key={a.id} to="/artists/$id" params={{ id: a.id }} className="text-center group">
+              <Link
+                key={a.id}
+                to="/artists/$id"
+                params={{ id: a.id }}
+                className="text-center group"
+              >
                 <div className="aspect-square rounded-full overflow-hidden bg-card ring-1 ring-white/5 mb-3 flex items-center justify-center">
                   {a.avatar_url ? (
-                    <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img
+                      src={a.avatar_url}
+                      alt={a.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
                   ) : (
                     <User className="size-10 text-muted-foreground" />
                   )}

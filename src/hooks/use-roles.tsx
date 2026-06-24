@@ -12,7 +12,11 @@ export function useUserRoles() {
   useEffect(() => {
     let cancel = false;
     async function load() {
-      if (!user) { setRoles([]); setLoading(false); return; }
+      if (!user) {
+        setRoles([]);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       if (cancel) return;
@@ -20,7 +24,9 @@ export function useUserRoles() {
       setLoading(false);
     }
     if (!authLoading) load();
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, [user, authLoading]);
 
   return {
