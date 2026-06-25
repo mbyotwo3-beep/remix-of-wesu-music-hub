@@ -35,20 +35,27 @@ export function SongRow({ song }: SongRowProps) {
   return (
     <button
       onClick={() => setTrack(track)}
-      className={`w-full flex items-center gap-3 px-4 py-2 min-h-[44px] text-left transition-colors hover:bg-white/5 active:bg-white/10 ${
+      className={`w-full flex items-center gap-3 px-4 py-2 min-h-[44px] text-left transition-colors hover:bg-foreground/5 active:bg-foreground/10 ${
         isActive ? "bg-primary/10" : ""
       }`}
       aria-pressed={isActive}
     >
       <div className="size-10 rounded-md overflow-hidden bg-card shrink-0 flex items-center justify-center">
         {song.coverUrl ? (
-          <img src={song.coverUrl} alt={song.title} className="w-full h-full object-cover" loading="lazy" />
+          <img
+            src={song.coverUrl}
+            alt={song.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
         ) : (
           <Music2 className="size-4 text-muted-foreground" />
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${isActive ? "text-primary" : ""}`}>{song.title}</p>
+        <p className={`text-sm font-medium truncate ${isActive ? "text-primary" : ""}`}>
+          {song.title}
+        </p>
         <p className="text-xs text-muted-foreground truncate">{song.artistName}</p>
       </div>
       {song.price != null && (

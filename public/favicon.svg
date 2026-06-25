@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Wesu+ favicon">
+  <rect width="120" height="120" rx="24" fill="#fbf7ee" />
+  <path d="M18 70 h18 c6 0 6-18 12-18 s6 18 12 18 c6 0 6-34 12-34 s6 34 12 34 c6 0 6-40 12-40 s6 40 12 40 h18" fill="none" stroke="#d0262d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="88" y="48" width="8" height="24" fill="#0c3c93" rx="2" />
+  <rect x="80" y="56" width="24" height="8" fill="#0c3c93" rx="2" />
+</svg>

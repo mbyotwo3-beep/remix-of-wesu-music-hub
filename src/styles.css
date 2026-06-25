@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,85 +50,127 @@
   --color-obsidian: var(--obsidian);
   --color-surface: var(--surface);
   --color-gold: var(--gold);
+  --color-brand: var(--brand);
 }
 
-/* LIGHT MODE — warm off-white, deep ink, same gold accent */
+/* ─────────────────────────────────────────────────────────────────────────
+   LIGHT MODE
+   Matches the WESU+ mockup: light blue-gray page, white cards,
+   RED (#cc2121) primary accent, NAVY (#1a2a6e) brand/heading colour.
+   ───────────────────────────────────────────────────────────────────────── */
 :root {
   --radius: 0.625rem;
-  --background: oklch(0.985 0.005 85);
-  --foreground: oklch(0.18 0.01 260);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.01 260);
+
+  /* Page & surfaces */
+  --background: oklch(0.955 0.008 240); /* #eef1f7 — cool light-gray */
+  --foreground: oklch(0.2 0.06 265); /* #1a2a6e navy — body text  */
+  --card: oklch(1 0 0); /* pure white cards          */
+  --card-foreground: oklch(0.2 0.06 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.01 260);
-  --primary: oklch(0.72 0.16 70);
-  --primary-foreground: oklch(0.18 0.01 260);
-  --secondary: oklch(0.95 0.01 85);
-  --secondary-foreground: oklch(0.18 0.01 260);
-  --muted: oklch(0.94 0.008 85);
-  --muted-foreground: oklch(0.45 0.015 260);
-  --accent: oklch(0.92 0.012 85);
-  --accent-foreground: oklch(0.18 0.01 260);
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.99 0.005 260);
-  --border: oklch(0.18 0.01 260 / 10%);
-  --input: oklch(0.18 0.01 260 / 14%);
-  --ring: oklch(0.72 0.16 70);
-  --chart-1: oklch(0.72 0.16 70);
-  --chart-2: oklch(0.65 0.12 162);
-  --chart-3: oklch(0.6 0.10 227);
-  --chart-4: oklch(0.55 0.08 303);
-  --chart-5: oklch(0.6 0.18 25);
-  --sidebar: oklch(0.97 0.008 85);
-  --sidebar-foreground: oklch(0.18 0.01 260);
-  --sidebar-primary: oklch(0.72 0.16 70);
-  --sidebar-primary-foreground: oklch(0.18 0.01 260);
-  --sidebar-accent: oklch(0.92 0.012 85);
-  --sidebar-accent-foreground: oklch(0.18 0.01 260);
-  --sidebar-border: oklch(0.18 0.01 260 / 10%);
-  --sidebar-ring: oklch(0.72 0.16 70);
-  --obsidian: oklch(0.985 0.005 85);
-  --surface: oklch(0.95 0.01 85);
+  --popover-foreground: oklch(0.2 0.06 265);
+
+  /* WESU+ red primary */
+  --primary: oklch(0.48 0.22 25); /* #cc2121 red               */
+  --primary-foreground: oklch(1 0 0); /* white on red              */
+
+  /* Neutral surfaces */
+  --secondary: oklch(0.94 0.01 240); /* slightly darker than bg   */
+  --secondary-foreground: oklch(0.2 0.06 265);
+  --muted: oklch(0.91 0.008 240);
+  --muted-foreground: oklch(0.48 0.04 265); /* mid-navy for hints        */
+  --accent: oklch(0.93 0.012 240);
+  --accent-foreground: oklch(0.2 0.06 265);
+
+  /* Danger */
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+
+  /* Borders & inputs */
+  --border: oklch(0.2 0.06 265 / 12%);
+  --input: oklch(0.2 0.06 265 / 16%);
+  --ring: oklch(0.48 0.22 25); /* red ring                 */
+
+  /* Charts */
+  --chart-1: oklch(0.48 0.22 25); /* red                      */
+  --chart-2: oklch(0.2 0.06 265); /* navy                     */
+  --chart-3: oklch(0.65 0.14 162);
+  --chart-4: oklch(0.6 0.1 227);
+  --chart-5: oklch(0.72 0.14 70);
+
+  /* Sidebar */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.2 0.06 265);
+  --sidebar-primary: oklch(0.48 0.22 25);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.93 0.012 240);
+  --sidebar-accent-foreground: oklch(0.2 0.06 265);
+  --sidebar-border: oklch(0.2 0.06 265 / 12%);
+  --sidebar-ring: oklch(0.48 0.22 25);
+
+  /* Custom tokens */
+  --obsidian: oklch(0.955 0.008 240); /* same as bg in light       */
+  --surface: oklch(0.94 0.01 240);
   --gold: oklch(0.72 0.16 70);
+  --brand: oklch(0.2 0.06 265); /* navy brand colour         */
 }
 
-/* DARK MODE */
+/* ─────────────────────────────────────────────────────────────────────────
+   DARK MODE
+   Same brand identity — RED still pops, NAVY becomes accent-light,
+   backgrounds shift to deep dark-charcoal/navy.
+   ───────────────────────────────────────────────────────────────────────── */
 .dark {
-  --background: oklch(0.15 0.005 260);
-  --foreground: oklch(0.96 0.005 260);
-  --card: oklch(0.20 0.01 260);
-  --card-foreground: oklch(0.96 0.005 260);
-  --popover: oklch(0.20 0.01 260);
-  --popover-foreground: oklch(0.96 0.005 260);
-  --primary: oklch(0.85 0.15 85);
-  --primary-foreground: oklch(0.15 0.005 260);
-  --secondary: oklch(0.25 0.015 260);
-  --secondary-foreground: oklch(0.96 0.005 260);
-  --muted: oklch(0.25 0.015 260);
-  --muted-foreground: oklch(0.65 0.02 260);
-  --accent: oklch(0.30 0.015 260);
-  --accent-foreground: oklch(0.96 0.005 260);
-  --destructive: oklch(0.65 0.22 25);
-  --destructive-foreground: oklch(0.98 0.005 260);
-  --border: oklch(1 0 0 / 8%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.85 0.15 85);
-  --chart-1: oklch(0.85 0.15 85);
-  --chart-2: oklch(0.75 0.12 162);
-  --chart-3: oklch(0.65 0.10 227);
-  --chart-4: oklch(0.60 0.08 303);
-  --chart-5: oklch(0.55 0.12 25);
-  --sidebar: oklch(0.20 0.01 260);
-  --sidebar-foreground: oklch(0.96 0.005 260);
-  --sidebar-primary: oklch(0.85 0.15 85);
-  --sidebar-primary-foreground: oklch(0.15 0.005 260);
-  --sidebar-accent: oklch(0.30 0.015 260);
-  --sidebar-accent-foreground: oklch(0.96 0.005 260);
+  /* Page & surfaces */
+  --background: oklch(0.13 0.025 265); /* very dark navy-charcoal   */
+  --foreground: oklch(0.93 0.01 240); /* near-white text           */
+  --card: oklch(0.18 0.03 265); /* dark card surface         */
+  --card-foreground: oklch(0.93 0.01 240);
+  --popover: oklch(0.18 0.03 265);
+  --popover-foreground: oklch(0.93 0.01 240);
+
+  /* WESU+ red primary — same hue, slightly brighter for dark bg */
+  --primary: oklch(0.56 0.22 25); /* vivid red                 */
+  --primary-foreground: oklch(1 0 0);
+
+  /* Neutral dark surfaces */
+  --secondary: oklch(0.22 0.035 265);
+  --secondary-foreground: oklch(0.93 0.01 240);
+  --muted: oklch(0.22 0.03 265);
+  --muted-foreground: oklch(0.6 0.025 255);
+  --accent: oklch(0.25 0.035 265);
+  --accent-foreground: oklch(0.93 0.01 240);
+
+  /* Danger */
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+
+  /* Borders & inputs */
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.56 0.22 25);
+
+  /* Charts */
+  --chart-1: oklch(0.56 0.22 25);
+  --chart-2: oklch(0.55 0.1 265);
+  --chart-3: oklch(0.7 0.14 162);
+  --chart-4: oklch(0.65 0.1 227);
+  --chart-5: oklch(0.75 0.14 70);
+
+  /* Sidebar */
+  --sidebar: oklch(0.16 0.03 265);
+  --sidebar-foreground: oklch(0.93 0.01 240);
+  --sidebar-primary: oklch(0.56 0.22 25);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.25 0.035 265);
+  --sidebar-accent-foreground: oklch(0.93 0.01 240);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.85 0.15 85);
-  --obsidian: oklch(0.15 0.005 260);
-  --surface: oklch(0.30 0.015 260);
-  --gold: oklch(0.85 0.15 85);
+  --sidebar-ring: oklch(0.56 0.22 25);
+
+  /* Custom tokens */
+  --obsidian: oklch(0.13 0.025 265); /* same as bg in dark        */
+  --surface: oklch(0.22 0.035 265);
+  --gold: oklch(0.78 0.14 70);
+  --brand: oklch(0.7 0.1 265); /* light navy-blue tint      */
 }
 
 @layer base {
@@ -147,6 +189,35 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease;
+  }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.48 0.22 25 / 40%); /* translucent red */
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.48 0.22 25 / 70%);
+  }
+
+  /* ── Focus ring ── */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  /* ── Range input accent ── */
+  input[type="range"] {
+    accent-color: var(--color-primary);
   }
 }

@@ -48,11 +48,11 @@ emulator). Then `bunx cap sync` and run.
 Use the `usePlatform()` hook:
 
 ```tsx
-import { usePlatform } from '@/hooks/use-platform';
+import { usePlatform } from "@/hooks/use-platform";
 
 export default function HomePage() {
   const platform = usePlatform();
-  return platform === 'native' ? <MobileHome /> : <WebHome />;
+  return platform === "native" ? <MobileHome /> : <WebHome />;
 }
 ```
 
@@ -81,6 +81,7 @@ bunx cap sync
 ```
 
 Common ones for a music app:
+
 - `@capacitor/filesystem` — offline song downloads
 - `@capacitor/preferences` — persisted settings
 - `@capacitor/share` — share songs/albums

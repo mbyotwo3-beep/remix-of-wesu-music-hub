@@ -15,11 +15,13 @@ New tables (all with GRANTs + RLS):
 - **revenue_splits** (computed log) — `transaction_id, payee_user_id, payee_role (artist/label/platform/collaborator), amount, created_at`. Written by trigger on `payment_transactions` when status flips to `paid`.
 
 Extend existing:
+
 - `artists` → add `label_id` (nullable), `accepts_collabs` (bool), `available_for_features` (bool).
 - `songs` → add `label_id` (cached from artist), `allow_collab_requests` (bool).
 - `payouts` → add `period_start, period_end, gross_amount, platform_fee, label_fee, net_amount`.
 
 Security-definer helpers:
+
 - `is_label_owner(_uid, _label_id)`, `is_song_collaborator(_uid, _song_id)`, `artist_user_id(_artist_id)`.
 
 Split trigger: on `payment_transactions.status = 'paid'`, compute splits — platform commission (from `platform_settings.commission_pct`), then label cut if song has `label_id`, remainder distributed across `song_collaborators.split_pct` (defaulting 100% main artist if none set). Insert one row per payee into `revenue_splits`.
@@ -27,24 +29,31 @@ Split trigger: on `payment_transactions.status = 'paid'`, compute splits — pla
 ## 2. Server functions
 
 New `src/lib/labels.functions.ts`:
+
 - `applyForLabel`, `updateLabel`, `listMyLabel`, `inviteArtistToLabel`, `respondToLabelInvite`, `setArtistRoyalty`, `removeArtistFromLabel`, `listLabelRoster`, `listLabelRevenue`, `requestLabelPayout`.
 
 New `src/lib/collabs.functions.ts`:
+
 - `inviteCollaborator(song_id, artist_id|email, role, split_pct)`, `respondToCollabInvite`, `listMyCollabInvites`, `listSongCollaborators`, `removeCollaborator`.
 
 New `src/lib/features.functions.ts` (superadmin/admin):
+
 - `listFeaturedSlots`, `upsertFeaturedSlot`, `removeFeaturedSlot`, `reorderSlots`.
 
 Extend `artist.functions.ts`:
+
 - `joinLabel`, `leaveLabel`, `setCollabPrefs`, `setFeatureAvailability`.
 
 Extend `superadmin.functions.ts`:
+
 - `moderateLabel(approve/reject)`, `setPlatformCommission`, `approvePayout`, `forcePayoutRecalc`.
 
 Extend `admin.functions.ts`:
+
 - `listLabels`, `listAllSplits`, `listFeatureRequests`.
 
 Extend `listener.functions.ts`:
+
 - `requestFeatureFromArtist` (fan-funded features: stub creates pending transaction + invitation).
 
 All write functions append to `audit_log`.
@@ -66,12 +75,14 @@ All write functions append to `audit_log`.
 **Listener**: sees collaborator credits on song rows; can request a feature from an artist (paid stub); browses labels.
 
 **Artist**:
+
 - Studio → Collaborators tab: invite by artist handle or email, set split %, accept/decline incoming, live total-split bar (must ≤ 100%).
 - Studio → Label tab: apply to existing label / accept label invite / leave label / view royalty %.
 - Studio → Features tab: toggle `available_for_features`, accept fan feature requests, set rate.
 - Dashboard earnings now split into: streams, sales, features, collab share, label deductions.
 
 **Label owner** (`/label-dashboard`):
+
 - Overview: roster size, monthly revenue, pending invites.
 - Roster: invite/remove artists, set per-artist royalty %, view per-artist revenue.
 - Releases: all songs/albums under the label.

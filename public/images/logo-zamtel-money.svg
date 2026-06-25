@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 130" width="320" height="130">
+  <rect width="320" height="130" fill="white"/>
+
+  <!-- Zamtel circular logo mark: circle with stylised Z/signal arcs inside -->
+  <g transform="translate(14, 15)">
+    <!-- Outer green circle -->
+    <circle cx="50" cy="50" r="48" fill="none" stroke="#00843D" stroke-width="6"/>
+    <!-- Inner stylised Z with arc lines (simplified accurate representation) -->
+    <!-- Top horizontal bar of Z -->
+    <line x1="22" y1="24" x2="70" y2="24" stroke="#00843D" stroke-width="6" stroke-linecap="round"/>
+    <!-- Diagonal stroke of Z -->
+    <line x1="70" y1="24" x2="30" y2="76" stroke="#00843D" stroke-width="6" stroke-linecap="round"/>
+    <!-- Bottom horizontal bar of Z -->
+    <line x1="30" y1="76" x2="78" y2="76" stroke="#00843D" stroke-width="6" stroke-linecap="round"/>
+    <!-- Signal arc lines (right side curves) -->
+    <path d="M 66 34 A 24 24 0 0 1 66 66" fill="none" stroke="#00843D" stroke-width="4" stroke-linecap="round"/>
+    <path d="M 74 26 A 36 36 0 0 1 74 74" fill="none" stroke="#00843D" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- "ZAMTEL" bold green wordmark -->
+  <text x="120" y="72"
+        font-family="Arial Black, Arial, sans-serif"
+        font-size="38"
+        font-weight="900"
+        letter-spacing="1"
+        fill="#00843D">ZAMTEL</text>
+
+  <!-- "Money" subtitle in dark grey -->
+  <text x="120" y="105"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="26"
+        font-weight="500"
+        fill="#444444">Money</text>
+</svg>

@@ -28,8 +28,11 @@ import { Route as AlbumsRouteImport } from './routes/albums'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LabelsIndexRouteImport } from './routes/labels.index'
+import { Route as CheckoutIndexRouteImport } from './routes/checkout.index'
 import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as LabelsSlugRouteImport } from './routes/labels.$slug'
+import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
+import { Route as CheckoutCancelRouteImport } from './routes/checkout.cancel'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 import { Route as ApiPublicDpoWebhookRouteImport } from './routes/api/public/dpo-webhook'
 
@@ -128,6 +131,11 @@ const LabelsIndexRoute = LabelsIndexRouteImport.update({
   path: '/labels/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CheckoutIndexRoute = CheckoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CheckoutRoute,
+} as any)
 const ArtistsIndexRoute = ArtistsIndexRouteImport.update({
   id: '/artists/',
   path: '/artists/',
@@ -137,6 +145,16 @@ const LabelsSlugRoute = LabelsSlugRouteImport.update({
   id: '/labels/$slug',
   path: '/labels/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutSuccessRoute = CheckoutSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => CheckoutRoute,
+} as any)
+const CheckoutCancelRoute = CheckoutCancelRouteImport.update({
+  id: '/cancel',
+  path: '/cancel',
+  getParentRoute: () => CheckoutRoute,
 } as any)
 const ArtistsIdRoute = ArtistsIdRouteImport.update({
   id: '/artists/$id',
@@ -159,7 +177,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -169,8 +187,11 @@ export interface FileRoutesByFullPath {
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
+  '/checkout/cancel': typeof CheckoutCancelRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/labels/$slug': typeof LabelsSlugRoute
   '/artists/': typeof ArtistsIndexRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/labels/': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
@@ -184,7 +205,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
-  '/checkout': typeof CheckoutRoute
   '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -194,8 +214,11 @@ export interface FileRoutesByTo {
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
+  '/checkout/cancel': typeof CheckoutCancelRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/labels/$slug': typeof LabelsSlugRoute
   '/artists': typeof ArtistsIndexRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/labels': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
@@ -210,7 +233,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/become-artist': typeof BecomeArtistRoute
   '/browse': typeof BrowseRoute
-  '/checkout': typeof CheckoutRoute
+  '/checkout': typeof CheckoutRouteWithChildren
   '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
@@ -220,8 +243,11 @@ export interface FileRoutesById {
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
+  '/checkout/cancel': typeof CheckoutCancelRoute
+  '/checkout/success': typeof CheckoutSuccessRoute
   '/labels/$slug': typeof LabelsSlugRoute
   '/artists/': typeof ArtistsIndexRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/labels/': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
 }
@@ -247,8 +273,11 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
+    | '/checkout/cancel'
+    | '/checkout/success'
     | '/labels/$slug'
     | '/artists/'
+    | '/checkout/'
     | '/labels/'
     | '/api/public/dpo-webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -262,7 +291,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/become-artist'
     | '/browse'
-    | '/checkout'
     | '/collabs'
     | '/contact'
     | '/dashboard'
@@ -272,8 +300,11 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
+    | '/checkout/cancel'
+    | '/checkout/success'
     | '/labels/$slug'
     | '/artists'
+    | '/checkout'
     | '/labels'
     | '/api/public/dpo-webhook'
   id:
@@ -297,8 +328,11 @@ export interface FileRouteTypes {
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
+    | '/checkout/cancel'
+    | '/checkout/success'
     | '/labels/$slug'
     | '/artists/'
+    | '/checkout/'
     | '/labels/'
     | '/api/public/dpo-webhook'
   fileRoutesById: FileRoutesById
@@ -313,7 +347,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BecomeArtistRoute: typeof BecomeArtistRoute
   BrowseRoute: typeof BrowseRoute
-  CheckoutRoute: typeof CheckoutRoute
+  CheckoutRoute: typeof CheckoutRouteWithChildren
   CollabsRoute: typeof CollabsRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
@@ -464,6 +498,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabelsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/'
+      fullPath: '/checkout/'
+      preLoaderRoute: typeof CheckoutIndexRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
     '/artists/': {
       id: '/artists/'
       path: '/artists'
@@ -477,6 +518,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/labels/$slug'
       preLoaderRoute: typeof LabelsSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/checkout/success': {
+      id: '/checkout/success'
+      path: '/success'
+      fullPath: '/checkout/success'
+      preLoaderRoute: typeof CheckoutSuccessRouteImport
+      parentRoute: typeof CheckoutRoute
+    }
+    '/checkout/cancel': {
+      id: '/checkout/cancel'
+      path: '/cancel'
+      fullPath: '/checkout/cancel'
+      preLoaderRoute: typeof CheckoutCancelRouteImport
+      parentRoute: typeof CheckoutRoute
     }
     '/artists/$id': {
       id: '/artists/$id'
@@ -495,6 +550,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CheckoutRouteChildren {
+  CheckoutCancelRoute: typeof CheckoutCancelRoute
+  CheckoutSuccessRoute: typeof CheckoutSuccessRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
+}
+
+const CheckoutRouteChildren: CheckoutRouteChildren = {
+  CheckoutCancelRoute: CheckoutCancelRoute,
+  CheckoutSuccessRoute: CheckoutSuccessRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
+}
+
+const CheckoutRouteWithChildren = CheckoutRoute._addFileChildren(
+  CheckoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -505,7 +576,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BecomeArtistRoute: BecomeArtistRoute,
   BrowseRoute: BrowseRoute,
-  CheckoutRoute: CheckoutRoute,
+  CheckoutRoute: CheckoutRouteWithChildren,
   CollabsRoute: CollabsRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,

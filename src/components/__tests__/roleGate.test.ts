@@ -34,16 +34,22 @@ const roleState = fc.record({
 describe("Property 24: RoleGate redirect on role violation", () => {
   it("should return 'redirect-auth' for any unauthenticated user regardless of required role", () => {
     fc.assert(
-      fc.property(appRole, fc.boolean(), fc.boolean(), fc.boolean(), (require, isArtist, isAdmin, isSuperAdmin) => {
-        const result = checkRoleAccess({
-          require,
-          isUser: false,
-          isArtist,
-          isAdmin,
-          isSuperAdmin,
-        });
-        expect(result).toBe("redirect-auth");
-      }),
+      fc.property(
+        appRole,
+        fc.boolean(),
+        fc.boolean(),
+        fc.boolean(),
+        (require, isArtist, isAdmin, isSuperAdmin) => {
+          const result = checkRoleAccess({
+            require,
+            isUser: false,
+            isArtist,
+            isAdmin,
+            isSuperAdmin,
+          });
+          expect(result).toBe("redirect-auth");
+        },
+      ),
       { numRuns: 100 },
     );
   });
@@ -51,38 +57,32 @@ describe("Property 24: RoleGate redirect on role violation", () => {
   it("should return 'redirect-home' (not 'allowed') when authenticated user lacks required role", () => {
     // Test: authenticated user with only the 'user' role trying to access artist/admin/superadmin routes
     fc.assert(
-      fc.property(
-        fc.constantFrom<AppRole>("artist", "admin", "superadmin"),
-        (require) => {
-          const result = checkRoleAccess({
-            require,
-            isUser: true,
-            isArtist: false,
-            isAdmin: false,
-            isSuperAdmin: false,
-          });
-          expect(result).toBe("redirect-home");
-        },
-      ),
+      fc.property(fc.constantFrom<AppRole>("artist", "admin", "superadmin"), (require) => {
+        const result = checkRoleAccess({
+          require,
+          isUser: true,
+          isArtist: false,
+          isAdmin: false,
+          isSuperAdmin: false,
+        });
+        expect(result).toBe("redirect-home");
+      }),
       { numRuns: 100 },
     );
   });
 
   it("should return 'redirect-home' when artist tries to access admin route", () => {
     fc.assert(
-      fc.property(
-        fc.constantFrom<AppRole>("admin", "superadmin"),
-        (require) => {
-          const result = checkRoleAccess({
-            require,
-            isUser: true,
-            isArtist: true,
-            isAdmin: false,
-            isSuperAdmin: false,
-          });
-          expect(result).toBe("redirect-home");
-        },
-      ),
+      fc.property(fc.constantFrom<AppRole>("admin", "superadmin"), (require) => {
+        const result = checkRoleAccess({
+          require,
+          isUser: true,
+          isArtist: true,
+          isAdmin: false,
+          isSuperAdmin: false,
+        });
+        expect(result).toBe("redirect-home");
+      }),
       { numRuns: 100 },
     );
   });

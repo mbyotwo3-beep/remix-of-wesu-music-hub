@@ -27,17 +27,17 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link to="/" className="font-bold text-xl tracking-tighter text-primary flex items-center gap-2">
-            <Music className="size-5" />
-            WESU+
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/images/wesu-splash-logo.png" alt="Wesu+ logo" className="h-9 w-auto" />
+            <span className="sr-only">Wesu+</span>
           </Link>
           <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
             {navLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                activeProps={{ className: "text-foreground" }}
-                className="hover:text-foreground transition-colors"
+                activeProps={{ className: "text-foreground border-b-2 border-primary pb-0.5" }}
+                className="hover:text-foreground transition-colors pb-0.5 border-b-2 border-transparent"
               >
                 {link.label}
               </Link>
@@ -50,7 +50,7 @@ export function Navbar() {
             <input
               type="text"
               placeholder="Search songs, artists..."
-              className="bg-secondary border border-border rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:border-primary/50 text-foreground placeholder:text-muted-foreground"
+              className="bg-card border border-border rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/30 text-foreground placeholder:text-muted-foreground transition-all"
             />
           </div>
 
@@ -72,33 +72,71 @@ export function Navbar() {
                       <div className="px-4 py-3 border-b border-border">
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                         <p className="text-xs font-semibold text-primary mt-0.5">
-                          {isSuperAdmin ? "Superadmin" : isAdmin ? "Admin" : isArtist ? "Artist" : "Listener"}
+                          {isSuperAdmin
+                            ? "Superadmin"
+                            : isAdmin
+                              ? "Admin"
+                              : isArtist
+                                ? "Artist"
+                                : "Listener"}
                         </p>
                       </div>
-                      <Link to="/dashboard" className="block px-4 py-2.5 text-sm hover:bg-accent" onClick={() => setMenuOpen(false)}>
+                      <Link
+                        to="/dashboard"
+                        className="block px-4 py-2.5 text-sm hover:bg-accent"
+                        onClick={() => setMenuOpen(false)}
+                      >
                         My Library
                       </Link>
-                      <Link to="/profile" className="block px-4 py-2.5 text-sm hover:bg-accent" onClick={() => setMenuOpen(false)}>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2.5 text-sm hover:bg-accent"
+                        onClick={() => setMenuOpen(false)}
+                      >
                         Profile
                       </Link>
                       {!isArtist && (
-                        <Link to="/become-artist" className="block px-4 py-2.5 text-sm hover:bg-accent" onClick={() => setMenuOpen(false)}>
-                          <span className="inline-flex items-center gap-2"><Mic2 className="size-4" /> Become an Artist</span>
+                        <Link
+                          to="/become-artist"
+                          className="block px-4 py-2.5 text-sm hover:bg-accent"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Mic2 className="size-4" /> Become an Artist
+                          </span>
                         </Link>
                       )}
                       {isArtist && (
-                        <Link to="/artist-dashboard" className="block px-4 py-2.5 text-sm hover:bg-accent" onClick={() => setMenuOpen(false)}>
-                          <span className="inline-flex items-center gap-2"><Mic2 className="size-4" /> Artist Portal</span>
+                        <Link
+                          to="/artist-dashboard"
+                          className="block px-4 py-2.5 text-sm hover:bg-accent"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Mic2 className="size-4" /> Artist Portal
+                          </span>
                         </Link>
                       )}
                       {isAdmin && (
-                        <Link to="/admin" className="block px-4 py-2.5 text-sm hover:bg-accent" onClick={() => setMenuOpen(false)}>
-                          <span className="inline-flex items-center gap-2"><Shield className="size-4" /> Admin</span>
+                        <Link
+                          to="/admin"
+                          className="block px-4 py-2.5 text-sm hover:bg-accent"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Shield className="size-4" /> Admin
+                          </span>
                         </Link>
                       )}
                       {isSuperAdmin && (
-                        <Link to="/superadmin" className="block px-4 py-2.5 text-sm hover:bg-accent" onClick={() => setMenuOpen(false)}>
-                          <span className="inline-flex items-center gap-2"><Shield className="size-4 text-primary" /> Superadmin</span>
+                        <Link
+                          to="/superadmin"
+                          className="block px-4 py-2.5 text-sm hover:bg-accent"
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Shield className="size-4 text-primary" /> Superadmin
+                          </span>
                         </Link>
                       )}
                       <button
@@ -118,7 +156,7 @@ export function Navbar() {
               ) : !isAuth ? (
                 <Link
                   to="/auth"
-                  className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-full hover:brightness-110 transition-all"
+                  className="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-full hover:brightness-110 transition-all shadow-sm"
                 >
                   Sign In
                 </Link>
@@ -149,26 +187,45 @@ export function Navbar() {
           ))}
           {user && (
             <>
-              <Link to="/dashboard" className="block text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+              <Link
+                to="/dashboard"
+                className="block text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => setMobileOpen(false)}
+              >
                 My Library
               </Link>
               {isArtist && (
-                <Link to="/artist-dashboard" className="block text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+                <Link
+                  to="/artist-dashboard"
+                  className="block text-sm font-medium text-muted-foreground hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
                   Artist Portal
                 </Link>
               )}
               {isAdmin && (
-                <Link to="/admin" className="block text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+                <Link
+                  to="/admin"
+                  className="block text-sm font-medium text-muted-foreground hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
                   Admin
                 </Link>
               )}
               {isSuperAdmin && (
-                <Link to="/superadmin" className="block text-sm font-medium text-muted-foreground hover:text-foreground" onClick={() => setMobileOpen(false)}>
+                <Link
+                  to="/superadmin"
+                  className="block text-sm font-medium text-muted-foreground hover:text-foreground"
+                  onClick={() => setMobileOpen(false)}
+                >
                   Superadmin
                 </Link>
               )}
               <button
-                onClick={() => { supabase.auth.signOut(); window.location.href = "/"; }}
+                onClick={() => {
+                  supabase.auth.signOut();
+                  window.location.href = "/";
+                }}
                 className="block text-sm font-medium text-destructive"
               >
                 Sign Out

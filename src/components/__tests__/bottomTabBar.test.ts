@@ -103,7 +103,12 @@ describe("Property 14: Role-based tab set is dynamically derived", () => {
   it("Admin tab route should be /admin when isAdmin but not isSuperAdmin", () => {
     fc.assert(
       fc.property(fc.boolean(), (isArtist) => {
-        const tabs = computeTabs({ isAuthenticated: true, isArtist, isAdmin: true, isSuperAdmin: false });
+        const tabs = computeTabs({
+          isAuthenticated: true,
+          isArtist,
+          isAdmin: true,
+          isSuperAdmin: false,
+        });
         const adminTab = tabs.find((t) => t.to === "/admin" || t.to === "/superadmin");
         expect(adminTab?.to).toBe("/admin");
       }),

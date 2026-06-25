@@ -53,7 +53,7 @@ function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-white/5 rounded-2xl p-8">
+          <div className="bg-card border border-border rounded-2xl p-8">
             <h2 className="text-xl font-semibold mb-6">Send a Message</h2>
             <form className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -61,14 +61,14 @@ function ContactPage() {
                   <label className="block text-sm font-medium mb-2">First Name</label>
                   <input
                     type="text"
-                    className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
+                    className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Last Name</label>
                   <input
                     type="text"
-                    className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
+                    className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
                   />
                 </div>
               </div>
@@ -76,14 +76,14 @@ function ContactPage() {
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <input
                   type="email"
-                  className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
+                  className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Message</label>
                 <textarea
                   rows={4}
-                  className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground resize-none"
+                  className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50 text-foreground resize-none"
                 />
               </div>
               <button

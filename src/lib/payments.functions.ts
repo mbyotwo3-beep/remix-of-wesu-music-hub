@@ -43,7 +43,9 @@ export const initiatePayment = createServerFn({ method: "POST" })
     // full checkout flow can be exercised without real credentials.
     const simulationMode = !companyToken || !serviceType;
     if (simulationMode) {
-      console.warn("[DPO Pay] Simulation mode active — env vars DPO_COMPANY_TOKEN / DPO_SERVICE_TYPE not set");
+      console.warn(
+        "[DPO Pay] Simulation mode active — env vars DPO_COMPANY_TOKEN / DPO_SERVICE_TYPE not set",
+      );
     }
 
     // Record the pending transaction (visible to the user).
@@ -66,10 +68,7 @@ export const initiatePayment = createServerFn({ method: "POST" })
     if (insertError) throw new Error(insertError.message);
 
     // Include phone number for mobile money methods.
-    const phone =
-      MOBILE_MONEY_METHODS.includes(data.method_code) && data.phone
-        ? data.phone
-        : null;
+    const phone = MOBILE_MONEY_METHODS.includes(data.method_code) && data.phone ? data.phone : null;
 
     // --- SIMULATION MODE: skip the real DPO API call ---
     if (simulationMode) {
@@ -78,11 +77,27 @@ export const initiatePayment = createServerFn({ method: "POST" })
         .from("payment_transactions")
         .update({ provider_token: fakeToken, status: "completed" })
         .eq("id", tx.id);
+
+      try {
+        const { fulfillTransaction } = await import("./payments.server");
+        await fulfillTransaction({
+          id: tx.id,
+          user_id: tx.user_id,
+          item_type: tx.item_type as "song" | "album" | "subscription",
+          item_id: tx.item_id,
+          amount: tx.amount,
+          currency: tx.currency,
+        });
+      } catch (err) {
+        console.error("[DPO Pay Simulation] Failed to fulfill simulated transaction:", err);
+      }
+
       return {
         transactionId: tx.id,
         paymentUrl: `/checkout/success?sim=1&ref=${tx.id}`,
         simulated: true,
-        message: "⚠️ Simulation mode: payment is pre-approved. Configure DPO_COMPANY_TOKEN and DPO_SERVICE_TYPE for real payments.",
+        message:
+          "⚠️ Simulation mode: payment is pre-approved. Configure DPO_COMPANY_TOKEN and DPO_SERVICE_TYPE for real payments.",
       };
     }
 
@@ -114,14 +129,11 @@ export const initiatePayment = createServerFn({ method: "POST" })
     const responseText = await response.text();
 
     const result = extractXmlTag(responseText, "Result");
-    const resultExplanation =
-      extractXmlTag(responseText, "ResultExplanation") ?? "Unknown error";
+    const resultExplanation = extractXmlTag(responseText, "ResultExplanation") ?? "Unknown error";
 
     if (result !== "000") {
       // Non-success result: leave transaction as pending, surface DPO error.
-      throw new Error(
-        `DPO Pay error (${result ?? "unknown"}): ${resultExplanation}`,
-      );
+      throw new Error(`DPO Pay error (${result ?? "unknown"}): ${resultExplanation}`);
     }
 
     const transToken = extractXmlTag(responseText, "TransToken");

@@ -30,7 +30,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [resolved, setResolved] = useState<Resolved>("dark");
 
   useEffect(() => {
-    const stored = (typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY)) as Theme | null;
+    const stored = (typeof localStorage !== "undefined" &&
+      localStorage.getItem(STORAGE_KEY)) as Theme | null;
     const t: Theme = stored ?? "system";
     setThemeState(t);
     const r: Resolved = t === "system" ? systemPref() : t;
@@ -52,13 +53,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    try { localStorage.setItem(STORAGE_KEY, t); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, t);
+    } catch {}
     const r: Resolved = t === "system" ? systemPref() : t;
     setResolved(r);
     applyClass(r);
   };
 
-  return <ThemeContext.Provider value={{ theme, resolved, setTheme }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme, resolved, setTheme }}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {

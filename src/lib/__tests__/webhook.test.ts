@@ -13,11 +13,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import fc from "fast-check";
-import {
-  verifyCompanyToken,
-  determineTxStatus,
-  shouldFulfill,
-} from "../webhook.utils";
+import { verifyCompanyToken, determineTxStatus, shouldFulfill } from "../webhook.utils";
 
 // ---------------------------------------------------------------------------
 // vi.mock for supabaseAdmin — used in fulfillTransaction tests (Property 11)
@@ -76,9 +72,7 @@ const nonEmptyToken = fc.stringOf(
  * Tokens that are guaranteed to be different from a reference token.
  * We generate a second token and append a suffix to ensure inequality.
  */
-const mismatchedPair = fc
-  .tuple(nonEmptyToken, nonEmptyToken)
-  .filter(([a, b]) => a !== b);
+const mismatchedPair = fc.tuple(nonEmptyToken, nonEmptyToken).filter(([a, b]) => a !== b);
 
 // ---------------------------------------------------------------------------
 // Property 10: Webhook CompanyToken verification returns 401 on mismatch
@@ -150,12 +144,9 @@ describe("Property 11: Payment fulfillment state transitions", () => {
   it("determineTxStatus should return 'completed' for ccdApproval === '000'", () => {
     // **Validates: Requirements 6.3**
     fc.assert(
-      fc.property(
-        fc.constant("000"),
-        (code) => {
-          expect(determineTxStatus(code)).toBe("completed");
-        },
-      ),
+      fc.property(fc.constant("000"), (code) => {
+        expect(determineTxStatus(code)).toBe("completed");
+      }),
       { numRuns: 1 },
     );
   });
@@ -172,7 +163,7 @@ describe("Property 11: Payment fulfillment state transitions", () => {
 
   it("fulfillTransaction for item_type='subscription' should call supabaseAdmin.from('subscriptions').upsert", async () => {
     // **Validates: Requirements 6.4**
-    const mod = await import("@/integrations/supabase/client.server") as any;
+    const mod = (await import("@/integrations/supabase/client.server")) as any;
     const chainObj = mod.__chainObj;
 
     // Reset all mocks, then configure responses for this test's call sequence:
@@ -208,7 +199,7 @@ describe("Property 11: Payment fulfillment state transitions", () => {
 
   it("fulfillTransaction for item_type='song' should call supabaseAdmin.from('purchases').insert", async () => {
     // **Validates: Requirements 6.5**
-    const mod = await import("@/integrations/supabase/client.server") as any;
+    const mod = (await import("@/integrations/supabase/client.server")) as any;
     const chainObj = mod.__chainObj;
 
     vi.clearAllMocks();
@@ -247,7 +238,7 @@ describe("Property 11: Payment fulfillment state transitions", () => {
 
   it("fulfillTransaction for item_type='album' should call supabaseAdmin.from('purchases').insert", async () => {
     // **Validates: Requirements 6.5**
-    const mod = await import("@/integrations/supabase/client.server") as any;
+    const mod = (await import("@/integrations/supabase/client.server")) as any;
     const chainObj = mod.__chainObj;
 
     vi.clearAllMocks();

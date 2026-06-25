@@ -74,7 +74,14 @@ export function NowPlayingScreen() {
         className="min-h-[44px] min-w-[44px] flex items-center justify-center self-start -ml-2 mb-4 text-muted-foreground"
         aria-label="Dismiss now playing"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
           <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
@@ -103,7 +110,9 @@ export function NowPlayingScreen() {
             className="min-h-[44px] min-w-[44px] flex items-center justify-center"
             aria-label={liked ? "Unlike" : "Like"}
           >
-            <Heart className={`size-6 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+            <Heart
+              className={`size-6 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`}
+            />
           </button>
         )}
       </div>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370 96" role="img" aria-label="Wesu+ logo">
+  <defs>
+    <style>
+      .text { font: 700 48px Inter, system-ui, sans-serif; fill: #0c3c93; }
+      .wave { fill: none; stroke: #d0262d; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <path class="wave" d="M20 62 h24 c6 0 6-18 12-18 s6 18 12 18 c6 0 6-34 12-34 s6 34 12 34 c6 0 6-40 12-40 s6 40 12 40 h20" />
+  <text class="text" x="150" y="66">ESU</text>
+  <rect x="322" y="34" width="10" height="28" fill="#0c3c93" rx="2" />
+  <rect x="312" y="44" width="28" height="10" fill="#0c3c93" rx="2" />
+</svg>

@@ -13,7 +13,11 @@ import { MobileProfile } from "@/components/mobile/screens/MobileProfile";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Wesu+" }] }),
-  component: () => <RoleGate require="user"><ProfileRoute /></RoleGate>,
+  component: () => (
+    <RoleGate require="user">
+      <ProfileRoute />
+    </RoleGate>
+  ),
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
@@ -31,14 +35,20 @@ function Page() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
-      if (data) setForm({
-        full_name: data.full_name ?? "",
-        bio: data.bio ?? "",
-        avatar_url: data.avatar_url ?? "",
-        location: data.location ?? "",
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data)
+          setForm({
+            full_name: data.full_name ?? "",
+            bio: data.bio ?? "",
+            avatar_url: data.avatar_url ?? "",
+            location: data.location ?? "",
+          });
       });
-    });
   }, [user]);
 
   const m = useMutation({ mutationFn: update });
@@ -50,37 +60,67 @@ function Page() {
         <h1 className="text-3xl font-bold">Your profile</h1>
       </div>
       <form
-        onSubmit={(e) => { e.preventDefault(); m.mutate({ data: form }); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          m.mutate({ data: form });
+        }}
         className="bg-card border border-border rounded-2xl p-6 space-y-4"
       >
-        <label className="block text-sm">Full name
-          <input className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+        <label className="block text-sm">
+          Full name
+          <input
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border"
+            value={form.full_name}
+            onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+          />
         </label>
-        <label className="block text-sm">Location
-          <input className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+        <label className="block text-sm">
+          Location
+          <input
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+          />
         </label>
-        <label className="block text-sm">Bio
-          <textarea rows={3} className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} />
+        <label className="block text-sm">
+          Bio
+          <textarea
+            rows={3}
+            className="mt-1 w-full px-3 py-2 rounded-lg bg-secondary border border-border"
+            value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+          />
         </label>
-        <label className="block text-sm">Avatar
-          <input type="file" accept="image/*" className="mt-1 block" onChange={async (e) => {
-            const f = e.target.files?.[0];
-            if (!f || !user) return;
-            setUploading(true);
-            try {
-              const path = await uploadFileToBucket("user-avatars", user.id, f);
-              setForm((s) => ({ ...s, avatar_url: path }));
-            } catch (err) {
-              alert((err as Error).message);
-            } finally {
-              setUploading(false);
-            }
-          }} />
+        <label className="block text-sm">
+          Avatar
+          <input
+            type="file"
+            accept="image/*"
+            className="mt-1 block"
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              if (!f || !user) return;
+              setUploading(true);
+              try {
+                const path = await uploadFileToBucket("user-avatars", user.id, f);
+                setForm((s) => ({ ...s, avatar_url: path }));
+              } catch (err) {
+                alert((err as Error).message);
+              } finally {
+                setUploading(false);
+              }
+            }}
+          />
         </label>
-        {form.avatar_url && <p className="text-xs text-muted-foreground">Uploaded: {form.avatar_url}</p>}
+        {form.avatar_url && (
+          <p className="text-xs text-muted-foreground">Uploaded: {form.avatar_url}</p>
+        )}
         {m.error ? <p className="text-sm text-destructive">{(m.error as Error).message}</p> : null}
         {m.isSuccess ? <p className="text-sm text-primary">Saved.</p> : null}
-        <button disabled={m.isPending || uploading} className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold">
+        <button
+          disabled={m.isPending || uploading}
+          className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold"
+        >
           {m.isPending ? "Saving…" : "Save profile"}
         </button>
       </form>

@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, useCallback, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -17,7 +17,7 @@ import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
 import { usePlatform } from "../hooks/use-platform";
 import { MobileShell } from "../components/mobile/MobileShell";
 import { registerDeepLinkHandler } from "../integrations/supabase/auth-deep-link";
-
+import { SplashScreen } from "../components/mobile/SplashScreen";
 
 function NotFoundComponent() {
   return (
@@ -84,20 +84,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#fbf7ee" },
       { title: "Wesu+ — Music Streaming" },
-      { name: "description", content: "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments." },
+      {
+        name: "description",
+        content:
+          "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments.",
+      },
       { name: "author", content: "Wesu+" },
       { property: "og:title", content: "Wesu+ — Music Streaming" },
-      { property: "og:description", content: "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments." },
+      {
+        property: "og:description",
+        content:
+          "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments.",
+      },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/images/wesu-logo.svg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@wesuplus" },
     ],
     links: [
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/images/wesu-icon.svg" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -125,6 +141,21 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const platform = usePlatform();
 
+  // Show splash once per session on web (native uses MobileShell's splash)
+  const [showWebSplash, setShowWebSplash] = useState(
+    () =>
+      platform !== "native" &&
+      typeof window !== "undefined" &&
+      !sessionStorage.getItem("wesu_splash_shown"),
+  );
+
+  const handleWebSplashDone = useCallback(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("wesu_splash_shown", "1");
+    }
+    setShowWebSplash(false);
+  }, []);
+
   // Register deep link auth handler on native platforms (Req 18.3)
   useEffect(() => {
     if (platform === "native") {
@@ -135,6 +166,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        {showWebSplash && <SplashScreen onDone={handleWebSplashDone} />}
         {platform === "native" ? (
           <MobileShell>
             <Outlet />

@@ -49,10 +49,14 @@ export function MobileLibrary() {
   return (
     <div className="pb-6">
       {/* Subscription banner */}
-      <div className={`mx-4 mt-4 mb-6 rounded-2xl p-4 flex items-center gap-3 ${
-        subscription ? "bg-primary/10 border border-primary/20" : "bg-card border border-border"
-      }`}>
-        <Crown className={`size-6 shrink-0 ${subscription ? "text-primary" : "text-muted-foreground"}`} />
+      <div
+        className={`mx-4 mt-4 mb-6 rounded-2xl p-4 flex items-center gap-3 ${
+          subscription ? "bg-primary/10 border border-primary/20" : "bg-card border border-border"
+        }`}
+      >
+        <Crown
+          className={`size-6 shrink-0 ${subscription ? "text-primary" : "text-muted-foreground"}`}
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold truncate">
             {subscription ? subscription.plan : "Free Plan"}
@@ -74,7 +78,9 @@ export function MobileLibrary() {
       {/* Playlists */}
       <div className="mb-6">
         <div className="flex items-center justify-between px-4 mb-3">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Playlists</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            Playlists
+          </h2>
           <button
             onClick={() => setShowCreate(true)}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center text-primary"
@@ -102,7 +108,10 @@ export function MobileLibrary() {
               Create
             </button>
             <button
-              onClick={() => { setShowCreate(false); setNewName(""); }}
+              onClick={() => {
+                setShowCreate(false);
+                setNewName("");
+              }}
               className="min-h-[44px] min-w-[44px] flex items-center justify-center text-muted-foreground"
               aria-label="Cancel"
             >
@@ -115,13 +124,18 @@ export function MobileLibrary() {
           <p className="px-4 text-sm text-muted-foreground">No playlists yet.</p>
         ) : (
           playlists.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 px-4 py-2 min-h-[44px] hover:bg-white/5">
+            <div
+              key={p.id}
+              className="flex items-center gap-3 px-4 py-2 min-h-[44px] hover:bg-foreground/5"
+            >
               <div className="size-10 rounded-md bg-card flex items-center justify-center shrink-0">
                 <ListMusic className="size-4 text-muted-foreground" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{p.is_public ? "Public" : "Private"}</p>
+                <p className="text-xs text-muted-foreground">
+                  {p.is_public ? "Public" : "Private"}
+                </p>
               </div>
             </div>
           ))
@@ -132,7 +146,9 @@ export function MobileLibrary() {
       <div>
         <div className="flex items-center gap-2 px-4 mb-3">
           <ShoppingBag className="size-4 text-muted-foreground" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Recent Purchases</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            Recent Purchases
+          </h2>
         </div>
         {purchases.length === 0 ? (
           <p className="px-4 text-sm text-muted-foreground">No purchases yet.</p>
@@ -145,7 +161,9 @@ export function MobileLibrary() {
             return (
               <div key={p.id} className="flex items-center justify-between px-4 py-2 min-h-[44px]">
                 <p className="text-sm truncate flex-1">{title}</p>
-                <span className="text-primary text-sm font-bold ml-4">K{Number(p.amount).toFixed(2)}</span>
+                <span className="text-primary text-sm font-bold ml-4">
+                  K{Number(p.amount).toFixed(2)}
+                </span>
               </div>
             );
           })

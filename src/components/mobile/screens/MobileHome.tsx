@@ -43,7 +43,9 @@ export function MobileHome() {
       {/* Featured Carousel */}
       {featured.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground px-4 mb-3">Featured</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground px-4 mb-3">
+            Featured
+          </h2>
           <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-3 pl-4">
               {featured.map((album) => (
@@ -80,7 +82,9 @@ export function MobileHome() {
       {/* New Releases */}
       <div className="mb-6">
         <div className="flex items-center justify-between px-4 mb-2">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">New Releases</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            New Releases
+          </h2>
         </div>
         <div>
           {newReleases.slice(0, 10).map((song) => (
@@ -106,7 +110,9 @@ export function MobileHome() {
       <div className="mb-6 px-4">
         <div className="flex items-center gap-2 mb-3">
           <TrendingUp className="size-4 text-primary" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Trending</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            Trending
+          </h2>
         </div>
         <div className="space-y-2">
           {trending.slice(0, 5).map((song, i) => (
@@ -132,7 +138,9 @@ export function MobileHome() {
         <Crown className="size-8 text-primary shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="font-bold text-sm">Go Premium</p>
-          <p className="text-xs text-muted-foreground">Ad-free listening · Support Zambian artists</p>
+          <p className="text-xs text-muted-foreground">
+            Ad-free listening · Support Zambian artists
+          </p>
         </div>
         <Link
           to="/subscriptions"

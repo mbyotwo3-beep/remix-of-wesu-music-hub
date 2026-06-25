@@ -92,7 +92,7 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 bg-obsidian/95 backdrop-blur-xl border-t border-white/10 z-50 pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 inset-x-0 bg-foreground/10 backdrop-blur-xl border-t border-border z-50 pb-[env(safe-area-inset-bottom)]"
       aria-label="Main navigation"
     >
       <div className="flex items-stretch h-14">

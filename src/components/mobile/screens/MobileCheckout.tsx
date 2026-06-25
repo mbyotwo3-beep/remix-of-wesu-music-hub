@@ -85,7 +85,9 @@ export function MobileCheckout({ planCode = "premium_monthly" }: MobileCheckoutP
 
       {/* Payment method cards — large tappable (≥64pt) */}
       <div className="space-y-3 mb-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Payment Method</h2>
+        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Payment Method
+        </h2>
         {methods.map((m: any) => (
           <button
             key={m.code}

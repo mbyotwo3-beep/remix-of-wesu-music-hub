@@ -18,9 +18,7 @@ export function MiniPlayer() {
   const isLoading = track.audioUrl === undefined;
 
   return (
-    <div
-      className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 h-16 bg-card/95 backdrop-blur-xl border-t border-white/10 z-40 flex items-center px-4 gap-3"
-    >
+    <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 h-16 bg-foreground/10 backdrop-blur-xl border-t border-border z-40 flex items-center px-4 gap-3">
       {/* Tappable info area → navigate to /now-playing */}
       <button
         className="flex items-center gap-3 flex-1 min-w-0 text-left"
