@@ -8,7 +8,7 @@ async function audit(actorId: string, action: string, target_type?: string, targ
 
 export const inviteCollaborator = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { song_id: string; artist_id: string; role: "featured" | "producer" | "writer" | "remixer"; split_pct: number }) => d)
+  .validator((d: { song_id: string; artist_id: string; role: "featured" | "producer" | "writer" | "remixer"; split_pct: number }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { error } = await supabase.from("song_collaborators").insert({
@@ -22,7 +22,7 @@ export const inviteCollaborator = createServerFn({ method: "POST" })
 
 export const respondToCollabInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; accept: boolean }) => d)
+  .validator((d: { id: string; accept: boolean }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     if (data.accept) {
@@ -53,7 +53,7 @@ export const listMyCollabInvites = createServerFn({ method: "GET" })
   });
 
 export const listSongCollaborators = createServerFn({ method: "GET" })
-  .inputValidator((d: { song_id: string }) => d)
+  .validator((d: { song_id: string }) => d)
   .handler(async ({ data }) => {
     const { createClient } = await import("@supabase/supabase-js");
     const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -69,7 +69,7 @@ export const listSongCollaborators = createServerFn({ method: "GET" })
 
 export const removeCollaborator = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("song_collaborators").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

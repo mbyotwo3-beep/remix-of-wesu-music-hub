@@ -12,7 +12,7 @@ function slugify(s: string) {
 
 export const applyForLabel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name: string; bio?: string; contact_email?: string; logo_url?: string }) => d)
+  .validator((d: { name: string; bio?: string; contact_email?: string; logo_url?: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const slug = slugify(data.name) + "-" + Math.random().toString(36).slice(2, 6);
@@ -27,7 +27,7 @@ export const applyForLabel = createServerFn({ method: "POST" })
 
 export const updateLabel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; name?: string; bio?: string; contact_email?: string; logo_url?: string }) => d)
+  .validator((d: { id: string; name?: string; bio?: string; contact_email?: string; logo_url?: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patch: any = {};
@@ -48,7 +48,7 @@ export const getMyLabel = createServerFn({ method: "GET" })
   });
 
 export const getLabelBySlug = createServerFn({ method: "GET" })
-  .inputValidator((d: { slug: string }) => d)
+  .validator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
     const { createClient } = await import("@supabase/supabase-js");
     const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
@@ -72,7 +72,7 @@ export const listApprovedLabels = createServerFn({ method: "GET" })
 
 export const inviteArtistToLabel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { label_id: string; artist_id: string; royalty_pct?: number }) => d)
+  .validator((d: { label_id: string; artist_id: string; royalty_pct?: number }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { error } = await supabase.from("label_artists").insert({
@@ -86,7 +86,7 @@ export const inviteArtistToLabel = createServerFn({ method: "POST" })
 
 export const respondToLabelInvite = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; accept: boolean }) => d)
+  .validator((d: { id: string; accept: boolean }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     if (data.accept) {
@@ -107,7 +107,7 @@ export const respondToLabelInvite = createServerFn({ method: "POST" })
 
 export const setArtistRoyalty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; royalty_pct: number }) => d)
+  .validator((d: { id: string; royalty_pct: number }) => d)
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("label_artists").update({ royalty_pct: data.royalty_pct } as any).eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -117,7 +117,7 @@ export const setArtistRoyalty = createServerFn({ method: "POST" })
 
 export const removeArtistFromLabel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: row } = await context.supabase.from("label_artists").select("artist_id").eq("id", data.id).maybeSingle();
     await context.supabase.from("label_artists").update({ status: "removed" } as any).eq("id", data.id);
@@ -131,7 +131,7 @@ export const removeArtistFromLabel = createServerFn({ method: "POST" })
 
 export const listLabelRoster = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { label_id: string }) => d)
+  .validator((d: { label_id: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: rows } = await context.supabase
       .from("label_artists")
@@ -142,7 +142,7 @@ export const listLabelRoster = createServerFn({ method: "GET" })
 
 export const listLabelRevenue = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { label_id: string }) => d)
+  .validator((d: { label_id: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: splits } = await context.supabase
       .from("revenue_splits")
@@ -156,7 +156,7 @@ export const listLabelRevenue = createServerFn({ method: "GET" })
 
 export const requestLabelPayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { label_id: string; amount: number; method_code: string; destination: string }) => d)
+  .validator((d: { label_id: string; amount: number; method_code: string; destination: string }) => d)
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("payouts").insert({
       label_id: data.label_id,

@@ -40,7 +40,7 @@ export const getTrendingSongs = createServerFn({ method: "GET" }).handler(async 
 // ---------- Browse / Search ----------
 
 export const searchSongs = createServerFn({ method: "GET" })
-  .inputValidator((d: { q?: string; genre?: string }) => d)
+  .validator((d: { q?: string; genre?: string }) => d)
   .handler(async ({ data }) => {
     const supabase = getPublicSupabase();
     let q = supabase
@@ -80,7 +80,7 @@ export const listArtists = createServerFn({ method: "GET" }).handler(async () =>
 // ---------- Artist & Album detail ----------
 
 export const getArtistById = createServerFn({ method: "GET" })
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ data }) => {
     const supabase = getPublicSupabase();
     const [artist, albums, songs] = await Promise.all([
@@ -106,7 +106,7 @@ export const getArtistById = createServerFn({ method: "GET" })
   });
 
 export const getAlbumWithSongs = createServerFn({ method: "GET" })
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ data }) => {
     const supabase = getPublicSupabase();
     const [album, songs] = await Promise.all([

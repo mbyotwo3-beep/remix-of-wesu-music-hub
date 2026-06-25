@@ -22,7 +22,7 @@ const DPO_PAY_URL = "https://secure.3gdirectpay.com/payv2.php?ID=";
  */
 export const initiatePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
+  .validator(
     (d: {
       amount: number;
       method_code: string;

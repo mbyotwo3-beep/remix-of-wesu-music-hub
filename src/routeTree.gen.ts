@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as NowPlayingRouteImport } from './routes/now-playing'
 import { Route as LabelDashboardRouteImport } from './routes/label-dashboard'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -45,6 +46,11 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NowPlayingRoute = NowPlayingRouteImport.update({
+  id: '/now-playing',
+  path: '/now-playing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabelDashboardRoute = LabelDashboardRouteImport.update({
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/label-dashboard': typeof LabelDashboardRoute
+  '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/label-dashboard': typeof LabelDashboardRoute
+  '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
   '/label-dashboard': typeof LabelDashboardRoute
+  '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/label-dashboard'
+    | '/now-playing'
     | '/profile'
     | '/subscriptions'
     | '/superadmin'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/label-dashboard'
+    | '/now-playing'
     | '/profile'
     | '/subscriptions'
     | '/superadmin'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dashboard'
     | '/label-dashboard'
+    | '/now-playing'
     | '/profile'
     | '/subscriptions'
     | '/superadmin'
@@ -306,6 +318,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
   LabelDashboardRoute: typeof LabelDashboardRoute
+  NowPlayingRoute: typeof NowPlayingRoute
   ProfileRoute: typeof ProfileRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   SuperadminRoute: typeof SuperadminRoute
@@ -337,6 +350,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/now-playing': {
+      id: '/now-playing'
+      path: '/now-playing'
+      fullPath: '/now-playing'
+      preLoaderRoute: typeof NowPlayingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/label-dashboard': {
@@ -490,6 +510,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
   LabelDashboardRoute: LabelDashboardRoute,
+  NowPlayingRoute: NowPlayingRoute,
   ProfileRoute: ProfileRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   SuperadminRoute: SuperadminRoute,
@@ -502,3 +523,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

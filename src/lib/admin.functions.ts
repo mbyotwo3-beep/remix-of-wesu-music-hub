@@ -88,7 +88,7 @@ export const listPendingSongs = createServerFn({ method: "GET" })
 
 export const moderateSong = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; status: "approved" | "rejected" | "taken_down" }) => d)
+  .validator((d: { id: string; status: "approved" | "rejected" | "taken_down" }) => d)
   .handler(async ({ context, data }) => {
     await assertStaff(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -113,7 +113,7 @@ export const listPendingArtists = createServerFn({ method: "GET" })
 
 export const moderateArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; status: "approved" | "rejected"; verified?: boolean }) => d)
+  .validator((d: { id: string; status: "approved" | "rejected"; verified?: boolean }) => d)
   .handler(async ({ context, data }) => {
     await assertStaff(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -150,7 +150,7 @@ export const listPendingLabels = createServerFn({ method: "GET" })
 
 export const moderateLabel = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; status: "approved" | "rejected" }) => d)
+  .validator((d: { id: string; status: "approved" | "rejected" }) => d)
   .handler(async ({ context, data }) => {
     await assertStaff(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
