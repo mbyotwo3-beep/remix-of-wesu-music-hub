@@ -119,6 +119,6 @@ export const incrementPlayCount = createServerFn({ method: "POST" })
   .validator((d: { song_id: string }) => d)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.rpc("increment_play_count", { _song_id: data.song_id });
+    await supabaseAdmin.rpc("increment_play_count" as any, { _song_id: data.song_id });
     return { ok: true };
   });

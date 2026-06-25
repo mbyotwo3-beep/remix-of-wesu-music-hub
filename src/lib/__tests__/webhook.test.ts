@@ -176,14 +176,14 @@ describe("Property 11: Payment fulfillment state transitions", () => {
     const chainObj = mod.__chainObj;
 
     // Reset all mocks, then configure responses for this test's call sequence:
-    // 1) subscription_plans → .select().eq().maybeSingle() → { interval_days: 30 }
+    // 1) subscription_plans → .select().eq().maybeSingle() → { interval: 'month' }
     // 2) subscriptions → .upsert() → { error: null }
     vi.clearAllMocks();
     // Every chain method returns chainObj (already the default), so we only
     // need to configure the terminal promise-returning calls.
     chainObj.select.mockReturnValue(chainObj);
     chainObj.eq.mockReturnValue(chainObj);
-    chainObj.maybeSingle.mockResolvedValueOnce({ data: { interval_days: 30 }, error: null });
+    chainObj.maybeSingle.mockResolvedValueOnce({ data: { interval: "month" }, error: null });
     chainObj.upsert.mockResolvedValueOnce({ data: null, error: null });
     // Re-attach chainObj to from() since clearAllMocks resets it
     (supabaseAdmin.from as ReturnType<typeof vi.fn>).mockReturnValue(chainObj);
@@ -201,7 +201,7 @@ describe("Property 11: Payment fulfillment state transitions", () => {
 
     // Verify supabaseAdmin.from was called with 'subscriptions' at some point
     const fromCalls: string[] = (supabaseAdmin.from as ReturnType<typeof vi.fn>).mock.calls.map(
-      (c: [string]) => c[0],
+      (c: any[]) => c[0],
     );
     expect(fromCalls).toContain("subscriptions");
   });
@@ -240,7 +240,7 @@ describe("Property 11: Payment fulfillment state transitions", () => {
     await fulfillTransaction(tx);
 
     const fromCalls: string[] = (supabaseAdmin.from as ReturnType<typeof vi.fn>).mock.calls.map(
-      (c: [string]) => c[0],
+      (c: any[]) => c[0],
     );
     expect(fromCalls).toContain("purchases");
   });
@@ -273,7 +273,7 @@ describe("Property 11: Payment fulfillment state transitions", () => {
     await fulfillTransaction(tx);
 
     const fromCalls: string[] = (supabaseAdmin.from as ReturnType<typeof vi.fn>).mock.calls.map(
-      (c: [string]) => c[0],
+      (c: any[]) => c[0],
     );
     expect(fromCalls).toContain("purchases");
   });

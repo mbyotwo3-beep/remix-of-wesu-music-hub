@@ -54,7 +54,7 @@ function CheckoutPage() {
   const payFn = useServerFn(initiatePayment);
   const mutation = useMutation({
     mutationFn: payFn,
-    onSuccess: (res) => setResultMsg(res.message),
+    onSuccess: (res) => setResultMsg(res.message ?? null),
     onError: (e: Error) => setResultMsg(e.message),
   });
 

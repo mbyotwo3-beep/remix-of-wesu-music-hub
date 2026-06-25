@@ -33,10 +33,17 @@ async function fulfillSubscription(tx: PaymentTransaction): Promise<void> {
   if (tx.item_id) {
     const { data: plan } = await supabaseAdmin
       .from("subscription_plans")
-      .select("interval_days")
+      .select("interval")
       .eq("id", tx.item_id)
       .maybeSingle();
-    if (plan?.interval_days) intervalDays = plan.interval_days;
+    if (plan?.interval) {
+      const intervalMap: Record<string, number> = {
+        week: 7,
+        month: 30,
+        year: 365,
+      };
+      intervalDays = intervalMap[plan.interval] ?? intervalDays;
+    }
   }
 
   const expiresAt = new Date(Date.now() + intervalDays * 24 * 60 * 60 * 1000).toISOString();
