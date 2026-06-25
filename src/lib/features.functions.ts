@@ -22,7 +22,7 @@ export const listFeaturedSlots = createServerFn({ method: "GET" })
 
 export const upsertFeaturedSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
+  .validator((d: {
     id?: string; slot_type: string; target_type: string; target_id: string;
     position?: number; title?: string; subtitle?: string; image_url?: string;
     starts_at?: string; ends_at?: string; active?: boolean;
@@ -40,7 +40,7 @@ export const upsertFeaturedSlot = createServerFn({ method: "POST" })
 
 export const removeFeaturedSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ context, data }) => {
     await ensureStaff(context.supabase, context.userId);
     await context.supabase.from("featured_slots").delete().eq("id", data.id);

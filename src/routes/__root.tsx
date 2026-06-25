@@ -14,6 +14,9 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "../components/Navbar";
 import { PlayerBar } from "../components/PlayerBar";
 import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
+import { usePlatform } from "../hooks/use-platform";
+import { MobileShell } from "../components/mobile/MobileShell";
+import { registerDeepLinkHandler } from "../integrations/supabase/auth-deep-link";
 
 
 function NotFoundComponent() {
@@ -120,15 +123,31 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const platform = usePlatform();
+
+  // Register deep link auth handler on native platforms (Req 18.3)
+  useEffect(() => {
+    if (platform === "native") {
+      registerDeepLinkHandler();
+    }
+  }, [platform]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Navbar />
-        <main className="min-h-screen">
-          <Outlet />
-        </main>
-        <PlayerBar />
+        {platform === "native" ? (
+          <MobileShell>
+            <Outlet />
+          </MobileShell>
+        ) : (
+          <>
+            <Navbar />
+            <main className="min-h-screen">
+              <Outlet />
+            </main>
+            <PlayerBar />
+          </>
+        )}
       </ThemeProvider>
     </QueryClientProvider>
   );

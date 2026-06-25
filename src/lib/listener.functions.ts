@@ -1,9 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { getPublicSupabase } from "./supabase-public.server";
 
 export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { full_name?: string; bio?: string; avatar_url?: string; location?: string }) => d)
+  .validator((d: { full_name?: string; bio?: string; avatar_url?: string; location?: string }) => d)
   .handler(async ({ context, data }) => {
     const patch: any = {};
     for (const k of ["full_name", "bio", "avatar_url", "location"] as const) {
@@ -16,7 +17,7 @@ export const updateProfile = createServerFn({ method: "POST" })
 
 export const createPlaylist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name: string; description?: string; is_public?: boolean }) => d)
+  .validator((d: { name: string; description?: string; is_public?: boolean }) => d)
   .handler(async ({ context, data }) => {
     const { data: row, error } = await context.supabase.from("playlists").insert({
       user_id: context.userId,
@@ -30,7 +31,7 @@ export const createPlaylist = createServerFn({ method: "POST" })
 
 export const deletePlaylist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => d)
+  .validator((d: { id: string }) => d)
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("playlists").delete().eq("id", data.id).eq("user_id", context.userId);
     if (error) throw new Error(error.message);
@@ -39,7 +40,7 @@ export const deletePlaylist = createServerFn({ method: "POST" })
 
 export const addToPlaylist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { playlist_id: string; song_id: string }) => d)
+  .validator((d: { playlist_id: string; song_id: string }) => d)
   .handler(async ({ context, data }) => {
     const { error } = await context.supabase.from("playlist_songs").insert({
       playlist_id: data.playlist_id,
@@ -51,7 +52,7 @@ export const addToPlaylist = createServerFn({ method: "POST" })
 
 export const toggleLike = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { song_id: string }) => d)
+  .validator((d: { song_id: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: existing } = await context.supabase
       .from("song_likes")
@@ -69,7 +70,7 @@ export const toggleLike = createServerFn({ method: "POST" })
 
 export const getSignedAudioUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { song_id: string }) => d)
+  .validator((d: { song_id: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: song } = await context.supabase.from("songs").select("audio_url, price").eq("id", data.song_id).single();
     if (!song) throw new Error("Song not found");
@@ -87,4 +88,37 @@ export const getSignedAudioUrl = createServerFn({ method: "POST" })
     const { data: signed, error } = await supabaseAdmin.storage.from("song-audio").createSignedUrl((song as any).audio_url, 3600);
     if (error) throw new Error(error.message);
     return { url: signed.signedUrl };
+  });
+
+/**
+ * Get a signed audio URL for a free song without requiring authentication.
+ * If the song has a price > 0, throws an error — use getSignedAudioUrl instead.
+ * Anonymous listeners hear the song with ads (enforced client-side).
+ */
+export const getPublicAudioUrl = createServerFn({ method: "POST" })
+  .validator((d: { song_id: string }) => d)
+  .handler(async ({ data }) => {
+    const supabase = getPublicSupabase();
+    const { data: song } = await supabase.from("songs").select("audio_url, price").eq("id", data.song_id).eq("status", "approved").single();
+    if (!song) throw new Error("Song not found");
+    if ((song as any).price && Number((song as any).price) > 0) {
+      throw new Error("This song requires a subscription or purchase");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: signed, error } = await supabaseAdmin.storage.from("song-audio").createSignedUrl((song as any).audio_url, 3600);
+    if (error) throw new Error(error.message);
+    return { url: signed.signedUrl };
+  });
+
+/**
+ * Increment the play_count for a song. Called when playback completes.
+ * Requires auth to prevent anonymous abuse.
+ */
+export const incrementPlayCount = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: { song_id: string }) => d)
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.rpc("increment_play_count", { _song_id: data.song_id });
+    return { ok: true };
   });

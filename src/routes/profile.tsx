@@ -8,13 +8,20 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { updateProfile } from "@/lib/listener.functions";
 import { uploadFileToBucket } from "@/lib/storage";
+import { usePlatform } from "@/hooks/use-platform";
+import { MobileProfile } from "@/components/mobile/screens/MobileProfile";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({ meta: [{ title: "Profile — Wesu+" }] }),
-  component: () => <RoleGate require="user"><Page /></RoleGate>,
+  component: () => <RoleGate require="user"><ProfileRoute /></RoleGate>,
   errorComponent: ({ error }) => <div className="p-12 text-center">{error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
+
+function ProfileRoute() {
+  const platform = usePlatform();
+  return platform === "native" ? <MobileProfile /> : <Page />;
+}
 
 function Page() {
   const { user } = useAuth();

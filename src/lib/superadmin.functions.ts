@@ -32,7 +32,7 @@ export const listUsers = createServerFn({ method: "GET" })
 
 export const grantRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { user_id: string; role: "user" | "artist" | "admin" | "superadmin" }) => d)
+  .validator((d: { user_id: string; role: "user" | "artist" | "admin" | "superadmin" }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -44,7 +44,7 @@ export const grantRole = createServerFn({ method: "POST" })
 
 export const revokeRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { user_id: string; role: "user" | "artist" | "admin" | "superadmin" }) => d)
+  .validator((d: { user_id: string; role: "user" | "artist" | "admin" | "superadmin" }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -56,7 +56,7 @@ export const revokeRole = createServerFn({ method: "POST" })
 
 export const upsertPlan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id?: string; name: string; price_zmw: number; description?: string; is_active?: boolean }) => d)
+  .validator((d: { id?: string; name: string; price_zmw: number; description?: string; is_active?: boolean }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -70,7 +70,7 @@ export const upsertPlan = createServerFn({ method: "POST" })
 
 export const togglePaymentMethod = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { code: string; is_enabled: boolean }) => d)
+  .validator((d: { code: string; is_enabled: boolean }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -82,7 +82,7 @@ export const togglePaymentMethod = createServerFn({ method: "POST" })
 
 export const updateSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { key: string; value: Record<string, unknown> }) => d)
+  .validator((d: { key: string; value: Record<string, unknown> }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -121,7 +121,7 @@ export const listPayouts = createServerFn({ method: "GET" })
 
 export const decidePayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string; decision: "approved" | "rejected"; notes?: string }) => d)
+  .validator((d: { id: string; decision: "approved" | "rejected"; notes?: string }) => d)
   .handler(async ({ context, data }) => {
     const { data: isStaff } = await context.supabase.rpc("is_staff", { _user_id: context.userId });
     if (!isStaff) throw new Error("Forbidden");
@@ -173,7 +173,7 @@ export const claimFirstSuperadmin = createServerFn({ method: "POST" })
  */
 export const markTransactionPaid = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { transaction_id: string }) => d)
+  .validator((d: { transaction_id: string }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -188,7 +188,7 @@ export const markTransactionPaid = createServerFn({ method: "POST" })
 
 export const setPlatformCommission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { pct: number }) => d)
+  .validator((d: { pct: number }) => d)
   .handler(async ({ context, data }) => {
     await assertSuperadmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

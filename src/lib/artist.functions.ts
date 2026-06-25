@@ -10,7 +10,7 @@ async function audit(actorId: string, action: string, target_type?: string, targ
 
 export const applyAsArtist = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name: string; bio?: string; genre?: string }) => d)
+  .validator((d: { name: string; bio?: string; genre?: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: existing } = await supabase.from("artists").select("id, status").eq("user_id", userId).maybeSingle();
@@ -29,7 +29,7 @@ export const applyAsArtist = createServerFn({ method: "POST" })
 
 export const updateArtistProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { name?: string; bio?: string; genre?: string; avatar_url?: string; social_links?: Record<string, string> }) => d)
+  .validator((d: { name?: string; bio?: string; genre?: string; avatar_url?: string; social_links?: Record<string, string> }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patch: any = {};
@@ -47,7 +47,7 @@ export const updateArtistProfile = createServerFn({ method: "POST" })
 
 export const uploadSong = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: {
+  .validator((d: {
     title: string;
     audio_url: string;     // path inside song-audio bucket
     cover_url?: string;    // path inside album-art bucket (optional)
@@ -82,7 +82,7 @@ export const uploadSong = createServerFn({ method: "POST" })
 
 export const createAlbum = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { title: string; cover_url?: string; release_date?: string; genre?: string; description?: string; price?: number }) => d)
+  .validator((d: { title: string; cover_url?: string; release_date?: string; genre?: string; description?: string; price?: number }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: artist } = await supabase.from("artists").select("id").eq("user_id", userId).maybeSingle();
@@ -114,7 +114,7 @@ export const listMyAlbums = createServerFn({ method: "GET" })
 
 export const requestPayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { amount: number; method_code: string; destination: string }) => d)
+  .validator((d: { amount: number; method_code: string; destination: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: artist } = await supabase.from("artists").select("id").eq("user_id", userId).maybeSingle();
@@ -143,7 +143,7 @@ export const listMyPayouts = createServerFn({ method: "GET" })
 
 export const setCollabPrefs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { accepts_collabs?: boolean; allow_features?: boolean; feature_rate?: number }) => d)
+  .validator((d: { accepts_collabs?: boolean; allow_features?: boolean; feature_rate?: number }) => d)
   .handler(async ({ context, data }) => {
     const patch: any = {};
     if (data.accepts_collabs !== undefined) patch.accepts_collabs = data.accepts_collabs;
@@ -191,7 +191,7 @@ export const listMySongs = createServerFn({ method: "GET" })
 
 export const signUpload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { bucket: "song-audio" | "album-art" | "artist-images" | "user-avatars"; path: string }) => d)
+  .validator((d: { bucket: "song-audio" | "album-art" | "artist-images" | "user-avatars"; path: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase } = context;
     const { data: signed, error } = await supabase.storage.from(data.bucket).createSignedUploadUrl(data.path);
