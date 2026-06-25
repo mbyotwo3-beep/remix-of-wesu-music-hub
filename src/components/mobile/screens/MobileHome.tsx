@@ -50,7 +50,7 @@ export function MobileHome() {
                 <Link
                   key={album.id}
                   to="/albums"
-                  className="shrink-0 w-36 rounded-xl overflow-hidden bg-card ring-1 ring-white/10"
+                  className="shrink-0 w-36 rounded-xl overflow-hidden bg-card ring-1 ring-border"
                 >
                   <div className="aspect-square bg-secondary">
                     {album.cover_url ? (

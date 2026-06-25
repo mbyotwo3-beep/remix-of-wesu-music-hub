@@ -40,7 +40,7 @@ function BrowsePage() {
         <p className="text-muted-foreground mb-8">Every track on Wesu+.</p>
 
         {songs.length === 0 ? (
-          <div className="p-12 border border-dashed border-white/10 rounded-2xl text-center">
+          <div className="p-12 border border-dashed border-border rounded-2xl text-center">
             <p className="text-muted-foreground mb-2">No music has been uploaded yet.</p>
             <Link to="/artist-dashboard" className="text-primary text-sm hover:underline">
               Are you an artist? Upload your first track →
@@ -60,7 +60,7 @@ function BrowsePage() {
                     durationSeconds: s.duration,
                   })
                 }
-                className="flex items-center gap-4 p-3 bg-card border border-white/5 rounded-xl hover:border-primary/30 transition-colors text-left"
+                className="flex items-center gap-4 p-3 bg-card border border-border rounded-xl hover:border-primary/30 transition-colors text-left"
               >
                 <div className="size-14 rounded bg-secondary overflow-hidden shrink-0 flex items-center justify-center">
                   {s.cover_url ? (

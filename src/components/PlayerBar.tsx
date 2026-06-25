@@ -202,7 +202,7 @@ export function PlayerBar() {
   }
 
   return (
-    <div className="fixed bottom-0 inset-x-0 bg-obsidian/95 backdrop-blur-xl border-t border-white/10 z-50">
+    <div className="fixed bottom-0 inset-x-0 bg-background/95 backdrop-blur-xl border-t border-border z-50">
       {/* Ad banner for anonymous / free users */}
       {showAd && !user && (
         <div className="flex items-center justify-between px-6 py-1.5 bg-primary/10 border-b border-primary/20 text-xs">
@@ -219,7 +219,7 @@ export function PlayerBar() {
       <div className="max-w-7xl mx-auto h-20 px-6 flex items-center justify-between gap-4">
         {/* Track info */}
         <div className="flex items-center gap-4 w-1/3 min-w-0">
-          <div className="size-12 rounded-md overflow-hidden bg-card shrink-0 ring-1 ring-white/10 flex items-center justify-center">
+          <div className="size-12 rounded-md overflow-hidden bg-card shrink-0 ring-1 ring-border flex items-center justify-center">
             {track.coverUrl ? (
               <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
             ) : (
@@ -246,7 +246,7 @@ export function PlayerBar() {
             <button
               onClick={() => { if (!loading && !error) togglePlay(); }}
               disabled={loading || !!error}
-              className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+              className="bg-foreground text-background p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
               aria-label={playing ? "Pause" : "Play"}
             >
               {loading

@@ -37,7 +37,7 @@ function ArtistPage() {
     <div className="min-h-screen pb-24">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
-          <div className="size-48 rounded-2xl overflow-hidden bg-card ring-1 ring-white/5 shrink-0 flex items-center justify-center">
+          <div className="size-48 rounded-2xl overflow-hidden bg-card ring-1 ring-border shrink-0 flex items-center justify-center">
             {a.avatar_url ? (
               <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover" />
             ) : (
@@ -64,7 +64,7 @@ function ArtistPage() {
                 <button
                   key={s.id}
                   onClick={() => setTrack({ id: s.id, title: s.title, artistName: a.name, coverUrl: s.cover_url, durationSeconds: s.duration })}
-                  className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 transition-colors text-left"
+                  className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-accent transition-colors text-left"
                 >
                   <span className="w-6 text-sm text-muted-foreground">{i + 1}</span>
                   <div className="flex-1">
@@ -86,7 +86,7 @@ function ArtistPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
               {data.albums.map((al) => (
                 <Link key={al.id} to="/albums" className="group">
-                  <div className="aspect-square rounded-xl overflow-hidden bg-card ring-1 ring-white/5 mb-2">
+                  <div className="aspect-square rounded-xl overflow-hidden bg-card ring-1 ring-border mb-2">
                     {al.cover_url && <img src={al.cover_url} alt={al.title} className="w-full h-full object-cover" />}
                   </div>
                   <p className="font-semibold text-sm truncate">{al.title}</p>

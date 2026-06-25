@@ -81,7 +81,7 @@ export function NowPlayingScreen() {
 
       {/* Cover art */}
       <div className="flex-1 flex items-center justify-center mb-6">
-        <div className="min-h-[280px] min-w-[280px] size-[280px] rounded-2xl overflow-hidden bg-card ring-1 ring-white/10 flex items-center justify-center">
+        <div className="min-h-[280px] min-w-[280px] size-[280px] rounded-2xl overflow-hidden bg-card ring-1 ring-border flex items-center justify-center">
           {track.coverUrl ? (
             <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
           ) : (
@@ -140,7 +140,7 @@ export function NowPlayingScreen() {
         </button>
         <button
           onClick={togglePlay}
-          className="min-h-[56px] min-w-[56px] flex items-center justify-center bg-foreground text-obsidian rounded-full hover:scale-105 transition-transform"
+          className="min-h-[56px] min-w-[56px] flex items-center justify-center bg-foreground text-background rounded-full hover:scale-105 transition-transform"
           aria-label={playing ? "Pause" : "Play"}
         >
           {playing ? <Pause className="size-6" /> : <Play className="size-6 ml-0.5" />}

@@ -26,12 +26,12 @@ function systemPref(): Resolved {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolved, setResolved] = useState<Resolved>("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
+  const [resolved, setResolved] = useState<Resolved>("light");
 
   useEffect(() => {
     const stored = (typeof localStorage !== "undefined" && localStorage.getItem(STORAGE_KEY)) as Theme | null;
-    const t: Theme = stored ?? "system";
+    const t: Theme = stored ?? "light";
     setThemeState(t);
     const r: Resolved = t === "system" ? systemPref() : t;
     setResolved(r);
@@ -70,7 +70,7 @@ export function useTheme() {
 /** Inline script string — runs before hydration to prevent FOUC. */
 export const themeInitScript = `
 (function(){try{
-  var t = localStorage.getItem('${STORAGE_KEY}') || 'system';
+  var t = localStorage.getItem('${STORAGE_KEY}') || 'light';
   var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   if (dark) document.documentElement.classList.add('dark');
 }catch(e){}})();

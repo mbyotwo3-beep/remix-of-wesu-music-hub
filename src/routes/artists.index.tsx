@@ -27,14 +27,14 @@ function ArtistsPage() {
         <h1 className="text-3xl font-bold mb-8">Artists</h1>
 
         {artists.length === 0 ? (
-          <div className="p-12 border border-dashed border-white/10 rounded-2xl text-center text-muted-foreground">
+          <div className="p-12 border border-dashed border-border rounded-2xl text-center text-muted-foreground">
             No artists yet.
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
             {artists.map((a) => (
               <Link key={a.id} to="/artists/$id" params={{ id: a.id }} className="text-center group">
-                <div className="aspect-square rounded-full overflow-hidden bg-card ring-1 ring-white/5 mb-3 flex items-center justify-center">
+                <div className="aspect-square rounded-full overflow-hidden bg-card ring-1 ring-border mb-3 flex items-center justify-center">
                   {a.avatar_url ? (
                     <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   ) : (

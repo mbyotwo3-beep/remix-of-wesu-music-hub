@@ -42,11 +42,11 @@ function SubscriptionsPage() {
               <div
                 key={p.id}
                 className={`p-8 rounded-3xl relative overflow-hidden ${
-                  featured ? "bg-surface border-2 border-primary" : "bg-card border border-white/5"
+                  featured ? "bg-surface border-2 border-primary" : "bg-card border border-border"
                 }`}
               >
                 {featured && (
-                  <div className="absolute top-0 right-0 bg-primary text-obsidian px-4 py-1 text-[10px] font-black uppercase rounded-bl-xl">
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-4 py-1 text-[10px] font-black uppercase rounded-bl-xl">
                     Most Popular
                   </div>
                 )}
@@ -72,8 +72,8 @@ function SubscriptionsPage() {
                   search={{ plan: p.code }}
                   className={`block w-full py-4 rounded-2xl font-bold text-center transition-all ${
                     featured
-                      ? "bg-primary text-obsidian hover:brightness-110 shadow-lg shadow-primary/10"
-                      : "border border-white/10 hover:bg-white/5"
+                      ? "bg-primary text-primary-foreground hover:brightness-110 shadow-lg shadow-primary/10"
+                      : "border border-border hover:bg-accent"
                   }`}
                 >
                   {Number(p.price_zmw) === 0 ? "Start Free" : "Choose Plan"}
@@ -87,7 +87,7 @@ function SubscriptionsPage() {
           <h2 className="text-2xl font-bold text-center mb-8">Supported Payment Methods</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {methods.map((m) => (
-              <div key={m.id} className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col justify-end hover:bg-white/5 transition-colors">
+              <div key={m.id} className="aspect-video bg-card border border-border rounded-xl p-4 flex flex-col justify-end hover:bg-accent transition-colors">
                 <p className="font-bold text-sm">{m.label}</p>
                 <p className="text-[10px] text-muted-foreground uppercase">{m.category.replace("_", " ")}</p>
               </div>

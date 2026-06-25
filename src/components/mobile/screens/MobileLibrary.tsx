@@ -115,7 +115,7 @@ export function MobileLibrary() {
           <p className="px-4 text-sm text-muted-foreground">No playlists yet.</p>
         ) : (
           playlists.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 px-4 py-2 min-h-[44px] hover:bg-white/5">
+            <div key={p.id} className="flex items-center gap-3 px-4 py-2 min-h-[44px] hover:bg-accent">
               <div className="size-10 rounded-md bg-card flex items-center justify-center shrink-0">
                 <ListMusic className="size-4 text-muted-foreground" />
               </div>
