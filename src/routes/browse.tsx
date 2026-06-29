@@ -15,7 +15,10 @@ export const Route = createFileRoute("/browse")({
   head: () => ({
     meta: [
       { title: "Browse Music — Wesu+" },
-      { name: "description", content: "Discover and stream the best Zambian and African music on Wesu+." },
+      {
+        name: "description",
+        content: "Discover and stream the best Zambian and African music on Wesu+.",
+      },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(browseQO),
@@ -75,7 +78,9 @@ function BrowsePage() {
                     {(s.artist as { name?: string } | null)?.name ?? "Unknown"} · {s.genre ?? "—"}
                   </p>
                 </div>
-                <span className="text-primary text-sm font-bold">K{Number(s.price ?? 0).toFixed(2)}</span>
+                <span className="text-primary text-sm font-bold">
+                  K{Number(s.price ?? 0).toFixed(2)}
+                </span>
               </button>
             ))}
           </div>

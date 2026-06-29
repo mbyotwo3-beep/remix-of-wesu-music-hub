@@ -42,13 +42,20 @@ export function SongRow({ song }: SongRowProps) {
     >
       <div className="size-10 rounded-md overflow-hidden bg-card shrink-0 flex items-center justify-center">
         {song.coverUrl ? (
-          <img src={song.coverUrl} alt={song.title} className="w-full h-full object-cover" loading="lazy" />
+          <img
+            src={song.coverUrl}
+            alt={song.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
         ) : (
           <Music2 className="size-4 text-muted-foreground" />
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${isActive ? "text-primary" : ""}`}>{song.title}</p>
+        <p className={`text-sm font-medium truncate ${isActive ? "text-primary" : ""}`}>
+          {song.title}
+        </p>
         <p className="text-xs text-muted-foreground truncate">{song.artistName}</p>
       </div>
       {song.price != null && (

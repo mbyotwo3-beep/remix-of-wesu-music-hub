@@ -17,8 +17,7 @@ export function buildCreateTokenXml(opts: {
   phone?: string | null;
 }): string {
   const serviceDate = new Date().toISOString().replace("T", " ").slice(0, 19);
-  const phoneElement =
-    opts.phone ? `<PhoneNumber>${opts.phone}</PhoneNumber>` : "";
+  const phoneElement = opts.phone ? `<PhoneNumber>${opts.phone}</PhoneNumber>` : "";
 
   return `<?xml version="1.0" encoding="utf-8"?>
 <API3G>
@@ -49,8 +48,6 @@ export function buildCreateTokenXml(opts: {
  * Returns the first match of <tagName>...</tagName>.
  */
 export function extractXmlTag(xml: string, tagName: string): string | null {
-  const match = xml.match(
-    new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`),
-  );
+  const match = xml.match(new RegExp(`<${tagName}>([\\s\\S]*?)<\\/${tagName}>`));
   return match ? match[1].trim() : null;
 }

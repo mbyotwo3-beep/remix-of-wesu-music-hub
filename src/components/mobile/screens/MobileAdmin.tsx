@@ -5,9 +5,12 @@ import { useState } from "react";
 import { useUserRoles } from "@/hooks/use-roles";
 import {
   getPlatformStats,
-  listPendingSongs, moderateSong,
-  listPendingArtists, moderateArtist,
-  listPendingLabels, moderateLabel,
+  listPendingSongs,
+  moderateSong,
+  listPendingArtists,
+  moderateArtist,
+  listPendingLabels,
+  moderateLabel,
 } from "@/lib/admin.functions";
 import { listPayouts, decidePayout } from "@/lib/superadmin.functions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,7 +23,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export function MobileAdmin() {
   const { isSuperAdmin } = useUserRoles();
   const statsFn = useServerFn(getPlatformStats);
-  const { data: stats } = useQuery({ queryKey: ["admin-stats"], queryFn: () => statsFn(), retry: false });
+  const { data: stats } = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: () => statsFn(),
+    retry: false,
+  });
 
   return (
     <div className="pb-6">
@@ -35,7 +42,11 @@ export function MobileAdmin() {
             { label: "Total Users", value: stats.totalUsers, icon: Users },
             { label: "Total Songs", value: stats.totalSongs, icon: Music },
             { label: "Premium Subs", value: stats.premiumSubscribers, icon: CreditCard },
-            { label: "Revenue 30d", value: `ZMW ${stats.monthlyRevenueZmw.toFixed(0)}`, icon: BarChart3 },
+            {
+              label: "Revenue 30d",
+              value: `ZMW ${stats.monthlyRevenueZmw.toFixed(0)}`,
+              icon: BarChart3,
+            },
           ].map((s) => (
             <div key={s.label} className="bg-card border border-border rounded-xl p-4">
               <s.icon className="size-4 text-primary mb-2" />
@@ -49,15 +60,35 @@ export function MobileAdmin() {
       {/* Moderation tabs */}
       <Tabs defaultValue="songs" className="px-4">
         <TabsList className="w-full mb-4">
-          <TabsTrigger value="songs" className="flex-1 text-xs">Songs</TabsTrigger>
-          <TabsTrigger value="artists" className="flex-1 text-xs">Artists</TabsTrigger>
-          <TabsTrigger value="labels" className="flex-1 text-xs">Labels</TabsTrigger>
-          {isSuperAdmin && <TabsTrigger value="payouts" className="flex-1 text-xs">Payouts</TabsTrigger>}
+          <TabsTrigger value="songs" className="flex-1 text-xs">
+            Songs
+          </TabsTrigger>
+          <TabsTrigger value="artists" className="flex-1 text-xs">
+            Artists
+          </TabsTrigger>
+          <TabsTrigger value="labels" className="flex-1 text-xs">
+            Labels
+          </TabsTrigger>
+          {isSuperAdmin && (
+            <TabsTrigger value="payouts" className="flex-1 text-xs">
+              Payouts
+            </TabsTrigger>
+          )}
         </TabsList>
-        <TabsContent value="songs"><SongQueue /></TabsContent>
-        <TabsContent value="artists"><ArtistQueue /></TabsContent>
-        <TabsContent value="labels"><LabelQueue /></TabsContent>
-        {isSuperAdmin && <TabsContent value="payouts"><PayoutsQueue /></TabsContent>}
+        <TabsContent value="songs">
+          <SongQueue />
+        </TabsContent>
+        <TabsContent value="artists">
+          <ArtistQueue />
+        </TabsContent>
+        <TabsContent value="labels">
+          <LabelQueue />
+        </TabsContent>
+        {isSuperAdmin && (
+          <TabsContent value="payouts">
+            <PayoutsQueue />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
@@ -68,7 +99,10 @@ function SongQueue() {
   const listFn = useServerFn(listPendingSongs);
   const modFn = useServerFn(moderateSong);
   const { data } = useQuery({ queryKey: ["pending-songs"], queryFn: () => listFn(), retry: false });
-  const m = useMutation({ mutationFn: modFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-songs"] }) });
+  const m = useMutation({
+    mutationFn: modFn,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-songs"] }),
+  });
   if (!data) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (data.length === 0) return <p className="text-sm text-muted-foreground">No pending songs.</p>;
   return (
@@ -91,10 +125,18 @@ function ArtistQueue() {
   const qc = useQueryClient();
   const listFn = useServerFn(listPendingArtists);
   const modFn = useServerFn(moderateArtist);
-  const { data } = useQuery({ queryKey: ["pending-artists"], queryFn: () => listFn(), retry: false });
-  const m = useMutation({ mutationFn: modFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-artists"] }) });
+  const { data } = useQuery({
+    queryKey: ["pending-artists"],
+    queryFn: () => listFn(),
+    retry: false,
+  });
+  const m = useMutation({
+    mutationFn: modFn,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-artists"] }),
+  });
   if (!data) return <p className="text-sm text-muted-foreground">Loading…</p>;
-  if (data.length === 0) return <p className="text-sm text-muted-foreground">No pending artists.</p>;
+  if (data.length === 0)
+    return <p className="text-sm text-muted-foreground">No pending artists.</p>;
   return (
     <div className="space-y-3">
       {data.map((a: any) => (
@@ -115,8 +157,15 @@ function LabelQueue() {
   const qc = useQueryClient();
   const listFn = useServerFn(listPendingLabels);
   const modFn = useServerFn(moderateLabel);
-  const { data } = useQuery({ queryKey: ["pending-labels"], queryFn: () => listFn(), retry: false });
-  const m = useMutation({ mutationFn: modFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-labels"] }) });
+  const { data } = useQuery({
+    queryKey: ["pending-labels"],
+    queryFn: () => listFn(),
+    retry: false,
+  });
+  const m = useMutation({
+    mutationFn: modFn,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-labels"] }),
+  });
   if (!data) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (data.length === 0) return <p className="text-sm text-muted-foreground">No pending labels.</p>;
   return (
@@ -140,10 +189,14 @@ function PayoutsQueue() {
   const listFn = useServerFn(listPayouts);
   const decideFn = useServerFn(decidePayout);
   const { data } = useQuery({ queryKey: ["super-payouts"], queryFn: () => listFn(), retry: false });
-  const m = useMutation({ mutationFn: decideFn, onSuccess: () => qc.invalidateQueries({ queryKey: ["super-payouts"] }) });
+  const m = useMutation({
+    mutationFn: decideFn,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-payouts"] }),
+  });
   if (!data) return <p className="text-sm text-muted-foreground">Loading…</p>;
   const pending = data.filter((p: any) => p.status === "pending");
-  if (pending.length === 0) return <p className="text-sm text-muted-foreground">No pending payouts.</p>;
+  if (pending.length === 0)
+    return <p className="text-sm text-muted-foreground">No pending payouts.</p>;
   return (
     <div className="space-y-3">
       {pending.map((p: any) => (
@@ -161,7 +214,11 @@ function PayoutsQueue() {
 }
 
 function ModerationCard({
-  title, subtitle, onApprove, onReject, loading,
+  title,
+  subtitle,
+  onApprove,
+  onReject,
+  loading,
 }: {
   title: string;
   subtitle: string;

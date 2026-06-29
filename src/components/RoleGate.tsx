@@ -13,13 +13,16 @@ export function RoleGate({ require, children }: Props) {
   const navigate = useNavigate();
 
   const ok =
-    !loading && (
-      require === "user" ? isUser :
-      require === "artist" ? isArtist || isAdmin || isSuperAdmin :
-      require === "admin" ? isAdmin :
-      require === "superadmin" ? isSuperAdmin :
-      false
-    );
+    !loading &&
+    (require === "user"
+      ? isUser
+      : require === "artist"
+        ? isArtist || isAdmin || isSuperAdmin
+        : require === "admin"
+          ? isAdmin
+          : require === "superadmin"
+            ? isSuperAdmin
+            : false);
 
   useEffect(() => {
     if (loading) return;

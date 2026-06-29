@@ -52,9 +52,7 @@ export function MobileBrowse() {
   }
 
   // Derive unique genres from results
-  const genres = Array.from(
-    new Set(songs.map((s) => s.genre).filter(Boolean))
-  ) as string[];
+  const genres = Array.from(new Set(songs.map((s) => s.genre).filter(Boolean))) as string[];
 
   return (
     <div className="flex flex-col h-full">

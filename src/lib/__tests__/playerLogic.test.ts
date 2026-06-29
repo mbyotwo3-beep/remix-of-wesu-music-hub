@@ -127,7 +127,7 @@ describe("Property 18: Seek sets audio currentTime proportionally (Req 1.5)", ()
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 1000 }), // barWidth
-        fc.integer({ min: 1, max: 3600 }),  // duration
+        fc.integer({ min: 1, max: 3600 }), // duration
         (barWidth, duration) => {
           const result = computeSeekTime(0, barWidth, duration);
           expect(result).toBe(0);
@@ -141,7 +141,7 @@ describe("Property 18: Seek sets audio currentTime proportionally (Req 1.5)", ()
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 1000 }), // barWidth
-        fc.integer({ min: 1, max: 3600 }),  // duration
+        fc.integer({ min: 1, max: 3600 }), // duration
         (barWidth, duration) => {
           const result = computeSeekTime(barWidth, barWidth, duration);
           expect(result).toBeCloseTo(duration, 5);
@@ -169,8 +169,8 @@ describe("Property 18: Seek sets audio currentTime proportionally (Req 1.5)", ()
     fc.assert(
       fc.property(
         fc.integer({ min: 1, max: 1000 }), // barWidth
-        fc.integer({ min: 1, max: 3600 }),  // duration
-        fc.integer({ min: 0, max: 1000 }),  // clickX (may exceed barWidth)
+        fc.integer({ min: 1, max: 3600 }), // duration
+        fc.integer({ min: 0, max: 1000 }), // clickX (may exceed barWidth)
         (barWidth, duration, rawX) => {
           const clampedX = Math.min(rawX, barWidth);
           const result = computeSeekTime(clampedX, barWidth, duration);
@@ -186,8 +186,8 @@ describe("Property 18: Seek sets audio currentTime proportionally (Req 1.5)", ()
     fc.assert(
       fc.property(
         fc.integer({ min: 100, max: 1000 }), // barWidth
-        fc.integer({ min: 10, max: 3600 }),   // duration
-        fc.integer({ min: 1, max: 49 }),       // x as percentage (1–49 to stay in range when doubled)
+        fc.integer({ min: 10, max: 3600 }), // duration
+        fc.integer({ min: 1, max: 49 }), // x as percentage (1–49 to stay in range when doubled)
         (barWidth, duration, xPct) => {
           const x1 = (xPct / 100) * barWidth;
           const x2 = ((xPct * 2) / 100) * barWidth;

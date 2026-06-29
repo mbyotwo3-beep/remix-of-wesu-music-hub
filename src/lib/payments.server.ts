@@ -48,17 +48,15 @@ async function fulfillSubscription(tx: PaymentTransaction): Promise<void> {
 
   const expiresAt = new Date(Date.now() + intervalDays * 24 * 60 * 60 * 1000).toISOString();
 
-  const { error } = await supabaseAdmin
-    .from("subscriptions")
-    .upsert(
-      {
-        user_id: tx.user_id,
-        plan_id: tx.item_id,
-        status: "active",
-        expires_at: expiresAt,
-      } as any,
-      { onConflict: "user_id" },
-    );
+  const { error } = await supabaseAdmin.from("subscriptions").upsert(
+    {
+      user_id: tx.user_id,
+      plan_id: tx.item_id,
+      status: "active",
+      expires_at: expiresAt,
+    } as any,
+    { onConflict: "user_id" },
+  );
 
   if (error) throw new Error(`fulfillSubscription failed: ${error.message}`);
 }

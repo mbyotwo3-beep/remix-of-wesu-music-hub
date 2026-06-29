@@ -23,13 +23,19 @@ export const Route = createFileRoute("/api/public/dpo-webhook")({
           if (contentType.includes("application/x-www-form-urlencoded")) {
             const text = await request.text();
             const params = new URLSearchParams(text);
-            params.forEach((v, k) => { body[k] = v; });
+            params.forEach((v, k) => {
+              body[k] = v;
+            });
           } else {
             // DPO may also send JSON or XML in some integrations; parse what we can
             const text = await request.text();
-            try { body = JSON.parse(text); } catch {
+            try {
+              body = JSON.parse(text);
+            } catch {
               // Try form parse as fallback
-              new URLSearchParams(text).forEach((v, k) => { body[k] = v; });
+              new URLSearchParams(text).forEach((v, k) => {
+                body[k] = v;
+              });
             }
           }
 

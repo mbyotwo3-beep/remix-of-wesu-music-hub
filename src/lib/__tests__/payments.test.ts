@@ -11,10 +11,7 @@
 
 import { describe, it, expect } from "vitest";
 import fc from "fast-check";
-import {
-  buildCreateTokenXml,
-  extractXmlTag,
-} from "../payments.utils";
+import { buildCreateTokenXml, extractXmlTag } from "../payments.utils";
 
 // ---------------------------------------------------------------------------
 // Shared arbitraries
@@ -248,9 +245,9 @@ describe("Property 8: Missing DPO env vars — configuration guard (documented b
       fc.property(
         xmlSafeString, // valid serviceType
         (serviceType) => {
-          expect(() =>
-            assertDpoConfigured(undefined, serviceType),
-          ).toThrow("Payment gateway not configured");
+          expect(() => assertDpoConfigured(undefined, serviceType)).toThrow(
+            "Payment gateway not configured",
+          );
         },
       ),
       { numRuns: 100 },
@@ -276,9 +273,9 @@ describe("Property 8: Missing DPO env vars — configuration guard (documented b
       fc.property(
         xmlSafeString, // valid companyToken
         (companyToken) => {
-          expect(() =>
-            assertDpoConfigured(companyToken, undefined),
-          ).toThrow("Payment gateway not configured");
+          expect(() => assertDpoConfigured(companyToken, undefined)).toThrow(
+            "Payment gateway not configured",
+          );
         },
       ),
       { numRuns: 100 },
@@ -287,15 +284,9 @@ describe("Property 8: Missing DPO env vars — configuration guard (documented b
 
   it("should NOT throw when both companyToken and serviceType are non-empty strings", () => {
     fc.assert(
-      fc.property(
-        xmlSafeString,
-        xmlSafeString,
-        (companyToken, serviceType) => {
-          expect(() =>
-            assertDpoConfigured(companyToken, serviceType),
-          ).not.toThrow();
-        },
-      ),
+      fc.property(xmlSafeString, xmlSafeString, (companyToken, serviceType) => {
+        expect(() => assertDpoConfigured(companyToken, serviceType)).not.toThrow();
+      }),
       { numRuns: 100 },
     );
   });

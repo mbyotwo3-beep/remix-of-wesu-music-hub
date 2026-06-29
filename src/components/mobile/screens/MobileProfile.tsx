@@ -26,19 +26,24 @@ export function MobileProfile() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data }) => {
-      if (data) {
-        const profile = {
-          full_name: data.full_name ?? "",
-          bio: data.bio ?? "",
-          avatar_url: data.avatar_url ?? "",
-          location: data.location ?? "",
-        };
-        setForm(profile);
-        // Cache for offline use
-        cacheProfile({ ...profile, email: user.email ?? "" }).catch(() => {});
-      }
-    });
+    supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          const profile = {
+            full_name: data.full_name ?? "",
+            bio: data.bio ?? "",
+            avatar_url: data.avatar_url ?? "",
+            location: data.location ?? "",
+          };
+          setForm(profile);
+          // Cache for offline use
+          cacheProfile({ ...profile, email: user.email ?? "" }).catch(() => {});
+        }
+      });
   }, [user]);
 
   const m = useMutation({ mutationFn: updateFn });
@@ -48,7 +53,13 @@ export function MobileProfile() {
     navigate({ to: "/" });
   }
 
-  const roleBadge = isSuperAdmin ? "Superadmin" : isAdmin ? "Admin" : isArtist ? "Artist" : "Listener";
+  const roleBadge = isSuperAdmin
+    ? "Superadmin"
+    : isAdmin
+      ? "Admin"
+      : isArtist
+        ? "Artist"
+        : "Listener";
 
   return (
     <div className="pb-8 px-4">
@@ -56,7 +67,11 @@ export function MobileProfile() {
       <div className="flex flex-col items-center py-8 gap-3">
         <div className="size-20 rounded-full bg-card border-2 border-border overflow-hidden flex items-center justify-center">
           {form.avatar_url ? (
-            <img src={form.avatar_url} alt={form.full_name} className="w-full h-full object-cover" />
+            <img
+              src={form.avatar_url}
+              alt={form.full_name}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <UserCircle className="size-12 text-muted-foreground" />
           )}
@@ -72,10 +87,15 @@ export function MobileProfile() {
 
       {/* Edit form */}
       <form
-        onSubmit={(e) => { e.preventDefault(); m.mutate({ data: form }); }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          m.mutate({ data: form });
+        }}
         className="space-y-4 mb-6"
       >
-        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Edit Profile</h2>
+        <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          Edit Profile
+        </h2>
         <label className="block text-sm">
           Full name
           <input
@@ -104,7 +124,8 @@ export function MobileProfile() {
         <label className="block text-sm">
           Avatar
           <input
-            type="file" accept="image/*"
+            type="file"
+            accept="image/*"
             className="mt-1 block text-sm"
             onChange={async (e) => {
               const f = e.target.files?.[0];

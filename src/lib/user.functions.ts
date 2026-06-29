@@ -23,11 +23,7 @@ export const getMyOverview = createServerFn({ method: "GET" })
         .eq("user_id", userId)
         .eq("status", "active")
         .maybeSingle(),
-      supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle(),
+      supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
     ]);
 
     return {
@@ -78,10 +74,7 @@ export const getMyArtistOverview = createServerFn({ method: "GET" })
       const filters: string[] = [];
       if (songIds.length) filters.push(`song_id.in.(${songIds.join(",")})`);
       if (albumIds.length) filters.push(`album_id.in.(${albumIds.join(",")})`);
-      const r = await supabaseAdmin
-        .from("purchases")
-        .select("amount")
-        .or(filters.join(","));
+      const r = await supabaseAdmin.from("purchases").select("amount").or(filters.join(","));
       sales = { data: r.data ?? [] };
     }
 

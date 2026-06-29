@@ -6,9 +6,9 @@ WESU+ is a Zambian music streaming and artist monetization platform built with T
 
 This feature spec covers the remaining work needed to complete WESU+ as a shippable Capacitor (Android) mobile app. The four major gaps are:
 
-1. **Audio playback** — the PlayerBar UI exists with Zustand state but the `getSignedAudioUrl` server function is not connected to any HTML audio element. No actual sound plays. *(Fix shipped: PlayerBar now wires a singleton `<audio>` element to Zustand via `getSignedAudioUrl` / `getPublicAudioUrl`.)*
-2. **Song upload failing** — storage RLS policies had a path-prefix conflict between `artist_id` (old migration) and `user_id` (new migration / `uploadFileToBucket`). *(Fix shipped: migration `20260623000000` drops conflicting policies.)*
-3. **Anonymous & free-listener access** — Unauthenticated visitors should be able to browse and play **free** songs without signing in, but with an ad banner. Free registered listeners also see ads. *(Fix shipped: `getPublicAudioUrl` server fn + ad banner in PlayerBar.)*
+1. **Audio playback** — the PlayerBar UI exists with Zustand state but the `getSignedAudioUrl` server function is not connected to any HTML audio element. No actual sound plays. _(Fix shipped: PlayerBar now wires a singleton `<audio>` element to Zustand via `getSignedAudioUrl` / `getPublicAudioUrl`.)_
+2. **Song upload failing** — storage RLS policies had a path-prefix conflict between `artist_id` (old migration) and `user_id` (new migration / `uploadFileToBucket`). _(Fix shipped: migration `20260623000000` drops conflicting policies.)_
+3. **Anonymous & free-listener access** — Unauthenticated visitors should be able to browse and play **free** songs without signing in, but with an ad banner. Free registered listeners also see ads. _(Fix shipped: `getPublicAudioUrl` server fn + ad banner in PlayerBar.)_
 4. **DPO Pay** — the `initiatePayment` server function is a stub. The live DPO Pay API call (`createToken`) is not wired, and there is no webhook handler to mark transactions as paid.
 5. **Mobile-native shell** — Capacitor is configured but no native-feel mobile components exist. The app uses only the web navbar and web layouts on Android. Navigation, player, and all role workflows need mobile-appropriate UI.
 

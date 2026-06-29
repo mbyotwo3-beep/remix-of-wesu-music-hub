@@ -140,8 +140,8 @@ Complete the WESU+ Capacitor Android music streaming app. Core audio engine, sto
 
 ---
 
-- [x] 7. __root.tsx — platform branching
-  - [x] 7.1 Modify RootComponent in __root.tsx to branch on usePlatform()
+- [x] 7. \_\_root.tsx — platform branching
+  - [x] 7.1 Modify RootComponent in \_\_root.tsx to branch on usePlatform()
     - Import usePlatform, MobileShell
     - native: `<MobileShell><Outlet /></MobileShell>`
     - web: existing `<Navbar /><main><Outlet /></main><PlayerBar />`
@@ -280,7 +280,7 @@ Complete the WESU+ Capacitor Android music streaming app. Core audio engine, sto
     - App.addListener('appUrlOpen') → parse access_token + refresh_token from URL → supabase.auth.setSession()
     - _Requirements: 18.3, 18.4_
 
-  - [x] 13.2 Register registerDeepLinkHandler() in __root.tsx inside useEffect guarded by usePlatform() === 'native'
+  - [x] 13.2 Register registerDeepLinkHandler() in \_\_root.tsx inside useEffect guarded by usePlatform() === 'native'
     - _Requirements: 18.3_
 
 ---

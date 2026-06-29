@@ -18,7 +18,6 @@ import { usePlatform } from "../hooks/use-platform";
 import { MobileShell } from "../components/mobile/MobileShell";
 import { registerDeepLinkHandler } from "../integrations/supabase/auth-deep-link";
 
-
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -84,20 +83,36 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#fbf7ee" },
       { title: "Wesu+ — Music Streaming" },
-      { name: "description", content: "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments." },
+      {
+        name: "description",
+        content:
+          "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments.",
+      },
       { name: "author", content: "Wesu+" },
       { property: "og:title", content: "Wesu+ — Music Streaming" },
-      { property: "og:description", content: "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments." },
+      {
+        property: "og:description",
+        content:
+          "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments.",
+      },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/images/wesu-logo.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@wesuplus" },
     ],
     links: [
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/images/wesu-icon-192.png" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,

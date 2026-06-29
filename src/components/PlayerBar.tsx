@@ -1,4 +1,14 @@
-import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, Music2, Loader2, Radio } from "lucide-react";
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  Heart,
+  Music2,
+  Loader2,
+  Radio,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePlayer } from "@/stores/player";
 import { useAuth } from "@/hooks/use-auth";
@@ -7,8 +17,12 @@ import { getSignedAudioUrl, getPublicAudioUrl, incrementPlayCount } from "@/lib/
 import { Link } from "@tanstack/react-router";
 import { useIsNative } from "@/hooks/use-platform";
 import {
-  preloadNative, playNative, pauseNative, stopNative,
-  onNativeComplete, isNativeAudioAvailable,
+  preloadNative,
+  playNative,
+  pauseNative,
+  stopNative,
+  onNativeComplete,
+  isNativeAudioAvailable,
 } from "@/lib/native-audio";
 
 // Singleton audio element — persists across route changes
@@ -231,8 +245,14 @@ export function PlayerBar() {
             <p className="text-xs text-muted-foreground truncate">{track.artistName}</p>
           </div>
           {user && (
-            <button onClick={toggleLike} className="hidden sm:block shrink-0" aria-label={liked ? "Unlike" : "Like"}>
-              <Heart className={`size-4 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`} />
+            <button
+              onClick={toggleLike}
+              className="hidden sm:block shrink-0"
+              aria-label={liked ? "Unlike" : "Like"}
+            >
+              <Heart
+                className={`size-4 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`}
+              />
             </button>
           )}
         </div>
@@ -240,30 +260,41 @@ export function PlayerBar() {
         {/* Controls */}
         <div className="flex flex-col items-center gap-1 w-1/3">
           <div className="flex items-center gap-6">
-            <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Previous">
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Previous"
+            >
               <SkipBack className="size-4" />
             </button>
             <button
-              onClick={() => { if (!loading && !error) togglePlay(); }}
+              onClick={() => {
+                if (!loading && !error) togglePlay();
+              }}
               disabled={loading || !!error}
               className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
               aria-label={playing ? "Pause" : "Play"}
             >
-              {loading
-                ? <Loader2 className="size-4 animate-spin" />
-                : playing
-                  ? <Pause className="size-4" />
-                  : <Play className="size-4 ml-0.5" />
-              }
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : playing ? (
+                <Pause className="size-4" />
+              ) : (
+                <Play className="size-4 ml-0.5" />
+              )}
             </button>
-            <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Next">
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Next"
+            >
               <SkipForward className="size-4" />
             </button>
           </div>
 
           {/* Progress bar */}
           <div className="w-full flex items-center gap-3">
-            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">{elapsed}</span>
+            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+              {elapsed}
+            </span>
             <div
               className="flex-1 h-1 bg-muted rounded-full relative overflow-hidden cursor-pointer"
               onClick={seek}
@@ -273,9 +304,14 @@ export function PlayerBar() {
               aria-valuenow={progressSeconds}
               aria-label="Seek"
             >
-              <div className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all" style={{ width: `${progress}%` }} />
+              <div
+                className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all"
+                style={{ width: `${progress}%` }}
+              />
             </div>
-            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">{durLabel}</span>
+            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+              {durLabel}
+            </span>
           </div>
 
           {error && <p className="text-[10px] text-destructive truncate max-w-xs">{error}</p>}

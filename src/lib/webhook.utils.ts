@@ -36,9 +36,7 @@ export function verifyCompanyToken(bodyToken: string, envToken: string): boolean
  *
  * @param ccdApproval  Raw CCDapproval string from DPO Pay payload.
  */
-export function determineTxStatus(
-  ccdApproval: string,
-): "completed" | "failed" | "cancelled" {
+export function determineTxStatus(ccdApproval: string): "completed" | "failed" | "cancelled" {
   if (ccdApproval === "000") return "completed";
   if (ccdApproval === "904") return "cancelled";
   return "failed";
