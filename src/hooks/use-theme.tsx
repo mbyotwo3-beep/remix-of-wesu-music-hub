@@ -21,13 +21,13 @@ function applyClass(resolved: Resolved) {
 }
 
 function systemPref(): Resolved {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("system");
-  const [resolved, setResolved] = useState<Resolved>("dark");
+  const [resolved, setResolved] = useState<Resolved>("light");
 
   useEffect(() => {
     const stored = (typeof localStorage !== "undefined" &&

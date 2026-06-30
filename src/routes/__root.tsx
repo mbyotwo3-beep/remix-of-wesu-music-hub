@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Navbar } from "../components/Navbar";
 import { PlayerBar } from "../components/PlayerBar";
+import { AppleMusicSidebar } from "../components/AppleMusicSidebar";
 import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
 import { usePlatform } from "../hooks/use-platform";
 import { MobileShell } from "../components/mobile/MobileShell";
@@ -155,13 +156,16 @@ function RootComponent() {
             <Outlet />
           </MobileShell>
         ) : (
-          <>
-            <Navbar />
-            <main className="min-h-screen">
-              <Outlet />
-            </main>
-            <PlayerBar />
-          </>
+          <div className="flex min-h-screen">
+            <AppleMusicSidebar />
+            <div className="flex-1 flex flex-col">
+              <Navbar />
+              <main className="flex-1">
+                <Outlet />
+              </main>
+              <PlayerBar />
+            </div>
+          </div>
         )}
       </ThemeProvider>
     </QueryClientProvider>

@@ -92,17 +92,26 @@ function SubscriptionsPage() {
         <div className="mt-20 max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-8">Supported Payment Methods</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {methods.map((m) => (
-              <div
-                key={m.id}
-                className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col justify-end hover:bg-white/5 transition-colors"
-              >
-                <p className="font-bold text-sm">{m.label}</p>
-                <p className="text-[10px] text-muted-foreground uppercase">
-                  {m.category.replace("_", " ")}
-                </p>
-              </div>
-            ))}
+            <div className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl font-black text-yellow-400 mb-1">MTN</div>
+              <p className="text-[10px] text-muted-foreground uppercase">Mobile Money</p>
+            </div>
+            <div className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl font-black text-red-500 mb-1">Airtel</div>
+              <p className="text-[10px] text-muted-foreground uppercase">Mobile Money</p>
+            </div>
+            <div className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl font-black text-blue-500 mb-1">Zamtel</div>
+              <p className="text-[10px] text-muted-foreground uppercase">Mobile Money</p>
+            </div>
+            <div className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl font-black text-blue-600 mb-1">VISA</div>
+              <p className="text-[10px] text-muted-foreground uppercase">Card</p>
+            </div>
+            <div className="aspect-video bg-card border border-white/10 rounded-xl p-4 flex flex-col items-center justify-center hover:bg-white/5 transition-colors">
+              <div className="text-2xl font-black text-orange-500 mb-1">Mastercard</div>
+              <p className="text-[10px] text-muted-foreground uppercase">Card</p>
+            </div>
           </div>
         </div>
       </div>
