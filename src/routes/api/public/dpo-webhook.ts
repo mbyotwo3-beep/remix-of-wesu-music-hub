@@ -42,9 +42,14 @@ export const Route = createFileRoute("/api/public/dpo-webhook")({
           const envToken = process.env.DPO_COMPANY_TOKEN ?? "";
           const bodyToken = body.CompanyToken ?? "";
 
-          // In simulation mode (no env token) still allow processing for testing
-          const simulationMode = !envToken;
-          if (!simulationMode && bodyToken !== envToken) {
+          // Always require the env token to be configured. No simulation bypass.
+          if (!envToken) {
+            console.error(
+              "[DPO webhook] DPO_COMPANY_TOKEN not configured — rejecting callback",
+            );
+            return new Response("Service Unavailable", { status: 503 });
+          }
+          if (bodyToken !== envToken) {
             console.warn("[DPO webhook] CompanyToken mismatch — rejecting");
             return new Response("Unauthorized", { status: 401 });
           }
