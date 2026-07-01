@@ -5,17 +5,11 @@ import { fulfillTransaction } from "@/lib/payments.server";
 /**
  * DPO Pay webhook callback.
  * POST /api/public/dpo-webhook
- *
- * DPO Pay sends a form-encoded POST when a payment is confirmed or cancelled.
- * This handler is intentionally public (no auth) — DPO does not sign payloads,
- * so we authenticate by matching CompanyToken from the body against our env var.
- *
- * Always returns HTTP 200 to prevent DPO retry storms.
  */
 export const Route = createFileRoute("/api/public/dpo-webhook")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      POST: async ({ request }: { request: Request }) => {
         try {
           const contentType = request.headers.get("content-type") ?? "";
           let body: Record<string, string> = {};
@@ -103,4 +97,4 @@ export const Route = createFileRoute("/api/public/dpo-webhook")({
       GET: async () => new Response("DPO webhook endpoint active"),
     },
   },
-});
+} as any);
