@@ -38,13 +38,21 @@ export const initiatePayment = createServerFn({ method: "POST" })
     const serviceType = process.env.DPO_SERVICE_TYPE ?? "";
     const appUrl = process.env.APP_URL;
 
-    // --- SIMULATION MODE ---
-    // When DPO env vars are absent, return a simulated payment URL so the
-    // full checkout flow can be exercised without real credentials.
-    const simulationMode = !companyToken || !serviceType;
+    // Simulation mode is ONLY enabled when explicitly opted in via env flag,
+    // and never in production. In production, missing DPO creds are a hard error.
+    const simulationMode =
+      process.env.ENABLE_PAYMENT_SIMULATION === "true" &&
+      process.env.NODE_ENV !== "production";
+
+    if (!simulationMode && (!companyToken || !serviceType)) {
+      throw new Error(
+        "Payment gateway not configured. DPO_COMPANY_TOKEN and DPO_SERVICE_TYPE must be set.",
+      );
+    }
+
     if (simulationMode) {
       console.warn(
-        "[DPO Pay] Simulation mode active — env vars DPO_COMPANY_TOKEN / DPO_SERVICE_TYPE not set",
+        "[DPO Pay] Simulation mode active — ENABLE_PAYMENT_SIMULATION=true in non-production env",
       );
     }
 
