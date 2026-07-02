@@ -103,6 +103,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image", content: "https://www.wesuplusly.com/images/wesu-logo-full.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@wesuplus" },
+      { name: "twitter:title", content: "Wesu+ — Music Streaming" },
+      { name: "description", content: "Wesu+ Music is a free and premium music streaming platform with song/album purchases and artist tools." },
+      { property: "og:description", content: "Wesu+ Music is a free and premium music streaming platform with song/album purchases and artist tools." },
+      { name: "twitter:description", content: "Wesu+ Music is a free and premium music streaming platform with song/album purchases and artist tools." },
+      { name: "twitter:image", content: "https://www.wesuplusly.com/images/wesu-logo-full.png" },
     ],
     links: [
       { rel: "icon", href: "/favicon.png", type: "image/png" },
