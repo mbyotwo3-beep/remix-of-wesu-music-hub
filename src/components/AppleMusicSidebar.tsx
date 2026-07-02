@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, Play, Grid, Radio, Clock, Disc, Music, ListMusic, Heart } from "lucide-react";
+import { Search, Play, Grid, Radio, Clock, Disc, Music, ListMusic, Heart, Mic2 } from "lucide-react";
 
 export function AppleMusicSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
