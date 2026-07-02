@@ -141,6 +141,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const platform = usePlatform();
+  const isMobile = useIsMobile();
+  const useMobileLayout = platform === "native" || isMobile;
 
   // Register deep link auth handler on native platforms (Req 18.3)
   useEffect(() => {
@@ -152,7 +154,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        {platform === "native" ? (
+        {useMobileLayout ? (
           <MobileShell>
             <Outlet />
           </MobileShell>
