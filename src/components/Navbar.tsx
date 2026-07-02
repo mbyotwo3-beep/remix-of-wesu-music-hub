@@ -22,7 +22,7 @@ export function Navbar() {
             className="flex items-center gap-2"
             aria-label="Wesu+ home"
           >
-            <img src={wesuLogo.url} alt="Wesu+" className="h-8 w-auto" />
+            <img src="/images/wesu-logo.png" alt="Wesu+" className="h-8 w-auto" />
           </Link>
         </div>
         <div className="flex items-center gap-3">
