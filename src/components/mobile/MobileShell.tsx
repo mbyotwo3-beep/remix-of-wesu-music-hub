@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { BottomTabBar } from "./BottomTabBar";
 import { MiniPlayer } from "./MiniPlayer";
 import { StatusBarInit } from "./StatusBarInit";
-import wesuLogo from "@/assets/wesu-logo.png.asset.json";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface MobileShellProps {
@@ -23,7 +23,7 @@ export function MobileShell({ children }: MobileShellProps) {
       <StatusBarInit />
       <header className="fixed top-0 inset-x-0 z-40 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] pb-2 bg-background/95 backdrop-blur border-b border-border">
         <Link to="/" aria-label="Wesu+ home" className="flex items-center gap-2">
-          <img src={wesuLogo.url} alt="Wesu+" className="h-7 w-auto" />
+          <img src="/images/wesu-logo.png" alt="Wesu+" className="h-7 w-auto" />
         </Link>
         <ThemeToggle />
       </header>

@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Search, Play, Grid, Radio, Clock, Disc, Music, ListMusic, Heart } from "lucide-react";
+import { Search, Play, Grid, Radio, Clock, Disc, Music, ListMusic, Heart, Mic2 } from "lucide-react";
 
 export function AppleMusicSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -19,7 +19,6 @@ export function AppleMusicSidebar() {
 
   const playlists = [
     { id: "1", name: "Favorites", icon: Heart },
-    { id: "2", name: "Chill Vibes", icon: Music },
     { id: "3", name: "Workout Mix", icon: Play },
     { id: "4", name: "Late Night", icon: Music },
   ];
@@ -113,6 +112,15 @@ export function AppleMusicSidebar() {
             );
           })}
         </nav>
+        <div className="mt-4 px-3">
+          <Link
+            to="/become-artist"
+            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:brightness-110 transition-all w-full"
+          >
+            <Mic2 className="size-4" />
+            Become an Artist
+          </Link>
+        </div>
       </div>
     </aside>
   );

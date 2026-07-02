@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search, LogOut, UserCircle, Shield, Mic2 } from "lucide-react";
-import wesuLogo from "@/assets/wesu-logo.png.asset.json";
 import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "../hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +22,7 @@ export function Navbar() {
             className="flex items-center gap-2"
             aria-label="Wesu+ home"
           >
-            <img src={wesuLogo.url} alt="Wesu+" className="h-8 w-auto" />
+            <img src="/images/wesu-logo.png" alt="Wesu+" className="h-8 w-auto" />
           </Link>
         </div>
         <div className="flex items-center gap-3">

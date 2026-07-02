@@ -17,6 +17,7 @@ import { AppleMusicSidebar } from "../components/AppleMusicSidebar";
 import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
 import { usePlatform } from "../hooks/use-platform";
 import { MobileShell } from "../components/mobile/MobileShell";
+import { useIsMobile } from "../hooks/use-mobile";
 import { registerDeepLinkHandler } from "../integrations/supabase/auth-deep-link";
 
 function NotFoundComponent() {
@@ -99,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Stream Zambian and African music. Free & Premium tiers with Mobile Money payments.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/images/wesu-logo.png" },
+      { property: "og:image", content: "https://www.wesuplusly.com/images/wesu-logo-full.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@wesuplus" },
     ],
@@ -140,6 +141,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const platform = usePlatform();
+  const isMobile = useIsMobile();
+  const useMobileLayout = platform === "native" || isMobile;
 
   // Register deep link auth handler on native platforms (Req 18.3)
   useEffect(() => {
@@ -151,7 +154,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        {platform === "native" ? (
+        {useMobileLayout ? (
           <MobileShell>
             <Outlet />
           </MobileShell>
