@@ -19,7 +19,6 @@ export function AppleMusicSidebar() {
 
   const playlists = [
     { id: "1", name: "Favorites", icon: Heart },
-    { id: "2", name: "Chill Vibes", icon: Music },
     { id: "3", name: "Workout Mix", icon: Play },
     { id: "4", name: "Late Night", icon: Music },
   ];
