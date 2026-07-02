@@ -1,12 +1,10 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Headphones, Heart, ListMusic, ShoppingBag, Shield } from "lucide-react";
+import { Headphones, Heart, ListMusic, ShoppingBag } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
-import { useUserRoles } from "../hooks/use-roles";
 import { getMyOverview } from "@/lib/user.functions";
-import { claimFirstSuperadmin } from "@/lib/superadmin.functions";
 import { usePlatform } from "@/hooks/use-platform";
 import { MobileLibrary } from "@/components/mobile/screens/MobileLibrary";
 
@@ -57,8 +55,6 @@ function DashboardPage() {
         <p className="text-muted-foreground mb-8">
           Welcome back{data.profile?.full_name ? `, ${data.profile.full_name}` : ""}.
         </p>
-
-        <SuperadminBootstrapCard />
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {stats.map((stat) => (
@@ -132,36 +128,6 @@ function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SuperadminBootstrapCard() {
-  const { isSuperAdmin, loading } = useUserRoles();
-  const claim = useServerFn(claimFirstSuperadmin);
-  const m = useMutation({
-    mutationFn: claim,
-    onSuccess: () => window.location.reload(),
-  });
-
-  if (loading || isSuperAdmin) return null;
-  return (
-    <div className="mb-8 bg-card border border-border rounded-2xl p-5 flex items-center gap-4">
-      <Shield className="size-6 text-primary shrink-0" />
-      <div className="flex-1 text-sm">
-        <p className="font-semibold">First-time setup</p>
-        <p className="text-muted-foreground">
-          If no superadmin exists yet, claim the role for this account. Only works once.
-        </p>
-        {m.error ? <p className="text-destructive mt-1">{(m.error as Error).message}</p> : null}
-      </div>
-      <button
-        disabled={m.isPending}
-        onClick={() => m.mutate({})}
-        className="px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold"
-      >
-        {m.isPending ? "Claiming…" : "Claim superadmin"}
-      </button>
     </div>
   );
 }

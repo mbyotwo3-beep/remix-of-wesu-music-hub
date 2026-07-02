@@ -8,6 +8,11 @@ import {
   Music2,
   Loader2,
   Radio,
+  X,
+  Maximize2,
+  Minimize2,
+  Repeat,
+  Shuffle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePlayer } from "@/stores/player";
@@ -59,6 +64,7 @@ export function PlayerBar() {
   const [error, setError] = useState<string | null>(null);
   const [volume, setVolume] = useState(1);
   const [showAd, setShowAd] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const currentTrackId = useRef<string | null>(null);
   const nativeCleanupRef = useRef<(() => void) | null>(null);
 
@@ -216,122 +222,277 @@ export function PlayerBar() {
   }
 
   return (
-    <div className="fixed bottom-0 inset-x-0 bg-obsidian/95 backdrop-blur-xl border-t border-white/10 z-50">
-      {/* Ad banner for anonymous / free users */}
-      {showAd && !user && (
-        <div className="flex items-center justify-between px-6 py-1.5 bg-primary/10 border-b border-primary/20 text-xs">
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <Radio className="size-3 text-primary" />
-            You're listening with ads.
-          </span>
-          <Link to="/auth" className="font-semibold text-primary hover:underline">
-            Sign up free to save music →
-          </Link>
+    <>
+      {/* Expanded Player View */}
+      {isExpanded && (
+        <div className="fixed inset-0 bg-gradient-to-b from-background to-background/95 z-[100] flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6">
+            <button
+              onClick={() => setIsExpanded(false)}
+              className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Minimize player"
+            >
+              <Minimize2 className="size-6" />
+            </button>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Now Playing</p>
+            </div>
+            <button
+              className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="More options"
+            >
+              <X className="size-6" />
+            </button>
+          </div>
+
+          {/* Album Art */}
+          <div className="flex-1 flex items-center justify-center px-8">
+            <div className="aspect-square max-w-md w-full rounded-lg overflow-hidden shadow-2xl bg-card">
+              {track.coverUrl ? (
+                <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Music2 className="size-24 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Track Info & Controls */}
+          <div className="p-6 space-y-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-2xl font-bold truncate">{track.title}</h2>
+                <p className="text-lg text-muted-foreground truncate">{track.artistName}</p>
+              </div>
+              {user && (
+                <button
+                  onClick={toggleLike}
+                  className="shrink-0 ml-4"
+                  aria-label={liked ? "Unlike" : "Like"}
+                >
+                  <Heart
+                    className={`size-6 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`}
+                  />
+                </button>
+              )}
+            </div>
+
+            {/* Progress Bar */}
+            <div className="space-y-2">
+              <div
+                className="h-1.5 bg-muted rounded-full relative overflow-hidden cursor-pointer"
+                onClick={seek}
+                role="slider"
+                aria-valuemin={0}
+                aria-valuemax={dur}
+                aria-valuenow={progressSeconds}
+                aria-label="Seek"
+              >
+                <div
+                  className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
+                <span>{elapsed}</span>
+                <span>{durLabel}</span>
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex items-center justify-center gap-8">
+              <button
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Shuffle"
+              >
+                <Shuffle className="size-5" />
+              </button>
+              <button
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Previous"
+              >
+                <SkipBack className="size-6" />
+              </button>
+              <button
+                onClick={() => {
+                  if (!loading && !error) togglePlay();
+                }}
+                disabled={loading || !!error}
+                className="bg-foreground text-background p-4 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+                aria-label={playing ? "Pause" : "Play"}
+              >
+                {loading ? (
+                  <Loader2 className="size-6 animate-spin" />
+                ) : playing ? (
+                  <Pause className="size-6" />
+                ) : (
+                  <Play className="size-6 ml-0.5" />
+                )}
+              </button>
+              <button
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Next"
+              >
+                <SkipForward className="size-6" />
+              </button>
+              <button
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Repeat"
+              >
+                <Repeat className="size-5" />
+              </button>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-3">
+              <Volume2 className="size-5 text-muted-foreground" />
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="flex-1 accent-primary"
+                aria-label="Volume"
+              />
+            </div>
+
+            {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          </div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto h-20 px-6 flex items-center justify-between gap-4">
-        {/* Track info */}
-        <div className="flex items-center gap-4 w-1/3 min-w-0">
-          <div className="size-12 rounded-md overflow-hidden bg-card shrink-0 ring-1 ring-white/10 flex items-center justify-center">
-            {track.coverUrl ? (
-              <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
-            ) : (
-              <Music2 className="size-4 text-muted-foreground" />
+      {/* Mini Player Bar */}
+      <div
+        className="fixed bottom-0 inset-x-0 bg-obsidian/95 backdrop-blur-xl border-t border-white/10 z-50 cursor-pointer"
+        onClick={() => setIsExpanded(true)}
+      >
+        {/* Ad banner for anonymous / free users */}
+        {showAd && !user && (
+          <div className="flex items-center justify-between px-6 py-1.5 bg-primary/10 border-b border-primary/20 text-xs">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              <Radio className="size-3 text-primary" />
+              You're listening with ads.
+            </span>
+            <Link to="/auth" className="font-semibold text-primary hover:underline">
+              Sign up free to save music →
+            </Link>
+          </div>
+        )}
+
+        <div className="max-w-7xl mx-auto h-20 px-6 flex items-center justify-between gap-4">
+          {/* Track info */}
+          <div className="flex items-center gap-4 w-1/3 min-w-0">
+            <div className="size-12 rounded-md overflow-hidden bg-card shrink-0 ring-1 ring-white/10 flex items-center justify-center">
+              {track.coverUrl ? (
+                <img src={track.coverUrl} alt={track.title} className="w-full h-full object-cover" />
+              ) : (
+                <Music2 className="size-4 text-muted-foreground" />
+              )}
+            </div>
+            <div className="overflow-hidden min-w-0">
+              <p className="text-sm font-medium truncate">{track.title}</p>
+              <p className="text-xs text-muted-foreground truncate">{track.artistName}</p>
+            </div>
+            {user && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleLike();
+                }}
+                className="hidden sm:block shrink-0"
+                aria-label={liked ? "Unlike" : "Like"}
+              >
+                <Heart
+                  className={`size-4 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`}
+                />
+              </button>
             )}
           </div>
-          <div className="overflow-hidden min-w-0">
-            <p className="text-sm font-medium truncate">{track.title}</p>
-            <p className="text-xs text-muted-foreground truncate">{track.artistName}</p>
-          </div>
-          {user && (
-            <button
-              onClick={toggleLike}
-              className="hidden sm:block shrink-0"
-              aria-label={liked ? "Unlike" : "Like"}
-            >
-              <Heart
-                className={`size-4 ${liked ? "fill-primary text-primary" : "text-muted-foreground"}`}
-              />
-            </button>
-          )}
-        </div>
 
-        {/* Controls */}
-        <div className="flex flex-col items-center gap-1 w-1/3">
-          <div className="flex items-center gap-6">
-            <button
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Previous"
-            >
-              <SkipBack className="size-4" />
-            </button>
-            <button
-              onClick={() => {
-                if (!loading && !error) togglePlay();
-              }}
-              disabled={loading || !!error}
-              className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
-              aria-label={playing ? "Pause" : "Play"}
-            >
-              {loading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : playing ? (
-                <Pause className="size-4" />
-              ) : (
-                <Play className="size-4 ml-0.5" />
-              )}
-            </button>
-            <button
-              className="text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Next"
-            >
-              <SkipForward className="size-4" />
-            </button>
-          </div>
-
-          {/* Progress bar */}
-          <div className="w-full flex items-center gap-3">
-            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
-              {elapsed}
-            </span>
-            <div
-              className="flex-1 h-1 bg-muted rounded-full relative overflow-hidden cursor-pointer"
-              onClick={seek}
-              role="slider"
-              aria-valuemin={0}
-              aria-valuemax={dur}
-              aria-valuenow={progressSeconds}
-              aria-label="Seek"
-            >
-              <div
-                className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all"
-                style={{ width: `${progress}%` }}
-              />
+          {/* Controls */}
+          <div className="flex flex-col items-center gap-1 w-1/3">
+            <div className="flex items-center gap-6">
+              <button
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Previous"
+              >
+                <SkipBack className="size-4" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!loading && !error) togglePlay();
+                }}
+                disabled={loading || !!error}
+                className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+                aria-label={playing ? "Pause" : "Play"}
+              >
+                {loading ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : playing ? (
+                  <Pause className="size-4" />
+                ) : (
+                  <Play className="size-4 ml-0.5" />
+                )}
+              </button>
+              <button
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Next"
+              >
+                <SkipForward className="size-4" />
+              </button>
             </div>
-            <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
-              {durLabel}
-            </span>
+
+            {/* Progress bar */}
+            <div className="w-full flex items-center gap-3">
+              <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+                {elapsed}
+              </span>
+              <div
+                className="flex-1 h-1 bg-muted rounded-full relative overflow-hidden cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  seek(e);
+                }}
+                role="slider"
+                aria-valuemin={0}
+                aria-valuemax={dur}
+                aria-valuenow={progressSeconds}
+                aria-label="Seek"
+              >
+                <div
+                  className="absolute left-0 top-0 h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+                {durLabel}
+              </span>
+            </div>
+
+            {error && <p className="text-[10px] text-destructive truncate max-w-xs">{error}</p>}
           </div>
 
-          {error && <p className="text-[10px] text-destructive truncate max-w-xs">{error}</p>}
-        </div>
-
-        {/* Volume */}
-        <div className="flex items-center justify-end gap-3 w-1/3">
-          <Volume2 className="size-4 text-muted-foreground shrink-0" />
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.05}
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-20 accent-primary hidden sm:block"
-            aria-label="Volume"
-          />
+          {/* Volume */}
+          <div className="flex items-center justify-end gap-3 w-1/3">
+            <Volume2 className="size-4 text-muted-foreground shrink-0" />
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="w-20 accent-primary hidden sm:block"
+              aria-label="Volume"
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

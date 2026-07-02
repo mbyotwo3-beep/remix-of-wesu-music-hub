@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, LogOut, UserCircle, Shield, Mic2 } from "lucide-react";
+import { Search, LogOut, UserCircle, Shield, Mic2, Menu, X, Home, Disc, Radio } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "../hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,15 +8,30 @@ import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, loading } = useAuth();
-  const { isArtist, isAdmin, isSuperAdmin } = useUserRoles();
+  const { isArtist, isAdmin, isSuperAdmin, loading: rolesLoading } = useUserRoles();
 
   const isAuth = useRouterState({ select: (s) => s.location.pathname }) === "/auth";
+  const isLoading = loading || rolesLoading;
+
+  const navLinks = [
+    { to: "/", label: "Home", icon: Home },
+    { to: "/browse", label: "Browse", icon: Disc },
+    { to: "/radio", label: "Radio", icon: Radio },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl h-16">
-      <div className="h-full px-6 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-xl h-16">
+      <div className="h-full px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors lg:hidden"
+            aria-label="Toggle mobile menu"
+          >
+            {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
           <Link
             to="/"
             className="flex items-center gap-2"
@@ -24,20 +39,39 @@ export function Navbar() {
           >
             <img src="/images/wesu-logo.png" alt="Wesu+" className="h-8 w-auto" />
           </Link>
+          <div className="hidden lg:flex items-center gap-1 ml-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-full transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="relative hidden lg:block">
+
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search"
-              className="bg-secondary/50 border border-input rounded-full pl-9 pr-4 py-2 text-sm w-64 focus:outline-none focus:border-ring text-foreground placeholder:text-muted-foreground transition-colors"
+              className="bg-secondary/50 border border-input rounded-full pl-9 pr-4 py-2 text-sm w-40 md:w-64 focus:outline-none focus:border-ring text-foreground placeholder:text-muted-foreground transition-colors"
             />
           </div>
 
+          <button
+            className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Search"
+          >
+            <Search className="size-5" />
+          </button>
+
           <ThemeToggle />
 
-          {!loading && (
+          {!isLoading && (
             <>
               {user ? (
                 <div className="relative">
@@ -146,6 +180,95 @@ export function Navbar() {
           )}
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-xl">
+          <div className="px-4 py-4 space-y-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+              >
+                <link.icon className="size-5" />
+                {link.label}
+              </Link>
+            ))}
+            {user && (
+              <>
+                <div className="border-t border-border my-2" />
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                >
+                  My Library
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                >
+                  Profile
+                </Link>
+                {!isArtist && (
+                  <Link
+                    to="/become-artist"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                  >
+                    <Mic2 className="size-5" />
+                    Become an Artist
+                  </Link>
+                )}
+                {isArtist && (
+                  <Link
+                    to="/artist-dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                  >
+                    <Mic2 className="size-5" />
+                    Artist Portal
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                  >
+                    <Shield className="size-5" />
+                    Admin
+                  </Link>
+                )}
+                {isSuperAdmin && (
+                  <Link
+                    to="/superadmin"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+                  >
+                    <Shield className="size-5 text-primary" />
+                    Superadmin
+                  </Link>
+                )}
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    setMobileMenuOpen(false);
+                    window.location.href = "/";
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-accent rounded-lg transition-colors"
+                >
+                  <LogOut className="size-5" />
+                  Sign Out
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

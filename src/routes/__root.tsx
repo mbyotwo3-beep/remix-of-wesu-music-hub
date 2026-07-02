@@ -130,12 +130,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="font-sans bg-background text-foreground">
+      <body className="font-sans bg-background text-foreground" suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
