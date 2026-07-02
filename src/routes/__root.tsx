@@ -17,7 +17,7 @@ import { AppleMusicSidebar } from "../components/AppleMusicSidebar";
 import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
 import { usePlatform } from "../hooks/use-platform";
 import { MobileShell } from "../components/mobile/MobileShell";
-import { useIsMobile } from "../hooks/use-mobile";
+import { useBelowLg } from "../hooks/use-below-lg";
 import { registerDeepLinkHandler } from "../integrations/supabase/auth-deep-link";
 
 function NotFoundComponent() {
@@ -146,8 +146,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const platform = usePlatform();
-  const isMobile = useIsMobile();
-  const useMobileLayout = platform === "native" || isMobile;
+  const isSmallScreen = useBelowLg();
+  const useMobileLayout = platform === "native" || isSmallScreen;
 
   // Register deep link auth handler on native platforms (Req 18.3)
   useEffect(() => {
