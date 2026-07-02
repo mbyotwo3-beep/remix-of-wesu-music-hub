@@ -29,10 +29,17 @@ function AuthPage() {
 
     try {
       if (mode === "signup") {
+        const siteUrl =
+          typeof window !== "undefined" && window.location.hostname === "localhost"
+            ? window.location.origin
+            : "https://www.wesuplusly.com";
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { full_name: name } },
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: `${siteUrl}/dashboard`,
+          },
         });
         if (error) throw error;
         alert("Check your email to confirm your account!");
