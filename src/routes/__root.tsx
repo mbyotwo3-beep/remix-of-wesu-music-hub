@@ -17,6 +17,7 @@ import { AppleMusicSidebar } from "../components/AppleMusicSidebar";
 import { ThemeProvider, themeInitScript } from "../hooks/use-theme";
 import { usePlatform } from "../hooks/use-platform";
 import { MobileShell } from "../components/mobile/MobileShell";
+import { useIsMobile } from "../hooks/use-mobile";
 import { registerDeepLinkHandler } from "../integrations/supabase/auth-deep-link";
 
 function NotFoundComponent() {
