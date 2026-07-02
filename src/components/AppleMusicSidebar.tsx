@@ -40,7 +40,7 @@ export function AppleMusicSidebar() {
       {/* Main Navigation */}
       <div className="px-3 mb-4">
         <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Apple Music
+          Wesu+ Music
         </h3>
         <nav className="space-y-0.5">
           {mainNav.map((item) => {
