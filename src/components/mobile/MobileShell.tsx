@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { BottomTabBar } from "./BottomTabBar";
 import { MiniPlayer } from "./MiniPlayer";
 import { StatusBarInit } from "./StatusBarInit";
-import wesuLogo from "@/assets/wesu-logo.png.asset.json";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface MobileShellProps {
