@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search, LogOut, UserCircle, Shield, Mic2 } from "lucide-react";
-import wesuLogo from "@/assets/wesu-logo.png.asset.json";
 import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "../hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
