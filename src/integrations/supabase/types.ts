@@ -26,6 +26,7 @@ export type Database = {
           label_id: string | null
           price: number | null
           release_date: string | null
+          status: string
           title: string
         }
         Insert: {
@@ -39,6 +40,7 @@ export type Database = {
           label_id?: string | null
           price?: number | null
           release_date?: string | null
+          status?: string
           title: string
         }
         Update: {
@@ -52,6 +54,7 @@ export type Database = {
           label_id?: string | null
           price?: number | null
           release_date?: string | null
+          status?: string
           title?: string
         }
         Relationships: [

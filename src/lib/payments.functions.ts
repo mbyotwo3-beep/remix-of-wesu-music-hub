@@ -24,7 +24,6 @@ export const initiatePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator(
     (d: {
-      amount: number;
       method_code: string;
       item_type: "song" | "album" | "subscription";
       item_id?: string;
@@ -38,8 +37,6 @@ export const initiatePayment = createServerFn({ method: "POST" })
     const serviceType = process.env.DPO_SERVICE_TYPE ?? "";
     const appUrl = process.env.APP_URL;
 
-    // Simulation mode is ONLY enabled when explicitly opted in via env flag,
-    // and never in production. In production, missing DPO creds are a hard error.
     const simulationMode =
       process.env.ENABLE_PAYMENT_SIMULATION === "true" &&
       process.env.NODE_ENV !== "production";
@@ -56,12 +53,45 @@ export const initiatePayment = createServerFn({ method: "POST" })
       );
     }
 
+    // === Authoritative price lookup (never trust client-supplied amount) ===
+    if (!data.item_id) throw new Error("item_id is required");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let authoritativeAmount: number | null = null;
+    if (data.item_type === "song") {
+      const { data: row } = await supabaseAdmin
+        .from("songs")
+        .select("price")
+        .eq("id", data.item_id)
+        .maybeSingle();
+      authoritativeAmount = row?.price != null ? Number(row.price) : null;
+    } else if (data.item_type === "album") {
+      const { data: row } = await supabaseAdmin
+        .from("albums")
+        .select("price")
+        .eq("id", data.item_id)
+        .maybeSingle();
+      authoritativeAmount = row?.price != null ? Number(row.price) : null;
+    } else if (data.item_type === "subscription") {
+      const { data: row } = await supabaseAdmin
+        .from("subscription_plans")
+        .select("price_zmw, is_active")
+        .eq("id", data.item_id)
+        .maybeSingle();
+      if (row && (row as any).is_active === false) throw new Error("Plan is not active");
+      authoritativeAmount = row?.price_zmw != null ? Number(row.price_zmw) : null;
+    }
+    if (authoritativeAmount == null || !Number.isFinite(authoritativeAmount) || authoritativeAmount < 0) {
+      throw new Error("Unable to determine price for the requested item");
+    }
+    const amount = authoritativeAmount;
+
+
     // Record the pending transaction (visible to the user).
     const { data: tx, error: insertError } = await supabase
       .from("payment_transactions")
       .insert({
         user_id: userId,
-        amount: data.amount,
+        amount,
         currency: "ZMW",
         method_code: data.method_code,
         provider: "dpo",
@@ -98,7 +128,7 @@ export const initiatePayment = createServerFn({ method: "POST" })
     const xmlPayload = buildCreateTokenXml({
       companyToken: companyToken!,
       serviceType: serviceType!,
-      amount: data.amount,
+      amount,
       companyRef: tx.id,
       redirectUrl: `${baseUrl}/checkout/success`,
       backUrl: `${baseUrl}/checkout/cancel`,
