@@ -182,9 +182,17 @@ export const decidePayout = createServerFn({ method: "POST" })
   });
 
 export const getSettings = createServerFn({ method: "GET" })
-  .middleware([requireSuperadmin])
-  .handler(async () => {
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Restrict to staff (admins / superadmins) only.
+    const { data: roles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const isStaff = (roles ?? []).some((r: any) => r.role === "admin" || r.role === "superadmin");
+    if (!isStaff) throw new Error("Not authorized");
+
     const { data } = await supabaseAdmin.from("platform_settings").select("key, value");
     const out: Record<string, any> = {};
     (data ?? []).forEach((r: any) => {
