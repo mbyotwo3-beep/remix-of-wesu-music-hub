@@ -26,7 +26,28 @@ export const applyAsArtist = createServerFn({ method: "POST" })
       .select("id, status")
       .eq("user_id", userId)
       .maybeSingle();
-    if (existing) return { ok: true, status: existing.status, id: existing.id };
+    if (existing && existing.status !== "rejected") {
+      return { ok: true, status: existing.status, id: existing.id };
+    }
+
+    if (existing && existing.status === "rejected") {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: row, error } = await supabaseAdmin
+        .from("artists")
+        .update({
+          name: data.name,
+          bio: data.bio ?? null,
+          genre: data.genre ?? null,
+          status: "pending",
+        } as any)
+        .eq("id", existing.id)
+        .select("id, status")
+        .single();
+      if (error) throw new Error(error.message);
+      await audit(userId, "artist.reapply", "artist", row!.id);
+      return { ok: true, status: row!.status, id: row!.id };
+    }
+
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
@@ -53,13 +74,14 @@ export const updateArtistProfile = createServerFn({ method: "POST" })
       bio?: string;
       genre?: string;
       avatar_url?: string;
+      cover_url?: string;
       social_links?: Record<string, string>;
     }) => d,
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patch: any = {};
-    for (const k of ["name", "bio", "genre", "avatar_url"] as const) {
+    for (const k of ["name", "bio", "genre", "avatar_url", "cover_url"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
     if (data.social_links) patch.social_links = data.social_links;

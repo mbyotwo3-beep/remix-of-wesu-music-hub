@@ -80,6 +80,7 @@ export type Database = {
           available_for_features: boolean
           avatar_url: string | null
           bio: string | null
+          cover_url: string | null
           created_at: string
           feature_rate: number | null
           genre: string | null
@@ -98,6 +99,7 @@ export type Database = {
           available_for_features?: boolean
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           feature_rate?: number | null
           genre?: string | null
@@ -116,6 +118,7 @@ export type Database = {
           available_for_features?: boolean
           avatar_url?: string | null
           bio?: string | null
+          cover_url?: string | null
           created_at?: string
           feature_rate?: number | null
           genre?: string | null

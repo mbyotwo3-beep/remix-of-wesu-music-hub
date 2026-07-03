@@ -53,6 +53,47 @@ function ArtistDashboardPage() {
     );
   }
 
+  if (data.artist.status !== "approved") {
+    const isRejected = data.artist.status === "rejected";
+    return (
+      <div className="max-w-2xl mx-auto p-12 text-center">
+        <div
+          className={`inline-flex items-center justify-center size-14 rounded-full mb-4 ${
+            isRejected ? "bg-destructive/10" : "bg-yellow-500/10"
+          }`}
+        >
+          <Music className={`size-6 ${isRejected ? "text-destructive" : "text-yellow-500"}`} />
+        </div>
+        <h1 className="text-2xl font-bold mb-2">
+          {isRejected ? "Application not approved" : "Application under review"}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {isRejected
+            ? "Your artist application was not approved. You can update your details and reapply."
+            : "Thanks for applying! An admin is reviewing your artist application. You'll get a notification once it's approved and you can start uploading music."}
+        </p>
+        <div className="bg-card border border-border rounded-2xl p-6 text-left">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Artist name</p>
+          <p className="font-semibold mb-3">{data.artist.name}</p>
+          {data.artist.genre && (
+            <>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Genre</p>
+              <p className="font-semibold mb-3">{data.artist.genre}</p>
+            </>
+          )}
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Status</p>
+          <p
+            className={`font-semibold capitalize ${
+              isRejected ? "text-destructive" : "text-yellow-500"
+            }`}
+          >
+            {data.artist.status}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const stats = [
     { label: "Total Revenue", value: `ZMW ${data.totalRevenueZmw.toFixed(2)}`, icon: DollarSign },
     { label: "Total Plays", value: data.totalPlays.toLocaleString(), icon: TrendingUp },

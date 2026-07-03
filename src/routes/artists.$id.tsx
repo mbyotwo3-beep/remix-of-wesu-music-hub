@@ -38,26 +38,54 @@ function ArtistPage() {
 
   return (
     <div className="min-h-screen pb-24">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
-          <div className="size-48 rounded-2xl overflow-hidden bg-card ring-1 ring-white/5 shrink-0 flex items-center justify-center">
-            {a.avatar_url ? (
-              <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover" />
-            ) : (
-              <User className="size-16 text-muted-foreground" />
-            )}
-          </div>
-          <div>
-            <h1 className="text-4xl font-bold flex items-center gap-2">
-              {a.name}
-              {a.verified && <CheckCircle2 className="size-6 text-primary" />}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {a.genre ?? "—"} · {a.monthly_listeners ?? 0} monthly listeners
-            </p>
-            {a.bio && <p className="text-sm mt-4 max-w-2xl">{a.bio}</p>}
+      {/* Spotify-style hero */}
+      <div className="relative">
+        <div
+          className="h-64 md:h-80 w-full bg-gradient-to-b from-primary/40 via-primary/20 to-background relative overflow-hidden"
+          style={
+            a.cover_url
+              ? {
+                  backgroundImage: `url(${a.cover_url})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : undefined
+          }
+        >
+          {a.cover_url && (
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          )}
+        </div>
+        <div className="max-w-7xl mx-auto px-6 -mt-24 md:-mt-32 relative">
+          <div className="flex flex-col md:flex-row gap-6 items-start md:items-end">
+            <div className="size-40 md:size-56 rounded-full overflow-hidden bg-card ring-4 ring-background shadow-2xl shrink-0 flex items-center justify-center">
+              {a.avatar_url ? (
+                <img src={a.avatar_url} alt={a.name} className="w-full h-full object-cover" />
+              ) : (
+                <User className="size-20 text-muted-foreground" />
+              )}
+            </div>
+            <div className="pb-2">
+              {a.verified && (
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-primary mb-2">
+                  <CheckCircle2 className="size-4" /> Verified Artist
+                </div>
+              )}
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight">{a.name}</h1>
+              <p className="text-sm text-muted-foreground mt-2">
+                {(a.monthly_listeners ?? 0).toLocaleString()} monthly listeners
+                {a.genre ? ` · ${a.genre}` : ""}
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 pt-10">
+        {a.bio && (
+          <p className="text-sm text-muted-foreground max-w-2xl mb-10 leading-relaxed">{a.bio}</p>
+        )}
+
 
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Top Songs</h2>

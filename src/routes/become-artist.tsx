@@ -1,10 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Mic2 } from "lucide-react";
+import { Mic2, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { RoleGate } from "@/components/RoleGate";
 import { applyAsArtist } from "@/lib/artist.functions";
+import { getMyArtistOverview } from "@/lib/user.functions";
 
 export const Route = createFileRoute("/become-artist")({
   head: () => ({ meta: [{ title: "Become an Artist — Wesu+" }] }),
@@ -20,18 +21,85 @@ export const Route = createFileRoute("/become-artist")({
 function Page() {
   const navigate = useNavigate();
   const apply = useServerFn(applyAsArtist);
+  const fetchOverview = useServerFn(getMyArtistOverview);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["my-artist-overview"],
+    queryFn: () => fetchOverview(),
+  });
+
   const m = useMutation({
     mutationFn: apply,
-    onSuccess: () => navigate({ to: "/dashboard" }),
+    onSuccess: () => refetch(),
   });
   const [form, setForm] = useState({ name: "", bio: "", genre: "" });
+
+  if (isLoading) {
+    return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
+  }
+
+  const artist = data?.artist;
+
+  if (artist && artist.status === "pending") {
+    return (
+      <div className="max-w-xl mx-auto px-6 py-16 text-center">
+        <div className="inline-flex items-center justify-center size-14 rounded-full bg-yellow-500/10 mb-4">
+          <Clock className="size-6 text-yellow-500" />
+        </div>
+        <h1 className="text-3xl font-bold mb-2">Application under review</h1>
+        <p className="text-muted-foreground mb-8">
+          Thanks for applying, {artist.name}! An admin is reviewing your artist application. You'll
+          be notified as soon as it's approved and you can start uploading music.
+        </p>
+        <div className="bg-card border border-border rounded-2xl p-6 text-left mb-6">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Status</p>
+          <p className="font-semibold text-yellow-500 capitalize">Pending review</p>
+        </div>
+        <Link
+          to="/dashboard"
+          className="inline-block px-5 py-2.5 rounded-full bg-secondary font-semibold"
+        >
+          Back to dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  if (artist && artist.status === "approved") {
+    return (
+      <div className="max-w-xl mx-auto px-6 py-16 text-center">
+        <div className="inline-flex items-center justify-center size-14 rounded-full bg-primary/10 mb-4">
+          <CheckCircle2 className="size-6 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold mb-2">You're already an approved artist</h1>
+        <p className="text-muted-foreground mb-8">Head to your artist dashboard to manage music.</p>
+        <button
+          onClick={() => navigate({ to: "/artist-dashboard" })}
+          className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold"
+        >
+          Open Artist Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  const rejected = artist?.status === "rejected";
 
   return (
     <div className="max-w-xl mx-auto px-6 py-16">
       <div className="flex items-center gap-3 mb-6">
         <Mic2 className="size-6 text-primary" />
-        <h1 className="text-3xl font-bold">Become an Artist</h1>
+        <h1 className="text-3xl font-bold">
+          {rejected ? "Reapply as an Artist" : "Become an Artist"}
+        </h1>
       </div>
+      {rejected && (
+        <div className="mb-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex gap-3">
+          <XCircle className="size-5 text-destructive shrink-0 mt-0.5" />
+          <div className="text-sm">
+            Your previous application was not approved. Update your details and submit again.
+          </div>
+        </div>
+      )}
       <p className="text-sm text-muted-foreground mb-8">
         Submit your application. An admin will review and approve you to start uploading music.
       </p>
