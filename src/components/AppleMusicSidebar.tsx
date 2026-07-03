@@ -112,15 +112,13 @@ export function AppleMusicSidebar() {
             );
           })}
         </nav>
-        <div className="mt-4 px-3">
-          <Link
-            to="/become-artist"
-            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:brightness-110 transition-all w-full"
-          >
-            <Mic2 className="size-4" />
-            Become an Artist
-          </Link>
-        </div>
+        <Link
+          to="/become-artist"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors w-full text-left"
+        >
+          <Mic2 className="size-5" />
+          Become an Artist
+        </Link>
       </div>
     </aside>
   );
