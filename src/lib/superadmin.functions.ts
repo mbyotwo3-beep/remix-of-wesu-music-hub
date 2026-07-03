@@ -201,29 +201,8 @@ export const getSettings = createServerFn({ method: "GET" })
     return out;
   });
 
-/**
- * Bootstrap: grant superadmin to the calling user ONLY if no superadmin exists yet.
- * One-time setup so the very first owner can self-claim the role.
- */
-export const claimFirstSuperadmin = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { count } = await supabaseAdmin
-      .from("user_roles")
-      .select("user_id", { count: "exact", head: true })
-      .eq("role", "superadmin");
-    if ((count ?? 0) > 0)
-      throw new Error("A superadmin already exists. Ask them to grant you the role.");
-    const { error } = await supabaseAdmin
-      .from("user_roles")
-      .upsert({ user_id: context.userId, role: "superadmin" } as any, {
-        onConflict: "user_id,role",
-      });
-    if (error) throw new Error(error.message);
-    await audit(context.userId, "superadmin.bootstrap", "user", context.userId);
-    return { ok: true };
-  });
+// claimFirstSuperadmin removed: the superadmin is already claimed and roles are
+// now granted only by an existing superadmin via grantRole.
 
 /**
  * Manually mark a payment_transaction as paid. Useful for testing the split
