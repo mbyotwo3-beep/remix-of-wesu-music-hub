@@ -128,7 +128,7 @@ export const initiatePayment = createServerFn({ method: "POST" })
     const xmlPayload = buildCreateTokenXml({
       companyToken: companyToken!,
       serviceType: serviceType!,
-      amount: data.amount,
+      amount,
       companyRef: tx.id,
       redirectUrl: `${baseUrl}/checkout/success`,
       backUrl: `${baseUrl}/checkout/cancel`,
