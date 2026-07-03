@@ -91,7 +91,7 @@ export const initiatePayment = createServerFn({ method: "POST" })
       .from("payment_transactions")
       .insert({
         user_id: userId,
-        amount: data.amount,
+        amount,
         currency: "ZMW",
         method_code: data.method_code,
         provider: "dpo",
