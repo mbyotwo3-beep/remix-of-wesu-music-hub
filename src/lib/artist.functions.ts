@@ -26,7 +26,28 @@ export const applyAsArtist = createServerFn({ method: "POST" })
       .select("id, status")
       .eq("user_id", userId)
       .maybeSingle();
-    if (existing) return { ok: true, status: existing.status, id: existing.id };
+    if (existing && existing.status !== "rejected") {
+      return { ok: true, status: existing.status, id: existing.id };
+    }
+
+    if (existing && existing.status === "rejected") {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: row, error } = await supabaseAdmin
+        .from("artists")
+        .update({
+          name: data.name,
+          bio: data.bio ?? null,
+          genre: data.genre ?? null,
+          status: "pending",
+        } as any)
+        .eq("id", existing.id)
+        .select("id, status")
+        .single();
+      if (error) throw new Error(error.message);
+      await audit(userId, "artist.reapply", "artist", row!.id);
+      return { ok: true, status: row!.status, id: row!.id };
+    }
+
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row, error } = await supabaseAdmin
