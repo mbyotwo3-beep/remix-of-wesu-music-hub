@@ -181,15 +181,17 @@ export const decidePayout = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const getSettings = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin.from("platform_settings").select("key, value");
-  const out: Record<string, any> = {};
-  (data ?? []).forEach((r: any) => {
-    out[r.key] = r.value;
+export const getSettings = createServerFn({ method: "GET" })
+  .middleware([requireSuperadmin])
+  .handler(async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin.from("platform_settings").select("key, value");
+    const out: Record<string, any> = {};
+    (data ?? []).forEach((r: any) => {
+      out[r.key] = r.value;
+    });
+    return out;
   });
-  return out;
-});
 
 /**
  * Bootstrap: grant superadmin to the calling user ONLY if no superadmin exists yet.
