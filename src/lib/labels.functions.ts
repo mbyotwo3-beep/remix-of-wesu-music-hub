@@ -67,7 +67,10 @@ export const updateLabel = createServerFn({ method: "POST" })
 export const getMyLabel = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data } = await context.supabase
+    // Read via admin client because contact_email is column-restricted from
+    // the authenticated Data API role; we still scope by owner_user_id.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
       .from("labels")
       .select("*")
       .eq("owner_user_id", context.userId)
