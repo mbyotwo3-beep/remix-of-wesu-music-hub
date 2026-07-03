@@ -143,7 +143,7 @@ function CheckoutPage() {
           onClick={() =>
             mutation.mutate({
               data: {
-                amount: Number(plan.price_zmw),
+                
                 method_code: selectedMethodCode,
                 item_type: "subscription",
                 item_id: plan.id,
