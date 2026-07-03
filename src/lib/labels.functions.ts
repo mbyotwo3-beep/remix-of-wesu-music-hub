@@ -162,7 +162,33 @@ export const setArtistRoyalty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: { id: string; royalty_pct: number }) => d)
   .handler(async ({ context, data }) => {
-    const { error } = await context.supabase
+    if (!Number.isFinite(data.royalty_pct) || data.royalty_pct < 0 || data.royalty_pct > 100) {
+      throw new Error("royalty_pct must be between 0 and 100");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Look up the row and verify caller is the label owner (or staff).
+    const { data: row } = await supabaseAdmin
+      .from("label_artists")
+      .select("label_id")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (!row) throw new Error("Roster entry not found");
+
+    const { data: ownerCheck } = await supabaseAdmin.rpc("is_label_owner", {
+      _user_id: context.userId,
+      _label_id: (row as any).label_id,
+    } as any);
+    const { data: roles } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId);
+    const isStaff = (roles ?? []).some((r: any) => r.role === "admin" || r.role === "superadmin");
+
+    if (!ownerCheck && !isStaff) {
+      throw new Error("Only the label owner can change royalty percentage");
+    }
+
+    const { error } = await supabaseAdmin
       .from("label_artists")
       .update({ royalty_pct: data.royalty_pct } as any)
       .eq("id", data.id);
