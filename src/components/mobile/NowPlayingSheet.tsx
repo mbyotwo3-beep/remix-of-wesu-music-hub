@@ -11,6 +11,7 @@ import {
   Volume2,
   Loader2,
   MoreHorizontal,
+  X,
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { usePlayer } from "@/stores/player";
@@ -169,12 +170,20 @@ export function NowPlayingSheet() {
           <div className="text-center">
             <p className="text-xs font-semibold text-white/50 uppercase tracking-widest">Now Playing</p>
           </div>
-          <button
-            className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white -mr-2"
-            aria-label="More options"
-          >
-            <MoreHorizontal className="size-5" />
-          </button>
+          {track.id !== "default-placeholder" ? (
+            <button
+              onClick={() => {
+                usePlayer.getState().exitSong();
+              }}
+              className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white -mr-2"
+              aria-label="Exit song"
+              title="Exit song"
+            >
+              <X className="size-6" />
+            </button>
+          ) : (
+            <div className="w-10" />
+          )}
         </div>
 
         {/* Album Art — large, with drop shadow */}

@@ -26,6 +26,7 @@ interface PlayerState {
   toggleLike: () => void;
   openNowPlaying: () => void;
   closeNowPlaying: () => void;
+  exitSong: () => void;
 }
 
 export const usePlayer = create<PlayerState>((set, get) => ({
@@ -84,4 +85,26 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   toggleLike: () => set((s) => ({ liked: !s.liked })),
   openNowPlaying: () => set({ nowPlayingOpen: true }),
   closeNowPlaying: () => set({ nowPlayingOpen: false }),
+  exitSong: () => {
+    // Also stop audio element
+    const audio = (window as any).__wesuAudio as HTMLAudioElement | undefined;
+    if (audio) {
+      audio.pause();
+      audio.src = "";
+    }
+    set({
+      track: {
+        id: "default-placeholder",
+        title: "Select a song",
+        artistName: "Wesu+ Music",
+        coverUrl: null,
+        audioUrl: null,
+        durationSeconds: 0,
+      },
+      playing: false,
+      progressSeconds: 0,
+      liked: false,
+      nowPlayingOpen: false,
+    });
+  },
 }));

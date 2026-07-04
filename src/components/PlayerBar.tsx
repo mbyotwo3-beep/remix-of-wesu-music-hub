@@ -240,8 +240,12 @@ export function PlayerBar() {
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Now Playing</p>
             </div>
             <button
+              onClick={() => {
+                usePlayer.getState().exitSong();
+                setIsExpanded(false);
+              }}
               className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="More options"
+              aria-label="Exit song"
             >
               <X className="size-6" />
             </button>
@@ -478,19 +482,34 @@ export function PlayerBar() {
             {error && <p className="text-[10px] text-destructive truncate max-w-xs">{error}</p>}
           </div>
 
-          {/* Volume */}
-          <div className="flex items-center justify-end gap-3 w-1/3">
-            <Volume2 className="size-4 text-muted-foreground shrink-0" />
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="w-20 accent-primary hidden sm:block"
-              aria-label="Volume"
-            />
+          {/* Volume & Exit */}
+          <div className="flex items-center justify-end gap-4 w-1/3">
+            <div className="flex items-center gap-3">
+              <Volume2 className="size-4 text-muted-foreground shrink-0" />
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="w-20 accent-primary hidden sm:block"
+                aria-label="Volume"
+              />
+            </div>
+            {track.id !== "default-placeholder" && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  usePlayer.getState().exitSong();
+                }}
+                className="p-1.5 rounded-full hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                aria-label="Exit song"
+                title="Exit song"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
