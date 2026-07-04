@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { radioStations } from "@/data/radioStations";
 import { usePlayer } from "@/stores/player";
 
 interface FeaturedSlide {
@@ -27,6 +28,14 @@ export function HeroSlider({ slides }: HeroSliderProps) {
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  // Auto‑advance timer (5 seconds)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
   const handlePlay = (slide: FeaturedSlide) => {
     setTrack({
       id: slide.id,
@@ -42,7 +51,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   const currentSlide = slides[currentIndex];
 
   return (
-    <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/9] lg:aspect-[2.39/1] overflow-hidden rounded-2xl mb-8">
+    <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/9] lg:aspect-[2.39/1] overflow-hidden rounded-2xl mb-8" onClick={() => handlePlay(currentSlide)} style={{ cursor: 'pointer' }}>
       {/* Slide */}
       <div
         key={currentIndex}
@@ -100,6 +109,29 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
+        ))}
+      </div>
+    </div>
+    {/* Radio Channels */}
+    <div className="mt-4 px-4">
+      <h3 className="text-sm font-medium text-white mb-2">Radio Channels</h3>
+      <div className="flex overflow-x-auto gap-3">
+        {radioStations.map((station) => (
+          <button
+            key={station.name}
+            onClick={() => {
+              setTrack({
+                id: station.name,
+                title: station.name,
+                artistName: "Radio",
+                coverUrl: station.imageUrl || "/images/radio-placeholder.png",
+                audioUrl: station.streamUrl,
+              });
+            }}
+            className="flex-shrink-0 bg-muted hover:bg-muted/80 rounded-lg p-2 text-sm text-white"
+          >
+            {station.name}
+          </button>
         ))}
       </div>
     </div>
