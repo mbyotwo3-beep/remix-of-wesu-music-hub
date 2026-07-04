@@ -1,5 +1,5 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Search, Library, User, Mic2, Shield, Menu, X, LogOut, Music, Play, Grid, Radio, Clock, Disc, ListMusic, Heart } from "lucide-react";
+import { Home, Search, Library, User, Mic2, Shield, Menu, X, LogOut, Music, Play, Clock, Disc, ListMusic, Heart } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserRoles } from "@/hooks/use-roles";
 import type { LucideIcon } from "lucide-react";
@@ -171,43 +171,8 @@ export function BottomTabBar() {
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {/* Wesu+ Music Section */}
-            <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Wesu+ Music
-            </h3>
-            <button
-              onClick={() => {
-                navigate({ to: "/" });
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-            >
-              <Play className="size-5" />
-              <span className="text-sm font-medium">Listen Now</span>
-            </button>
-            <button
-              onClick={() => {
-                navigate({ to: "/browse" });
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-            >
-              <Grid className="size-5" />
-              <span className="text-sm font-medium">Browse</span>
-            </button>
-            <button
-              onClick={() => {
-                navigate({ to: "/radio" });
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-            >
-              <Radio className="size-5" />
-              <span className="text-sm font-medium">Radio</span>
-            </button>
-
             {/* Library Section */}
-            <h3 className="px-3 mb-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <h3 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Library
             </h3>
             <button
