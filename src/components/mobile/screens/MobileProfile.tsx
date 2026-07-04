@@ -163,6 +163,15 @@ export function MobileProfile() {
             Artist Studio
           </Link>
         )}
+        {!isArtist && (
+          <Link
+            to="/become-artist"
+            className="flex items-center gap-3 min-h-[44px] px-4 bg-card border border-border rounded-xl text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <Mic2 className="size-4 text-primary" />
+            Become an Artist
+          </Link>
+        )}
         <Link
           to="/subscriptions"
           className="flex items-center gap-3 min-h-[44px] px-4 bg-card border border-border rounded-xl text-sm font-medium"

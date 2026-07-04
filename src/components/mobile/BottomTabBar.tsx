@@ -205,16 +205,18 @@ export function BottomTabBar() {
               <Radio className="size-5" />
               <span className="text-sm font-medium">Radio</span>
             </button>
-            <button
-              onClick={() => {
-                navigate({ to: "/become-artist" });
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-            >
-              <User className="size-5" />
-              <span className="text-sm font-medium">Become an Artist</span>
-            </button>
+            {!user && (
+              <button
+                onClick={() => {
+                  navigate({ to: "/become-artist" });
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+              >
+                <Mic2 className="size-5" />
+                <span className="text-sm font-medium">Become an Artist</span>
+              </button>
+            )}
             {/* Library Section */}
             <h3 className="px-3 mb-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Library
