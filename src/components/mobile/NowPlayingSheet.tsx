@@ -170,20 +170,16 @@ export function NowPlayingSheet() {
           <div className="text-center">
             <p className="text-xs font-semibold text-white/50 uppercase tracking-widest">Now Playing</p>
           </div>
-          {track.id !== "default-placeholder" ? (
-            <button
-              onClick={() => {
-                usePlayer.getState().exitSong();
-              }}
-              className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white -mr-2"
-              aria-label="Exit song"
-              title="Exit song"
-            >
-              <X className="size-6" />
-            </button>
-          ) : (
-            <div className="w-10" />
-          )}
+          <button
+            onClick={() => {
+              usePlayer.getState().exitSong();
+            }}
+            className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-white -mr-2"
+            aria-label="Exit song"
+            title="Exit song"
+          >
+            <X className="size-6" />
+          </button>
         </div>
 
         {/* Album Art — large, with drop shadow */}
@@ -273,8 +269,8 @@ export function NowPlayingSheet() {
           </button>
 
           <button
-            onClick={() => { if (!isLoading && track.id !== "default-placeholder") togglePlay(); }}
-            disabled={isLoading || track.id === "default-placeholder"}
+            onClick={() => { if (!isLoading) togglePlay(); }}
+            disabled={isLoading}
             className="w-16 h-16 flex items-center justify-center bg-white rounded-full shadow-lg active:scale-90 transition-transform disabled:opacity-50"
             aria-label={playing ? "Pause" : "Play"}
           >

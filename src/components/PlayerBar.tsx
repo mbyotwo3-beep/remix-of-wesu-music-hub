@@ -70,7 +70,7 @@ export function PlayerBar() {
 
   // Load audio when track changes
   useEffect(() => {
-    if (!track || track.id === "default-placeholder") {
+    if (!track) {
       // Stop both engines
       if (currentTrackId.current) stopNative(currentTrackId.current).catch(() => {});
       getAudio().pause();
@@ -324,7 +324,7 @@ export function PlayerBar() {
                 onClick={() => {
                   if (!loading && !error) togglePlay();
                 }}
-                disabled={loading || !!error || track.id === "default-placeholder"}
+                disabled={loading || !!error}
                 className="bg-foreground text-background p-4 rounded-full hover:scale-105 transition-transform disabled:opacity-30"
                 aria-label={playing ? "Pause" : "Play"}
               >
@@ -432,7 +432,7 @@ export function PlayerBar() {
                   e.stopPropagation();
                   if (!loading && !error) togglePlay();
                 }}
-                disabled={loading || !!error || track.id === "default-placeholder"}
+                disabled={loading || !!error}
                 className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-30"
                 aria-label={playing ? "Pause" : "Play"}
               >
@@ -497,7 +497,7 @@ export function PlayerBar() {
                 aria-label="Volume"
               />
             </div>
-            {track.id !== "default-placeholder" && (
+            {track && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

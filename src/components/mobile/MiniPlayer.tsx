@@ -67,7 +67,7 @@ export function MiniPlayer() {
 
             <button
               onClick={togglePlay}
-              disabled={isLoading || track.id === "default-placeholder"}
+              disabled={isLoading}
               className="w-9 h-9 flex items-center justify-center text-white hover:text-white/80 active:scale-90 transition-all disabled:opacity-40"
               aria-label={playing ? "Pause" : "Play"}
             >
@@ -88,7 +88,7 @@ export function MiniPlayer() {
               <SkipForward className="size-4 fill-white/80" />
             </button>
 
-            {track.id !== "default-placeholder" && (
+            {track && (
               <button
                 onClick={() => usePlayer.getState().exitSong()}
                 className="w-9 h-9 flex items-center justify-center text-white/60 hover:text-white active:scale-90 transition-all ml-1 border-l border-white/10 pl-1"

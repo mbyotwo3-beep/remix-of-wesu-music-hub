@@ -30,14 +30,7 @@ interface PlayerState {
 }
 
 export const usePlayer = create<PlayerState>((set, get) => ({
-  track: {
-    id: "default-placeholder",
-    title: "Select a song",
-    artistName: "Wesu+ Music",
-    coverUrl: null,
-    audioUrl: null,
-    durationSeconds: 0,
-  },
+  track: null,
   queue: [],
   queueIndex: 0,
   playing: false,
@@ -45,14 +38,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
   progressSeconds: 0,
   nowPlayingOpen: false,
 
-  setTrack: (t) => set({ track: t || {
-    id: "default-placeholder",
-    title: "Select a song",
-    artistName: "Wesu+ Music",
-    coverUrl: null,
-    audioUrl: null,
-    durationSeconds: 0,
-  }, playing: !!t, progressSeconds: 0, liked: false }),
+  setTrack: (t) => set({ track: t, playing: !!t, progressSeconds: 0, liked: false }),
 
   setQueue: (tracks, startIndex = 0) => {
     const track = tracks[startIndex] ?? null;
@@ -93,14 +79,7 @@ export const usePlayer = create<PlayerState>((set, get) => ({
       audio.src = "";
     }
     set({
-      track: {
-        id: "default-placeholder",
-        title: "Select a song",
-        artistName: "Wesu+ Music",
-        coverUrl: null,
-        audioUrl: null,
-        durationSeconds: 0,
-      },
+      track: null,
       playing: false,
       progressSeconds: 0,
       liked: false,

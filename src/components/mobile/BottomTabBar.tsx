@@ -1,5 +1,5 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Search, Library, User, Mic2, Shield, Menu, X, LogOut, Play, Grid, Radio, Clock, Disc, ListMusic, Heart } from "lucide-react";
+import { Home, Search, Library, User, Mic2, Shield, Menu, X, LogOut, Play, Grid, Radio, Clock, Disc, ListMusic, Heart, Music } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserRoles } from "@/hooks/use-roles";
 import type { LucideIcon } from "lucide-react";
