@@ -184,18 +184,26 @@ function AuthPage() {
           Continue with Google
         </button>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-3">
           <button
             onClick={() => {
               setMode(mode === "signin" ? "signup" : "signin");
               setError(null);
             }}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
           >
             {mode === "signin"
               ? "Don't have an account? Sign up"
               : "Already have an account? Sign in"}
           </button>
+          {mode === "signin" && (
+            <Link
+              to="/forgot-password"
+              className="text-sm text-primary hover:brightness-110 transition-colors block"
+            >
+              Forgot password?
+            </Link>
+          )}
         </div>
 
         <div className="mt-8 pt-6 border-t border-white/5 text-center">
