@@ -38,7 +38,7 @@ function AuthPage() {
           },
         });
         if (error) throw error;
-        alert("Check your email to confirm your account!");
+        window.location.href = "/dashboard";
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;

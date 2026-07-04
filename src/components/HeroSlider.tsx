@@ -42,7 +42,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   const currentSlide = slides[currentIndex];
 
   return (
-    <div className="relative w-full aspect-[21/9] md:aspect-[16/9] lg:aspect-[2.39/1] overflow-hidden rounded-2xl mb-8">
+    <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/9] lg:aspect-[2.39/1] overflow-hidden rounded-2xl mb-8">
       {/* Slide */}
       <div
         key={currentIndex}
@@ -59,15 +59,15 @@ export function HeroSlider({ slides }: HeroSliderProps) {
       {/* Content */}
       <div className="absolute inset-0 flex items-center px-8 md:px-12 lg:px-16">
         <div className="max-w-2xl">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-3">
+          <h2 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-2 md:mb-3">
             {currentSlide.title}
           </h2>
-          <p className="text-lg md:text-xl text-zinc-300 mb-6">{currentSlide.subtitle}</p>
+          <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-zinc-300 mb-4 md:mb-6">{currentSlide.subtitle}</p>
           <button
             onClick={() => handlePlay(currentSlide)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-1.5 px-4 py-2 sm:px-6 sm:py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full text-xs sm:text-sm md:text-base font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
           >
-            <Play className="size-5 fill-primary-foreground" />
+            <Play className="size-4 sm:size-5 fill-primary-foreground" />
             Play Now
           </button>
         </div>
@@ -76,14 +76,14 @@ export function HeroSlider({ slides }: HeroSliderProps) {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+        className="hidden sm:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 items-center justify-center text-white hover:bg-black/70 transition-colors"
         aria-label="Previous slide"
       >
         <ChevronLeft className="size-5" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+        className="hidden sm:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md border border-white/20 items-center justify-center text-white hover:bg-black/70 transition-colors"
         aria-label="Next slide"
       >
         <ChevronRight className="size-5" />

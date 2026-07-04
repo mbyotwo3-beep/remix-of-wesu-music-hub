@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, LogOut, UserCircle, Shield, Mic2, Menu, X, Home, Disc, Radio } from "lucide-react";
+import { Search, LogOut, UserCircle, Shield, Mic2, Menu, X } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "../hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,23 +15,21 @@ export function Navbar() {
   const isAuth = useRouterState({ select: (s) => s.location.pathname }) === "/auth";
   const isLoading = loading || rolesLoading;
 
-  const navLinks = [
-    { to: "/", label: "Home", icon: Home },
-    { to: "/browse", label: "Browse", icon: Disc },
-    { to: "/radio", label: "Radio", icon: Radio },
-  ];
+  const navLinks: { to: string; label: string; icon: any }[] = [];
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-xl h-16">
       <div className="h-full px-4 md:px-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors lg:hidden"
-            aria-label="Toggle mobile menu"
-          >
-            {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
-          </button>
+          {user && (
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors lg:hidden"
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            </button>
+          )}
           <Link
             to="/"
             className="flex items-center gap-2"
