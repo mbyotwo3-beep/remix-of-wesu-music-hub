@@ -51,6 +51,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
   const currentSlide = slides[currentIndex];
 
   return (
+    <>
     <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] md:aspect-[16/9] lg:aspect-[2.39/1] overflow-hidden rounded-2xl mb-8" onClick={() => handlePlay(currentSlide)} style={{ cursor: 'pointer' }}>
       {/* Slide */}
       <div
@@ -135,5 +136,6 @@ export function HeroSlider({ slides }: HeroSliderProps) {
         ))}
       </div>
     </div>
+    </>
   );
 }
