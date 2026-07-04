@@ -1,5 +1,5 @@
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Home, Search, Library, User, Mic2, Shield, Menu, X, LogOut, Music, Play, Grid, Radio, Clock, Disc, ListMusic, Heart } from "lucide-react";
+import { Home, Search, Library, User, Mic2, Shield, Menu, X, LogOut, Play, Grid, Radio, Clock, Disc, ListMusic, Heart } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserRoles } from "@/hooks/use-roles";
 import type { LucideIcon } from "lucide-react";
@@ -63,7 +63,6 @@ export function BottomTabBar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
 
   const tabs = computeTabs({
     isAuthenticated: !!user,
@@ -82,21 +81,9 @@ export function BottomTabBar() {
 
   return (
     <>
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsVisible(!isVisible)}
-        className={`fixed right-4 z-[70] bg-primary text-primary-foreground p-3 rounded-full shadow-lg hover:bg-primary/90 transition-all duration-300 ${
-          isVisible ? 'bottom-20' : 'bottom-4'
-        }`}
-        aria-label="Toggle navigation"
-      >
-        <Music className="size-5" />
-      </button>
 
       <nav
-        className={`fixed bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 z-50 pb-[env(safe-area-inset-bottom)] transition-transform duration-300 ${
-          isVisible ? 'translate-y-0' : 'translate-y-full'
-        }`}
+        className="fixed bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 z-50 pb-[env(safe-area-inset-bottom)]"
         aria-label="Main navigation"
       >
         <div className="flex items-stretch h-16">

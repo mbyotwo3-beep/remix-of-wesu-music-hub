@@ -70,11 +70,12 @@ export function PlayerBar() {
 
   // Load audio when track changes
   useEffect(() => {
-    if (!track) {
+    if (!track || track.id === "default-placeholder") {
       // Stop both engines
       if (currentTrackId.current) stopNative(currentTrackId.current).catch(() => {});
       getAudio().pause();
       currentTrackId.current = null;
+      setLoading(false);
       return;
     }
     if (currentTrackId.current === track.id) return;
@@ -319,8 +320,8 @@ export function PlayerBar() {
                 onClick={() => {
                   if (!loading && !error) togglePlay();
                 }}
-                disabled={loading || !!error}
-                className="bg-foreground text-background p-4 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+                disabled={loading || !!error || track.id === "default-placeholder"}
+                className="bg-foreground text-background p-4 rounded-full hover:scale-105 transition-transform disabled:opacity-30"
                 aria-label={playing ? "Pause" : "Play"}
               >
                 {loading ? (
@@ -427,8 +428,8 @@ export function PlayerBar() {
                   e.stopPropagation();
                   if (!loading && !error) togglePlay();
                 }}
-                disabled={loading || !!error}
-                className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+                disabled={loading || !!error || track.id === "default-placeholder"}
+                className="bg-foreground text-obsidian p-2.5 rounded-full hover:scale-105 transition-transform disabled:opacity-30"
                 aria-label={playing ? "Pause" : "Play"}
               >
                 {loading ? (
