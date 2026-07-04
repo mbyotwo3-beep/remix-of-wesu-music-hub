@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RadioRouteImport } from './routes/radio'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as NowPlayingRouteImport } from './routes/now-playing'
 import { Route as LabelDashboardRouteImport } from './routes/label-dashboard'
@@ -48,6 +49,11 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RadioRoute = RadioRouteImport.update({
+  id: '/radio',
+  path: '/radio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/label-dashboard': typeof LabelDashboardRoute
   '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
+  '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/label-dashboard': typeof LabelDashboardRoute
   '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
+  '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/label-dashboard': typeof LabelDashboardRoute
   '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
+  '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/label-dashboard'
     | '/now-playing'
     | '/profile'
+    | '/radio'
     | '/reset-password'
     | '/subscriptions'
     | '/superadmin'
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/label-dashboard'
     | '/now-playing'
     | '/profile'
+    | '/radio'
     | '/reset-password'
     | '/subscriptions'
     | '/superadmin'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/label-dashboard'
     | '/now-playing'
     | '/profile'
+    | '/radio'
     | '/reset-password'
     | '/subscriptions'
     | '/superadmin'
@@ -345,6 +357,7 @@ export interface RootRouteChildren {
   LabelDashboardRoute: typeof LabelDashboardRoute
   NowPlayingRoute: typeof NowPlayingRoute
   ProfileRoute: typeof ProfileRoute
+  RadioRoute: typeof RadioRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   SuperadminRoute: typeof SuperadminRoute
@@ -376,6 +389,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/radio': {
+      id: '/radio'
+      path: '/radio'
+      fullPath: '/radio'
+      preLoaderRoute: typeof RadioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -553,6 +573,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabelDashboardRoute: LabelDashboardRoute,
   NowPlayingRoute: NowPlayingRoute,
   ProfileRoute: ProfileRoute,
+  RadioRoute: RadioRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   SuperadminRoute: SuperadminRoute,
