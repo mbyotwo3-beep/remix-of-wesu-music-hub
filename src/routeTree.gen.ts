@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as NowPlayingRouteImport } from './routes/now-playing'
 import { Route as LabelDashboardRouteImport } from './routes/label-dashboard'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CollabsRouteImport } from './routes/collabs'
@@ -43,6 +45,11 @@ const SubscriptionsRoute = SubscriptionsRouteImport.update({
   path: '/subscriptions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -56,6 +63,11 @@ const NowPlayingRoute = NowPlayingRouteImport.update({
 const LabelDashboardRoute = LabelDashboardRouteImport.update({
   id: '/label-dashboard',
   path: '/label-dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -163,9 +175,11 @@ export interface FileRoutesByFullPath {
   '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/label-dashboard': typeof LabelDashboardRoute
   '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -188,9 +202,11 @@ export interface FileRoutesByTo {
   '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/label-dashboard': typeof LabelDashboardRoute
   '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -214,9 +230,11 @@ export interface FileRoutesById {
   '/collabs': typeof CollabsRoute
   '/contact': typeof ContactRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/label-dashboard': typeof LabelDashboardRoute
   '/now-playing': typeof NowPlayingRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -241,9 +259,11 @@ export interface FileRouteTypes {
     | '/collabs'
     | '/contact'
     | '/dashboard'
+    | '/forgot-password'
     | '/label-dashboard'
     | '/now-playing'
     | '/profile'
+    | '/reset-password'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
@@ -266,9 +286,11 @@ export interface FileRouteTypes {
     | '/collabs'
     | '/contact'
     | '/dashboard'
+    | '/forgot-password'
     | '/label-dashboard'
     | '/now-playing'
     | '/profile'
+    | '/reset-password'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
@@ -291,9 +313,11 @@ export interface FileRouteTypes {
     | '/collabs'
     | '/contact'
     | '/dashboard'
+    | '/forgot-password'
     | '/label-dashboard'
     | '/now-playing'
     | '/profile'
+    | '/reset-password'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
@@ -317,9 +341,11 @@ export interface RootRouteChildren {
   CollabsRoute: typeof CollabsRoute
   ContactRoute: typeof ContactRoute
   DashboardRoute: typeof DashboardRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LabelDashboardRoute: typeof LabelDashboardRoute
   NowPlayingRoute: typeof NowPlayingRoute
   ProfileRoute: typeof ProfileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   SuperadminRoute: typeof SuperadminRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
@@ -345,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SubscriptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
@@ -364,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/label-dashboard'
       fullPath: '/label-dashboard'
       preLoaderRoute: typeof LabelDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -509,9 +549,11 @@ const rootRouteChildren: RootRouteChildren = {
   CollabsRoute: CollabsRoute,
   ContactRoute: ContactRoute,
   DashboardRoute: DashboardRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LabelDashboardRoute: LabelDashboardRoute,
   NowPlayingRoute: NowPlayingRoute,
   ProfileRoute: ProfileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   SuperadminRoute: SuperadminRoute,
   ArtistsIdRoute: ArtistsIdRoute,
