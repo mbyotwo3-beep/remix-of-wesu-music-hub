@@ -83,7 +83,7 @@ export function BottomTabBar() {
     <>
 
       <nav
-        className="fixed bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 z-50 pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 inset-x-0 bg-background/70 backdrop-blur-xl border-t border-border/50 z-50 pb-[env(safe-area-inset-bottom)]"
         aria-label="Main navigation"
       >
         <div className="flex items-stretch h-16">
@@ -97,7 +97,7 @@ export function BottomTabBar() {
                 aria-label={tab.ariaLabel}
                 aria-current={isActive ? "page" : undefined}
                 className={`flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] min-w-[44px] transition-colors ${
-                  isActive ? "text-white" : "text-gray-400 hover:text-white"
+                  isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="size-6" />
@@ -108,7 +108,7 @@ export function BottomTabBar() {
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             aria-label="Search"
-            className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] min-w-[44px] transition-colors text-gray-400 hover:text-white"
+            className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] min-w-[44px] transition-colors text-muted-foreground hover:text-foreground"
           >
             <Search className="size-6" />
             <span className="text-[10px] font-medium leading-none">Search</span>
@@ -116,7 +116,7 @@ export function BottomTabBar() {
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Menu"
-            className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] min-w-[44px] transition-colors text-gray-400 hover:text-white"
+            className="flex-1 flex flex-col items-center justify-center gap-1 min-h-[44px] min-w-[44px] transition-colors text-muted-foreground hover:text-foreground"
           >
             {menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
             <span className="text-[10px] font-medium leading-none">Menu</span>
