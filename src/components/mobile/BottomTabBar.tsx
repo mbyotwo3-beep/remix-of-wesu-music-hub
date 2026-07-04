@@ -205,18 +205,7 @@ export function BottomTabBar() {
               <Radio className="size-5" />
               <span className="text-sm font-medium">Radio</span>
             </button>
-            {!user && (
-              <button
-                onClick={() => {
-                  navigate({ to: "/become-artist" });
-                  setMenuOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-              >
-                <Mic2 className="size-5" />
-                <span className="text-sm font-medium">Become an Artist</span>
-              </button>
-            )}
+
             {/* Library Section */}
             <h3 className="px-3 mb-2 mt-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Library
@@ -321,18 +310,6 @@ export function BottomTabBar() {
                   <User className="size-5" />
                   <span className="text-sm font-medium">Profile</span>
                 </button>
-                {!isArtist && (
-                  <button
-                    onClick={() => {
-                      navigate({ to: "/become-artist" });
-                      setMenuOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
-                  >
-                    <Mic2 className="size-5" />
-                    <span className="text-sm font-medium">Become an Artist</span>
-                  </button>
-                )}
                 {isArtist && (
                   <button
                     onClick={() => {
@@ -383,6 +360,21 @@ export function BottomTabBar() {
               </>
             )}
           </div>
+          {/* Pinned bottom: Become an Artist (like desktop sidebar) */}
+          {!isArtist && (
+            <div className="border-t border-border p-4">
+              <button
+                onClick={() => {
+                  navigate({ to: "/become-artist" });
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-left text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
+              >
+                <Mic2 className="size-5" />
+                <span className="text-sm font-medium">Become an Artist</span>
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>
