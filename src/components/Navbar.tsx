@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search, LogOut, UserCircle, Shield, Mic2, Menu, X } from "lucide-react";
 import { useAuth } from "../hooks/use-auth";
