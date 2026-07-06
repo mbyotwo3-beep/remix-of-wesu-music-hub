@@ -1,17 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// Best-effort audit; RLS may block insert for regular users — never fail the
+// user's action because of this. SUPABASE_SERVICE_ROLE_KEY is not available on
+// Lovable Cloud, so we can't fall back to an admin client here.
 async function audit(
+  client: SupabaseClient,
   actorId: string,
   action: string,
   target_type?: string,
   target_id?: string,
   meta: any = {},
 ) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin
-    .from("audit_log")
-    .insert({ actor_id: actorId, action, target_type, target_id, meta });
+  try {
+    await client
+      .from("audit_log")
+      .insert({ actor_id: actorId, action, target_type, target_id, meta } as any);
+  } catch {
+    /* ignore */
+  }
 }
 
 // ---------- Artist application & profile ----------
@@ -31,8 +39,7 @@ export const applyAsArtist = createServerFn({ method: "POST" })
     }
 
     if (existing && existing.status === "rejected") {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data: row, error } = await supabaseAdmin
+      const { data: row, error } = await supabase
         .from("artists")
         .update({
           name: data.name,
@@ -44,13 +51,11 @@ export const applyAsArtist = createServerFn({ method: "POST" })
         .select("id, status")
         .single();
       if (error) throw new Error(error.message);
-      await audit(userId, "artist.reapply", "artist", row!.id);
+      await audit(supabase, userId, "artist.reapply", "artist", row!.id);
       return { ok: true, status: row!.status, id: row!.id };
     }
 
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await supabase
       .from("artists")
       .insert({
         user_id: userId,
@@ -62,9 +67,10 @@ export const applyAsArtist = createServerFn({ method: "POST" })
       .select("id, status")
       .single();
     if (error) throw new Error(error.message);
-    await audit(userId, "artist.apply", "artist", row!.id);
+    await audit(supabase, userId, "artist.apply", "artist", row!.id);
     return { ok: true, status: row!.status, id: row!.id };
   });
+
 
 export const updateArtistProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -87,7 +93,7 @@ export const updateArtistProfile = createServerFn({ method: "POST" })
     if (data.social_links) patch.social_links = data.social_links;
     const { error } = await supabase.from("artists").update(patch).eq("user_id", userId);
     if (error) throw new Error(error.message);
-    await audit(userId, "artist.profile.update", "artist", userId, patch);
+    await audit(supabase, userId, "artist.profile.update", "artist", userId, patch);
     return { ok: true };
   });
 
@@ -133,7 +139,7 @@ export const uploadSong = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await audit(userId, "song.upload", "song", song!.id, { title: data.title });
+    await audit(supabase, userId, "song.upload", "song", song!.id, { title: data.title });
     return { ok: true, id: song!.id };
   });
 
@@ -173,7 +179,7 @@ export const createAlbum = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await audit(userId, "album.create", "album", album!.id, { title: data.title });
+    await audit(supabase, userId, "album.create", "album", album!.id, { title: data.title });
     return { ok: true, id: album!.id };
   });
 
@@ -214,7 +220,7 @@ export const requestPayout = createServerFn({ method: "POST" })
       destination: data.destination,
     } as any);
     if (error) throw new Error(error.message);
-    await audit(userId, "payout.request", "artist", (artist as any).id, { amount: data.amount });
+    await audit(supabase, userId, "payout.request", "artist", (artist as any).id, { amount: data.amount });
     return { ok: true };
   });
 
@@ -264,14 +270,13 @@ export const leaveLabel = createServerFn({ method: "POST" })
       .eq("user_id", context.userId)
       .maybeSingle();
     if (!artist) throw new Error("Artist profile required");
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
+    await context.supabase
       .from("artists")
-      .update({ label_id: null })
+      .update({ label_id: null } as any)
       .eq("id", (artist as any).id);
-    await supabaseAdmin
+    await context.supabase
       .from("label_artists")
-      .update({ status: "left" })
+      .update({ status: "left" } as any)
       .eq("artist_id", (artist as any).id)
       .eq("status", "active");
     return { ok: true };
