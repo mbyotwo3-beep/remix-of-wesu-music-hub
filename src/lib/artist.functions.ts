@@ -93,7 +93,7 @@ export const updateArtistProfile = createServerFn({ method: "POST" })
     if (data.social_links) patch.social_links = data.social_links;
     const { error } = await supabase.from("artists").update(patch).eq("user_id", userId);
     if (error) throw new Error(error.message);
-    await audit(userId, "artist.profile.update", "artist", userId, patch);
+    await audit(supabase, userId, "artist.profile.update", "artist", userId, patch);
     return { ok: true };
   });
 
@@ -139,7 +139,7 @@ export const uploadSong = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await audit(userId, "song.upload", "song", song!.id, { title: data.title });
+    await audit(supabase, userId, "song.upload", "song", song!.id, { title: data.title });
     return { ok: true, id: song!.id };
   });
 
@@ -179,7 +179,7 @@ export const createAlbum = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    await audit(userId, "album.create", "album", album!.id, { title: data.title });
+    await audit(supabase, userId, "album.create", "album", album!.id, { title: data.title });
     return { ok: true, id: album!.id };
   });
 
@@ -220,7 +220,7 @@ export const requestPayout = createServerFn({ method: "POST" })
       destination: data.destination,
     } as any);
     if (error) throw new Error(error.message);
-    await audit(userId, "payout.request", "artist", (artist as any).id, { amount: data.amount });
+    await audit(supabase, userId, "payout.request", "artist", (artist as any).id, { amount: data.amount });
     return { ok: true };
   });
 
