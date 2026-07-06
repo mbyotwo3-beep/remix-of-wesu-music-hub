@@ -55,6 +55,67 @@ export const searchSongs = createServerFn({ method: "GET" })
     return rows ?? [];
   });
 
+/**
+ * Spotify-style global search — hits songs, albums, and artists in parallel.
+ * Ranks by exact/prefix match first, then substring match, then popularity.
+ */
+export const globalSearch = createServerFn({ method: "GET" })
+  .validator((d: { q: string; limit?: number }) => d)
+  .handler(async ({ data }) => {
+    const q = (data.q ?? "").trim();
+    if (!q) return { songs: [], albums: [], artists: [] };
+    const limit = data.limit ?? 8;
+    const supabase = getPublicSupabase();
+    const like = `%${q}%`;
+
+    const [songsRes, albumsRes, artistsRes] = await Promise.all([
+      supabase
+        .from("songs")
+        .select("id,title,cover_url,price,duration,play_count,artist:artists(id,name)")
+        .ilike("title", like)
+        .order("play_count", { ascending: false })
+        .limit(limit * 3),
+      supabase
+        .from("albums")
+        .select("id,title,cover_url,price,release_date,artist:artists(id,name)")
+        .ilike("title", like)
+        .order("release_date", { ascending: false })
+        .limit(limit * 3),
+      supabase
+        .from("artists")
+        .select("id,name,avatar_url,genre,verified,monthly_listeners")
+        .ilike("name", like)
+        .order("monthly_listeners", { ascending: false })
+        .limit(limit * 3),
+    ]);
+
+    if (songsRes.error) throw new Error(songsRes.error.message);
+    if (albumsRes.error) throw new Error(albumsRes.error.message);
+    if (artistsRes.error) throw new Error(artistsRes.error.message);
+
+    const needle = q.toLowerCase();
+    const score = (s: string | null | undefined) => {
+      if (!s) return 0;
+      const v = s.toLowerCase();
+      if (v === needle) return 3;
+      if (v.startsWith(needle)) return 2;
+      if (v.includes(needle)) return 1;
+      return 0;
+    };
+    const sortByScore = <T extends { title?: string; name?: string }>(rows: T[]) =>
+      rows
+        .map((r, i) => ({ r, s: score(r.title ?? r.name), i }))
+        .sort((a, b) => b.s - a.s || a.i - b.i)
+        .map((x) => x.r)
+        .slice(0, limit);
+
+    return {
+      songs: sortByScore(songsRes.data ?? []),
+      albums: sortByScore(albumsRes.data ?? []),
+      artists: sortByScore(artistsRes.data ?? []),
+    };
+  });
+
 export const listAlbums = createServerFn({ method: "GET" }).handler(async () => {
   const supabase = getPublicSupabase();
   const { data, error } = await supabase
