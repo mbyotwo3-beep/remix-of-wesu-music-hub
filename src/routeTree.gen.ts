@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SuperadminRouteImport } from './routes/superadmin'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -44,6 +45,11 @@ const SuperadminRoute = SuperadminRouteImport.update({
 const SubscriptionsRoute = SubscriptionsRouteImport.update({
   id: '/subscriptions',
   path: '/subscriptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/search': typeof SearchRoute
   '/subscriptions': typeof SubscriptionsRoute
   '/superadmin': typeof SuperadminRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/radio'
     | '/reset-password'
+    | '/search'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/radio'
     | '/reset-password'
+    | '/search'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/radio'
     | '/reset-password'
+    | '/search'
     | '/subscriptions'
     | '/superadmin'
     | '/artists/$id'
@@ -359,6 +371,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RadioRoute: typeof RadioRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SearchRoute: typeof SearchRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
   SuperadminRoute: typeof SuperadminRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
@@ -382,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/subscriptions'
       fullPath: '/subscriptions'
       preLoaderRoute: typeof SubscriptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -575,6 +595,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RadioRoute: RadioRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SearchRoute: SearchRoute,
   SubscriptionsRoute: SubscriptionsRoute,
   SuperadminRoute: SuperadminRoute,
   ArtistsIdRoute: ArtistsIdRoute,
@@ -586,13 +607,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

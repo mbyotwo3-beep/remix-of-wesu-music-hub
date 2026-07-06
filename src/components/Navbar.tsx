@@ -5,6 +5,7 @@ import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "../hooks/use-roles";
 import { supabase } from "@/integrations/supabase/client";
 import { ThemeToggle } from "./ThemeToggle";
+import { GlobalSearch } from "./GlobalSearch";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,21 +52,18 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="bg-secondary/50 border border-input rounded-full pl-9 pr-4 py-2 text-sm w-40 md:w-64 focus:outline-none focus:border-ring text-foreground placeholder:text-muted-foreground transition-colors"
-            />
+          <div className="hidden md:block">
+            <GlobalSearch />
           </div>
 
-          <button
+          <Link
+            to="/search"
+            search={{ q: "", tab: "all" }}
             className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Search"
           >
             <Search className="size-5" />
-          </button>
+          </Link>
 
           <ThemeToggle />
 
