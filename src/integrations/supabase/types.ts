@@ -384,6 +384,7 @@ export type Database = {
           id: string
           is_enabled: boolean
           label: string
+          lenco_operator: string | null
           logo_url: string | null
           sort_order: number
         }
@@ -394,6 +395,7 @@ export type Database = {
           id?: string
           is_enabled?: boolean
           label: string
+          lenco_operator?: string | null
           logo_url?: string | null
           sort_order?: number
         }
@@ -404,6 +406,7 @@ export type Database = {
           id?: string
           is_enabled?: boolean
           label?: string
+          lenco_operator?: string | null
           logo_url?: string | null
           sort_order?: number
         }
