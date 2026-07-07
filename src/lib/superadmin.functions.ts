@@ -52,6 +52,42 @@ export const grantRole = createServerFn({ method: "POST" })
       .from("user_roles")
       .upsert({ user_id: data.user_id, role: data.role }, { onConflict: "user_id,role" });
     if (error) throw new Error(error.message);
+
+    // When granting the artist role, ensure an approved artist profile exists.
+    // This handles the case where the user never went through the application
+    // flow, so they appear on the public artists listing immediately.
+    if (data.role === "artist") {
+      const { data: existing } = await supabaseAdmin
+        .from("artists")
+        .select("id, status")
+        .eq("user_id", data.user_id)
+        .maybeSingle();
+
+      if (existing) {
+        // Artist profile exists — make sure it's approved.
+        if (existing.status !== "approved") {
+          await supabaseAdmin
+            .from("artists")
+            .update({ status: "approved", verified: true } as any)
+            .eq("id", existing.id);
+        }
+      } else {
+        // No artist profile yet — fetch the user's display name and create one.
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", data.user_id)
+          .maybeSingle();
+        const artistName = (profile as any)?.full_name || "Artist";
+        await supabaseAdmin.from("artists").insert({
+          user_id: data.user_id,
+          name: artistName,
+          status: "approved",
+          verified: true,
+        } as any);
+      }
+    }
+
     await audit(context.userId, "role.grant", "user", data.user_id, { role: data.role });
     return { ok: true };
   });

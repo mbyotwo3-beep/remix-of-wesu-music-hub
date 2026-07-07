@@ -84,6 +84,7 @@ export const globalSearch = createServerFn({ method: "GET" })
       supabase
         .from("artists")
         .select("id,name,avatar_url,genre,verified,monthly_listeners")
+        .eq("status", "approved")
         .ilike("name", like)
         .order("monthly_listeners", { ascending: false })
         .limit(limit * 3),
@@ -132,6 +133,7 @@ export const listArtists = createServerFn({ method: "GET" }).handler(async () =>
   const { data, error } = await supabase
     .from("artists")
     .select("id,name,genre,avatar_url,verified,monthly_listeners")
+    .eq("status", "approved")
     .order("monthly_listeners", { ascending: false })
     .limit(60);
   if (error) throw new Error(error.message);
