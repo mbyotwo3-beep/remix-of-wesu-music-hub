@@ -123,6 +123,17 @@ export const uploadSong = createServerFn({ method: "POST" })
     if ((artist as any).status === "pending")
       throw new Error("Your artist application is pending approval");
 
+    // Security: storage paths must be scoped to the caller's own folder.
+    // Prevents referencing another user's private object and later obtaining
+    // a signed download URL for it via admin-signed URL helpers.
+    const ownerPrefix = `${userId}/`;
+    if (!data.audio_url || !data.audio_url.startsWith(ownerPrefix)) {
+      throw new Error("Invalid audio_url: must be under your own storage folder");
+    }
+    if (data.cover_url && !data.cover_url.startsWith(ownerPrefix)) {
+      throw new Error("Invalid cover_url: must be under your own storage folder");
+    }
+
     const { data: song, error } = await supabase
       .from("songs")
       .insert({
