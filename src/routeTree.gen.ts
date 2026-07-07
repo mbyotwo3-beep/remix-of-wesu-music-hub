@@ -35,6 +35,7 @@ import { Route as LabelsIndexRouteImport } from './routes/labels.index'
 import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as LabelsSlugRouteImport } from './routes/labels.$slug'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
+import { Route as ApiPublicLencoWebhookRouteImport } from './routes/api/public/lenco-webhook'
 import { Route as ApiPublicDpoWebhookRouteImport } from './routes/api/public/dpo-webhook'
 
 const SuperadminRoute = SuperadminRouteImport.update({
@@ -167,6 +168,11 @@ const ArtistsIdRoute = ArtistsIdRouteImport.update({
   path: '/artists/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicLencoWebhookRoute = ApiPublicLencoWebhookRouteImport.update({
+  id: '/api/public/lenco-webhook',
+  path: '/api/public/lenco-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDpoWebhookRoute = ApiPublicDpoWebhookRouteImport.update({
   id: '/api/public/dpo-webhook',
   path: '/api/public/dpo-webhook',
@@ -201,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/artists/': typeof ArtistsIndexRoute
   '/labels/': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
+  '/api/public/lenco-webhook': typeof ApiPublicLencoWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -230,6 +237,7 @@ export interface FileRoutesByTo {
   '/artists': typeof ArtistsIndexRoute
   '/labels': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
+  '/api/public/lenco-webhook': typeof ApiPublicLencoWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/artists/': typeof ArtistsIndexRoute
   '/labels/': typeof LabelsIndexRoute
   '/api/public/dpo-webhook': typeof ApiPublicDpoWebhookRoute
+  '/api/public/lenco-webhook': typeof ApiPublicLencoWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/artists/'
     | '/labels/'
     | '/api/public/dpo-webhook'
+    | '/api/public/lenco-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/artists'
     | '/labels'
     | '/api/public/dpo-webhook'
+    | '/api/public/lenco-webhook'
   id:
     | '__root__'
     | '/'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/artists/'
     | '/labels/'
     | '/api/public/dpo-webhook'
+    | '/api/public/lenco-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -379,6 +391,7 @@ export interface RootRouteChildren {
   ArtistsIndexRoute: typeof ArtistsIndexRoute
   LabelsIndexRoute: typeof LabelsIndexRoute
   ApiPublicDpoWebhookRoute: typeof ApiPublicDpoWebhookRoute
+  ApiPublicLencoWebhookRoute: typeof ApiPublicLencoWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -565,6 +578,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/lenco-webhook': {
+      id: '/api/public/lenco-webhook'
+      path: '/api/public/lenco-webhook'
+      fullPath: '/api/public/lenco-webhook'
+      preLoaderRoute: typeof ApiPublicLencoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/dpo-webhook': {
       id: '/api/public/dpo-webhook'
       path: '/api/public/dpo-webhook'
@@ -603,17 +623,8 @@ const rootRouteChildren: RootRouteChildren = {
   ArtistsIndexRoute: ArtistsIndexRoute,
   LabelsIndexRoute: LabelsIndexRoute,
   ApiPublicDpoWebhookRoute: ApiPublicDpoWebhookRoute,
+  ApiPublicLencoWebhookRoute: ApiPublicLencoWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

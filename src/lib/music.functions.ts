@@ -186,6 +186,30 @@ export const getAlbumWithSongs = createServerFn({ method: "GET" })
     return { album: album.data, songs: songs.data ?? [] };
   });
 
+// ---------- Purchasable item lookup (song or album) ----------
+
+export const getPurchasableItem = createServerFn({ method: "GET" })
+  .validator((d: { item_type: "song" | "album"; id: string }) => d)
+  .handler(async ({ data }) => {
+    const supabase = getPublicSupabase();
+    if (data.item_type === "song") {
+      const { data: row, error } = await supabase
+        .from("songs")
+        .select("id,title,price,cover_url,artist:artists(id,name)")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
+      return row;
+    }
+    const { data: row, error } = await supabase
+      .from("albums")
+      .select("id,title,price,cover_url,artist:artists(id,name)")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
 // ---------- Subscription Plans & Payment Methods ----------
 
 export const getSubscriptionPlans = createServerFn({ method: "GET" }).handler(async () => {

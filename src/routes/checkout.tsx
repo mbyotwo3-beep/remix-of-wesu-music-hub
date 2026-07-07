@@ -1,9 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { CreditCard, Smartphone, Check, Loader2 } from "lucide-react";
-import { getPaymentMethods, getSubscriptionPlans } from "@/lib/music.functions";
+import {
+  getPaymentMethods,
+  getSubscriptionPlans,
+  getPurchasableItem,
+} from "@/lib/music.functions";
 import { initiatePayment } from "@/lib/payments.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { usePlatform } from "@/hooks/use-platform";
@@ -12,6 +16,12 @@ import { MobileCheckout } from "@/components/mobile/screens/MobileCheckout";
 const methodsQO = queryOptions({ queryKey: ["methods"], queryFn: () => getPaymentMethods() });
 const plansQO = queryOptions({ queryKey: ["plans"], queryFn: () => getSubscriptionPlans() });
 
+type CheckoutSearch = {
+  plan: string;
+  item?: "song" | "album";
+  id?: string;
+};
+
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
@@ -19,9 +29,14 @@ export const Route = createFileRoute("/checkout")({
       { name: "description", content: "Complete your purchase on Wesu+." },
     ],
   }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    plan: typeof s.plan === "string" ? s.plan : "premium_monthly",
-  }),
+  validateSearch: (s: Record<string, unknown>): CheckoutSearch => {
+    const item = s.item === "song" || s.item === "album" ? s.item : undefined;
+    return {
+      plan: typeof s.plan === "string" ? s.plan : "premium_monthly",
+      item,
+      id: typeof s.id === "string" ? s.id : undefined,
+    };
+  },
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(methodsQO);
     context.queryClient.ensureQueryData(plansQO);
@@ -38,13 +53,22 @@ function CheckoutRoute() {
 }
 
 function CheckoutPage() {
-  const { plan: planCode } = Route.useSearch();
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { data: methods } = useSuspenseQuery(methodsQO);
   const { data: plans } = useSuspenseQuery(plansQO);
 
-  const plan = plans.find((p) => p.code === planCode) ?? plans[0];
+  const isPurchase = !!(search.item && search.id);
+  const { data: purchasable } = useQuery({
+    queryKey: ["purchasable", search.item, search.id],
+    queryFn: () =>
+      getPurchasableItem({ data: { item_type: search.item!, id: search.id! } }),
+    enabled: isPurchase,
+  });
+
+  const plan = plans.find((p) => p.code === search.plan) ?? plans[0];
+
   const [selectedMethodCode, setSelectedMethodCode] = useState(methods[0]?.code ?? "");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [resultMsg, setResultMsg] = useState<string | null>(null);
@@ -56,14 +80,54 @@ function CheckoutPage() {
   const payFn = useServerFn(initiatePayment);
   const mutation = useMutation({
     mutationFn: payFn,
-    onSuccess: (res) => setResultMsg(res.message ?? null),
+    onSuccess: (res: any) => {
+      if (res?.paymentUrl) {
+        // Card / hosted checkout — redirect to Lenco
+        window.location.href = res.paymentUrl;
+        return;
+      }
+      setResultMsg(
+        res?.message ??
+          (res?.pendingUssd
+            ? "Check your phone and approve the payment prompt."
+            : "Payment started."),
+      );
+    },
     onError: (e: Error) => setResultMsg(e.message),
   });
 
-  if (loading || !user || !plan) return null;
+  if (loading || !user) return null;
+
+  // Resolve line item
+  let lineName = "";
+  let linePrice = 0;
+  let itemType: "song" | "album" | "subscription" = "subscription";
+  let itemId: string | undefined;
+
+  if (isPurchase && purchasable) {
+    lineName = `${(purchasable as any).title}${(purchasable as any).artist?.name ? ` — ${(purchasable as any).artist.name}` : ""}`;
+    linePrice = Number((purchasable as any).price ?? 0);
+    itemType = search.item!;
+    itemId = (purchasable as any).id;
+  } else if (!isPurchase && plan) {
+    lineName = `Wesu+ ${plan.name}`;
+    linePrice = Number(plan.price_zmw);
+    itemType = "subscription";
+    itemId = plan.id;
+  } else if (isPurchase && !purchasable) {
+    return <div className="p-12 text-center text-muted-foreground">Loading item…</div>;
+  } else {
+    return null;
+  }
 
   const selectedMethod = methods.find((m) => m.code === selectedMethodCode);
   const isCard = selectedMethod?.category === "card";
+  const disabled =
+    mutation.isPending ||
+    !selectedMethodCode ||
+    !itemId ||
+    (!isCard && !phoneNumber.trim()) ||
+    linePrice <= 0;
 
   return (
     <div className="min-h-screen pb-24">
@@ -74,14 +138,12 @@ function CheckoutPage() {
         <div className="bg-card border border-white/5 rounded-2xl p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
           <div className="flex justify-between items-center py-3 border-b border-white/5">
-            <span className="text-muted-foreground">Wesu+ {plan.name}</span>
-            <span className="font-semibold">ZMW {Number(plan.price_zmw).toFixed(2)}</span>
+            <span className="text-muted-foreground">{lineName}</span>
+            <span className="font-semibold">ZMW {linePrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center py-3">
             <span className="font-semibold">Total</span>
-            <span className="text-xl font-bold text-primary">
-              ZMW {Number(plan.price_zmw).toFixed(2)}
-            </span>
+            <span className="text-xl font-bold text-primary">ZMW {linePrice.toFixed(2)}</span>
           </div>
         </div>
 
@@ -121,13 +183,12 @@ function CheckoutPage() {
                 className="w-full bg-secondary/50 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary/50"
               />
               <p className="text-xs text-muted-foreground">
-                You will receive a prompt on your phone to authorize this payment.
+                You'll receive a prompt on your phone to authorize this payment.
               </p>
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Card payments are processed securely by DPO Pay. You'll be redirected after
-              confirming.
+              Card payments are processed securely by Lenco. You'll be redirected after confirming.
             </p>
           )}
         </div>
@@ -139,14 +200,13 @@ function CheckoutPage() {
         )}
 
         <button
-          disabled={mutation.isPending || !selectedMethodCode}
+          disabled={disabled}
           onClick={() =>
             mutation.mutate({
               data: {
-                
                 method_code: selectedMethodCode,
-                item_type: "subscription",
-                item_id: plan.id,
+                item_type: itemType,
+                item_id: itemId!,
                 phone: phoneNumber || undefined,
               },
             })
@@ -158,7 +218,7 @@ function CheckoutPage() {
           ) : (
             <Check className="size-4" />
           )}
-          Pay ZMW {Number(plan.price_zmw).toFixed(2)}
+          Pay ZMW {linePrice.toFixed(2)}
         </button>
       </div>
     </div>
