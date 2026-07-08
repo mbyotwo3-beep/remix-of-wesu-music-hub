@@ -4,13 +4,19 @@ import { useServerFn } from "@tanstack/react-start";
 import { Upload, TrendingUp, DollarSign, Music, BarChart3 } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
+import { useUserRoles } from "@/hooks/use-roles";
 import { getMyArtistOverview } from "@/lib/user.functions";
+import { RoleGate } from "@/components/RoleGate";
 
 export const Route = createFileRoute("/artist-dashboard")({
   head: () => ({
     meta: [{ title: "Artist Dashboard — Wesu+" }],
   }),
-  component: ArtistDashboardPage,
+  component: () => (
+    <RoleGate require="artist">
+      <ArtistDashboardPage />
+    </RoleGate>
+  ),
   errorComponent: ({ error }) => <div className="p-12 text-center">Failed: {error.message}</div>,
   notFoundComponent: () => <div className="p-12 text-center">Not found</div>,
 });
@@ -24,15 +30,26 @@ function ArtistDashboardPage() {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["artist-overview", user?.id],
     queryFn: () => fetchOverview(),
     enabled: !!user,
+    retry: 1,
   });
 
   if (loading || !user) return null;
-  if (isLoading || !data)
-    return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto p-12 text-center">
+        <p className="text-destructive mb-4">Failed to load artist data</p>
+        <p className="text-sm text-muted-foreground">{(error as Error).message}</p>
+      </div>
+    );
+  }
+  if (isLoading)
+    return <div className="p-12 text-center text-muted-foreground">Loading artist data…</div>;
+  if (!data)
+    return <div className="p-12 text-center text-muted-foreground">No artist data available</div>;
 
   if (!data.artist) {
     return (
@@ -40,8 +57,7 @@ function ArtistDashboardPage() {
         <Music className="size-12 mx-auto mb-4 text-muted-foreground" />
         <h1 className="text-2xl font-bold mb-2">You're not an artist yet</h1>
         <p className="text-muted-foreground mb-6">
-          Apply for an artist account to start uploading music. An admin will review your
-          application.
+          You have the artist role but no artist profile. Apply for an artist account to start uploading music.
         </p>
         <a
           href="/become-artist"

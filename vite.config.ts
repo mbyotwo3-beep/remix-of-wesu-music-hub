@@ -12,4 +12,22 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    build: {
+      rollupOptions: {
+        external: ['crypto', 'node:crypto'],
+        onwarn(warning, warn) {
+          // Ignore warnings about external crypto module
+          if (warning.code === 'MODULE_NOT_FOUND' && warning.message.includes('crypto')) {
+            return;
+          }
+          warn(warning);
+        },
+      },
+    },
+    ssr: {
+      // Don't externalize crypto for SSR - it's needed on the server
+      noExternal: ['crypto', 'node:crypto'],
+    },
+  },
 });

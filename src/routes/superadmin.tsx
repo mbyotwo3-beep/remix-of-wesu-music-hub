@@ -177,7 +177,7 @@ function FeaturedTab() {
   const { data } = useQuery({
     queryKey: ["super-featured"],
     queryFn: () => listFn(),
-    retry: false,
+    retry: 1,
   });
   const upsertM = useMutation({
     mutationFn: upsertFn,
@@ -320,7 +320,7 @@ function FeaturedTab() {
 
 function OverviewTab() {
   const fn = useServerFn(getPlatformStats);
-  const { data } = useQuery({ queryKey: ["super-stats"], queryFn: () => fn(), retry: false });
+  const { data } = useQuery({ queryKey: ["super-stats"], queryFn: () => fn(), retry: 1 });
   if (!data) return <div className="text-muted-foreground">Loading…</div>;
   const cards = [
     { label: "Total Users", value: data.totalUsers },
@@ -348,7 +348,7 @@ function UsersTab() {
   const { data: users } = useQuery({
     queryKey: ["super-users"],
     queryFn: () => list(),
-    retry: false,
+    retry: 1,
   });
 
   const grantM = useMutation({
@@ -563,7 +563,7 @@ function PayoutsTab() {
   const qc = useQueryClient();
   const list = useServerFn(listPayouts);
   const decide = useServerFn(decidePayout);
-  const { data } = useQuery({ queryKey: ["super-payouts"], queryFn: () => list(), retry: false });
+  const { data } = useQuery({ queryKey: ["super-payouts"], queryFn: () => list(), retry: 1 });
   const m = useMutation({
     mutationFn: decide,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["super-payouts"] }),
@@ -707,7 +707,7 @@ function SettingsTab() {
 
 function AuditTab() {
   const fn = useServerFn(listAudit);
-  const { data } = useQuery({ queryKey: ["super-audit"], queryFn: () => fn(), retry: false });
+  const { data } = useQuery({ queryKey: ["super-audit"], queryFn: () => fn(), retry: 1 });
   if (!data) return <div className="text-muted-foreground">Loading…</div>;
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">

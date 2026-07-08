@@ -134,7 +134,7 @@ export const listArtists = createServerFn({ method: "GET" }).handler(async () =>
     .from("artists")
     .select("id,name,genre,avatar_url,verified,monthly_listeners")
     .eq("status", "approved")
-    .order("monthly_listeners", { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(60);
   if (error) throw new Error(error.message);
   return data ?? [];

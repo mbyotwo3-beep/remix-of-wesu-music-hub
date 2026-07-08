@@ -15,7 +15,9 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RadioRouteImport } from './routes/radio'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PlaylistsRouteImport } from './routes/playlists'
 import { Route as NowPlayingRouteImport } from './routes/now-playing'
+import { Route as LibraryRouteImport } from './routes/library'
 import { Route as LabelDashboardRouteImport } from './routes/label-dashboard'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -68,9 +70,19 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlaylistsRoute = PlaylistsRouteImport.update({
+  id: '/playlists',
+  path: '/playlists',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NowPlayingRoute = NowPlayingRouteImport.update({
   id: '/now-playing',
   path: '/now-playing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LabelDashboardRoute = LabelDashboardRouteImport.update({
@@ -195,7 +207,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/label-dashboard': typeof LabelDashboardRoute
+  '/library': typeof LibraryRoute
   '/now-playing': typeof NowPlayingRoute
+  '/playlists': typeof PlaylistsRoute
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -225,7 +239,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/label-dashboard': typeof LabelDashboardRoute
+  '/library': typeof LibraryRoute
   '/now-playing': typeof NowPlayingRoute
+  '/playlists': typeof PlaylistsRoute
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -256,7 +272,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/label-dashboard': typeof LabelDashboardRoute
+  '/library': typeof LibraryRoute
   '/now-playing': typeof NowPlayingRoute
+  '/playlists': typeof PlaylistsRoute
   '/profile': typeof ProfileRoute
   '/radio': typeof RadioRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -288,7 +306,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/label-dashboard'
+    | '/library'
     | '/now-playing'
+    | '/playlists'
     | '/profile'
     | '/radio'
     | '/reset-password'
@@ -318,7 +338,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/label-dashboard'
+    | '/library'
     | '/now-playing'
+    | '/playlists'
     | '/profile'
     | '/radio'
     | '/reset-password'
@@ -348,7 +370,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-password'
     | '/label-dashboard'
+    | '/library'
     | '/now-playing'
+    | '/playlists'
     | '/profile'
     | '/radio'
     | '/reset-password'
@@ -379,7 +403,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LabelDashboardRoute: typeof LabelDashboardRoute
+  LibraryRoute: typeof LibraryRoute
   NowPlayingRoute: typeof NowPlayingRoute
+  PlaylistsRoute: typeof PlaylistsRoute
   ProfileRoute: typeof ProfileRoute
   RadioRoute: typeof RadioRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -438,11 +464,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/playlists': {
+      id: '/playlists'
+      path: '/playlists'
+      fullPath: '/playlists'
+      preLoaderRoute: typeof PlaylistsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/now-playing': {
       id: '/now-playing'
       path: '/now-playing'
       fullPath: '/now-playing'
       preLoaderRoute: typeof NowPlayingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/label-dashboard': {
@@ -611,7 +651,9 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LabelDashboardRoute: LabelDashboardRoute,
+  LibraryRoute: LibraryRoute,
   NowPlayingRoute: NowPlayingRoute,
+  PlaylistsRoute: PlaylistsRoute,
   ProfileRoute: ProfileRoute,
   RadioRoute: RadioRoute,
   ResetPasswordRoute: ResetPasswordRoute,
@@ -628,3 +670,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

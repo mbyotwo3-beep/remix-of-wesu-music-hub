@@ -4,7 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { Headphones, Heart, ListMusic, ShoppingBag } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
+import { useUserRoles } from "@/hooks/use-roles";
 import { getMyOverview } from "@/lib/user.functions";
+import { getMyLabel } from "@/lib/labels.functions";
 import { usePlatform } from "@/hooks/use-platform";
 import { MobileLibrary } from "@/components/mobile/screens/MobileLibrary";
 
@@ -18,7 +20,36 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardRoute() {
+  const { isSuperAdmin, isAdmin, isArtist, loading } = useUserRoles();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const platform = usePlatform();
+  const getLabelFn = useServerFn(getMyLabel);
+
+  const { data: label } = useQuery({
+    queryKey: ["my-label", user?.id],
+    queryFn: () => getLabelFn(),
+    enabled: !!user && !loading,
+  });
+
+  useEffect(() => {
+    if (loading) return;
+    // Route users to appropriate dashboard based on highest role
+    if (isSuperAdmin) {
+      navigate({ to: "/superadmin", replace: true });
+    } else if (isAdmin) {
+      navigate({ to: "/admin", replace: true });
+    } else if (isArtist) {
+      navigate({ to: "/artist-dashboard", replace: true });
+    } else if (label && label.status === "approved") {
+      navigate({ to: "/label-dashboard", replace: true });
+    }
+    // Regular users stay on /dashboard
+  }, [isSuperAdmin, isAdmin, isArtist, label, loading, navigate]);
+
+  if (loading) return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
+  if (isSuperAdmin || isAdmin || isArtist || (label && label.status === "approved")) return null;
+
   return platform === "native" ? <MobileLibrary /> : <DashboardPage />;
 }
 
@@ -42,10 +73,10 @@ function DashboardPage() {
     return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
 
   const stats = [
-    { label: "Playlists", value: data.stats.playlists, icon: ListMusic },
-    { label: "Purchases", value: data.stats.purchases, icon: ShoppingBag },
-    { label: "Plan", value: data.subscription?.plan ?? "Free", icon: Headphones },
-    { label: "Liked", value: 0, icon: Heart },
+    { label: "Playlists", value: data.stats.playlists, icon: ListMusic, link: "/playlists" },
+    { label: "Purchases", value: data.stats.purchases, icon: ShoppingBag, link: "/library" },
+    { label: "Plan", value: data.subscription?.plan ?? "Free", icon: Headphones, link: "/subscriptions" },
+    { label: "Liked", value: 0, icon: Heart, link: "/library" },
   ];
 
   return (
@@ -58,11 +89,15 @@ function DashboardPage() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           {stats.map((stat) => (
-            <div key={stat.label} className="bg-card border border-border rounded-2xl p-6">
+            <Link
+              key={stat.label}
+              to={stat.link as any}
+              className="bg-card border border-border rounded-2xl p-6 hover:border-primary/50 transition-colors cursor-pointer"
+            >
               <stat.icon className="size-5 text-primary mb-3" />
               <p className="text-2xl font-bold">{String(stat.value)}</p>
               <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-            </div>
+            </Link>
           ))}
         </div>
 

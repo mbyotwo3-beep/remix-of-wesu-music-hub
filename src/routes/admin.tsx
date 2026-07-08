@@ -13,6 +13,7 @@ import {
   moderateArtist,
   listPendingLabels,
   moderateLabel,
+  getArtistDiagnostics,
 } from "@/lib/admin.functions";
 import { usePlatform } from "@/hooks/use-platform";
 import { MobileAdmin } from "@/components/mobile/screens/MobileAdmin";
@@ -33,7 +34,7 @@ function AdminRoute() {
   return platform === "native" ? <MobileAdmin /> : <AdminPage />;
 }
 
-type Tab = "overview" | "songs" | "artists" | "labels";
+type Tab = "overview" | "songs" | "artists" | "labels" | "diagnostics";
 
 function AdminPage() {
   const [tab, setTab] = useState<Tab>("overview");
@@ -46,9 +47,10 @@ function AdminPage() {
           <h1 className="text-3xl font-bold">Admin</h1>
         </div>
         <div className="flex gap-2 mb-8 border-b border-border pb-3">
-          {(["overview", "songs", "artists", "labels"] as Tab[]).map((t) => (
+          {(["overview", "songs", "artists", "labels", "diagnostics"] as Tab[]).map((t) => (
             <button
               key={t}
+              data-tab={t}
               onClick={() => setTab(t)}
               className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
                 tab === t
@@ -64,6 +66,7 @@ function AdminPage() {
         {tab === "songs" && <SongMod />}
         {tab === "artists" && <ArtistMod />}
         {tab === "labels" && <LabelMod />}
+        {tab === "diagnostics" && <Diagnostics />}
       </div>
     </div>
   );
@@ -124,11 +127,11 @@ function LabelMod() {
 function Overview() {
   const statsFn = useServerFn(getPlatformStats);
   const activityFn = useServerFn(getRecentActivity);
-  const statsQ = useQuery({ queryKey: ["admin-stats"], queryFn: () => statsFn(), retry: false });
+  const statsQ = useQuery({ queryKey: ["admin-stats"], queryFn: () => statsFn(), retry: 1 });
   const activityQ = useQuery({
     queryKey: ["admin-activity"],
     queryFn: () => activityFn(),
-    retry: false,
+    retry: 1,
   });
 
   const stats = statsQ.data
@@ -296,6 +299,106 @@ function ArtistMod() {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function Diagnostics() {
+  const diagFn = useServerFn(getArtistDiagnostics);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["artist-diagnostics"],
+    queryFn: () => diagFn(),
+    retry: false,
+  });
+
+  if (isLoading) return <div className="text-muted-foreground">Loading diagnostics…</div>;
+  if (!data) return <div className="text-muted-foreground">No diagnostic data available.</div>;
+
+  const { info, report } = data;
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Artist Status Overview</h2>
+          <button
+            onClick={() => refetch()}
+            className="text-xs px-3 py-1.5 rounded-full bg-primary/15 text-primary hover:bg-primary/25"
+          >
+            Refresh
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-accent rounded-xl p-4">
+            <p className="text-2xl font-bold">{info.summary.totalArtists}</p>
+            <p className="text-xs text-muted-foreground mt-1">Total Artists</p>
+          </div>
+          <div className="bg-accent rounded-xl p-4">
+            <p className="text-2xl font-bold text-green-500">{info.summary.visibleOnArtistsPage}</p>
+            <p className="text-xs text-muted-foreground mt-1">Visible on /artists</p>
+          </div>
+          <div className="bg-accent rounded-xl p-4">
+            <p className="text-2xl font-bold text-yellow-500">{info.summary.awaitingApproval}</p>
+            <p className="text-xs text-muted-foreground mt-1">Awaiting Approval</p>
+          </div>
+          <div className="bg-accent rounded-xl p-4">
+            <p className="text-2xl font-bold text-red-500">{info.summary.rejected}</p>
+            <p className="text-xs text-muted-foreground mt-1">Rejected</p>
+          </div>
+        </div>
+
+        <div className="bg-accent rounded-xl p-4">
+          <h3 className="font-semibold mb-3 text-sm">Detailed Report</h3>
+          <pre className="text-xs font-mono whitespace-pre-wrap text-muted-foreground">
+            {report}
+          </pre>
+        </div>
+      </div>
+
+      {info.summary.awaitingApproval > 0 && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6">
+          <h3 className="font-semibold mb-2 flex items-center gap-2">
+            <Shield className="size-4" />
+            Action Required
+          </h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            You have {info.summary.awaitingApproval} artist application(s) waiting for review.
+          </p>
+          <button
+            onClick={() => {
+              const el = document.querySelector('[data-tab="artists"]') as HTMLButtonElement;
+              if (el) el.click();
+            }}
+            className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Go to Artists Tab
+          </button>
+        </div>
+      )}
+
+      {info.dataIntegrity.approvedArtistsWithoutRole.length > 0 && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6">
+          <h3 className="font-semibold mb-2 flex items-center gap-2">
+            <Shield className="size-4" />
+            Data Integrity Issue
+          </h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            {info.dataIntegrity.approvedArtistsWithoutRole.length} approved artist(s) are missing the 'artist' role.
+            This can happen if the approval process was interrupted.
+          </p>
+          <div className="text-xs space-y-2">
+            {info.dataIntegrity.approvedArtistsWithoutRole.map((artist) => (
+              <div key={artist.id} className="bg-card p-2 rounded">
+                {artist.name} (ID: {artist.id})
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            To fix: Re-approve these artists via the Artists tab, or run the SQL fix from ARTIST_VISIBILITY_FIX.md
+          </p>
+        </div>
+      )}
     </div>
   );
 }

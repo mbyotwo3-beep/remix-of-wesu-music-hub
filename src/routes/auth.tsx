@@ -34,7 +34,7 @@ function AuthPage() {
           password,
           options: {
             data: { full_name: name },
-            emailRedirectTo: "https://www.wesuplusly.com/dashboard",
+            emailRedirectTo: `${window.location.origin}/dashboard`,
           },
         });
         if (error) throw error;

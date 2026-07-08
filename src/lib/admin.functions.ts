@@ -198,3 +198,21 @@ export const listAllSplits = createServerFn({ method: "GET" })
       .limit(100);
     return data ?? [];
   });
+
+// ---------- Artist Status Diagnostics ----------
+
+export const getArtistDiagnostics = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertStaff(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { getDiagnosticInfo, formatDiagnosticReport } = await import("./artist-status-utils");
+    
+    const info = await getDiagnosticInfo(supabaseAdmin);
+    const report = formatDiagnosticReport(info);
+    
+    return {
+      info,
+      report,
+    };
+  });

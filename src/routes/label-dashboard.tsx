@@ -31,14 +31,22 @@ type Tab = "overview" | "roster" | "revenue" | "payouts" | "settings";
 
 function Page() {
   const getLabel = useServerFn(getMyLabel);
-  const { data: label, isLoading } = useQuery({
+  const { data: label, isLoading, error } = useQuery({
     queryKey: ["my-label"],
     queryFn: () => getLabel(),
-    retry: false,
+    retry: 1,
   });
   const [tab, setTab] = useState<Tab>("overview");
 
-  if (isLoading) return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
+  if (error) {
+    return (
+      <div className="max-w-xl mx-auto px-6 py-16 text-center">
+        <p className="text-destructive mb-4">Failed to load label data</p>
+        <p className="text-sm text-muted-foreground">{(error as Error).message}</p>
+      </div>
+    );
+  }
+  if (isLoading) return <div className="p-12 text-center text-muted-foreground">Loading label data…</div>;
   if (!label) {
     return (
       <div className="max-w-xl mx-auto px-6 py-16 text-center">
