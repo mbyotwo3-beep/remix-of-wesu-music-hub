@@ -101,12 +101,35 @@ export const listSongCollaborators = createServerFn({ method: "GET" })
     const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
+    
+    // SECURITY: Don't expose split_pct to public queries
+    // Use the public view which excludes financial data
     const { data: rows } = await sb
-      .from("song_collaborators")
-      .select("id, role, split_pct, accepted, artists!inner(id, name, avatar_url)")
-      .eq("song_id", data.song_id)
-      .eq("accepted", true);
-    return rows ?? [];
+      .from("public_song_collaborators")
+      .select("id, role, accepted, created_at, song_id, artist_id")
+      .eq("song_id", data.song_id);
+    
+    if (!rows) return [];
+    
+    // Fetch artist details separately
+    const artistIds = rows.map((r: any) => r.artist_id);
+    const { data: artists } = await sb
+      .from("artists")
+      .select("id, name, avatar_url")
+      .in("id", artistIds);
+    
+    // Combine the data
+    const result = rows.map((row: any) => {
+      const artist = (artists ?? []).find((a: any) => a.id === row.artist_id);
+      return {
+        id: row.id,
+        role: row.role,
+        accepted: row.accepted,
+        artists: artist ? [artist] : [],
+      };
+    });
+    
+    return result;
   });
 
 export const removeCollaborator = createServerFn({ method: "POST" })

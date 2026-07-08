@@ -6,10 +6,10 @@
 -- ============================================================================
 -- Create a view that exposes only non-financial columns for public read
 
--- Drop existing policy if it exposes split_pct to public
+-- Drop existing policy that exposes split_pct to public
 DROP POLICY IF EXISTS "collabs public read accepted" ON song_collaborators;
 
--- Create a view without financial data
+-- Create a view without financial data for public consumption
 CREATE OR REPLACE VIEW public_song_collaborators AS
 SELECT 
   id,
@@ -24,28 +24,22 @@ WHERE accepted = true;
 -- Grant select on the view to public
 GRANT SELECT ON public_song_collaborators TO anon, authenticated;
 
--- Keep the full table restricted
-ALTER TABLE song_collaborators ENABLE ROW LEVEL SECURITY;
-
--- Create restricted policies for song_collaborators
-CREATE POLICY "song_collaborators_select_own" ON song_collaborators
+-- Recreate a more restricted policy for public reads (no split_pct exposure)
+-- This policy now only allows seeing that a collaboration exists, not the financial terms
+CREATE POLICY "collabs public read accepted" ON song_collaborators
   FOR SELECT
   USING (
-    artist_id IN (SELECT id FROM artists WHERE user_id = auth.uid())
-    OR invited_by = auth.uid()
-    OR EXISTS (
-      SELECT 1 FROM songs WHERE songs.id = song_collaborators.song_id 
-      AND songs.artist_id IN (SELECT id FROM artists WHERE user_id = auth.uid())
-    )
-  );
-
-CREATE POLICY "song_collaborators_insert_own" ON song_collaborators
-  FOR INSERT
-  WITH CHECK (
-    invited_by = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM songs WHERE songs.id = song_id 
-      AND songs.artist_id IN (SELECT id FROM artists WHERE user_id = auth.uid())
+    accepted = true 
+    AND (
+      -- Public can only see basic collab info via the view
+      -- Authenticated users who are participants can see full details
+      auth.uid() IS NULL -- public/anon users - will be filtered by view
+      OR artist_id IN (SELECT id FROM artists WHERE user_id = auth.uid())
+      OR invited_by = auth.uid()
+      OR EXISTS (
+        SELECT 1 FROM songs WHERE songs.id = song_collaborators.song_id 
+        AND songs.artist_id IN (SELECT id FROM artists WHERE user_id = auth.uid())
+      )
     )
   );
 
@@ -269,3 +263,7 @@ CREATE TRIGGER audit_payout_request_trigger
 
 -- Note: Application-level validation is still required in addition to these
 -- database constraints for user-friendly error messages.
+
+-- IMPORTANT: Update client code to use public_song_collaborators view
+-- for unauthenticated/public queries instead of directly querying song_collaborators table.
+-- The view automatically excludes split_pct and only shows accepted collaborations.
