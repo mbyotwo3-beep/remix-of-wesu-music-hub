@@ -109,14 +109,12 @@ function ArtistProfileEditPage() {
 
       // Update profile
       await updateProfile({
-        data: {
-          name: formData.name,
-          bio: formData.bio,
-          genre: formData.genre,
-          avatar_url: avatarUrl,
-          cover_url: coverUrl,
-          social_links: formData.social_links,
-        },
+        name: formData.name,
+        bio: formData.bio,
+        genre: formData.genre,
+        avatar_url: avatarUrl,
+        cover_url: coverUrl,
+        social_links: formData.social_links,
       });
     },
     onSuccess: () => {
