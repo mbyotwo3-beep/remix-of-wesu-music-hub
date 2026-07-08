@@ -92,3 +92,16 @@ export const getMyArtistOverview = createServerFn({ method: "GET" })
       totalRevenueZmw,
     };
   });
+
+export const getMyArtistProfile = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { data: artist } = await supabase
+      .from("artists")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    return artist;
+  });

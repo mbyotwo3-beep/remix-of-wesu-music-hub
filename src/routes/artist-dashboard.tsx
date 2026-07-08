@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Upload, TrendingUp, DollarSign, Music, BarChart3 } from "lucide-react";
+import { Upload, TrendingUp, DollarSign, Music, BarChart3, Settings } from "lucide-react";
 import { useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useUserRoles } from "@/hooks/use-roles";
@@ -125,6 +125,12 @@ function ArtistDashboardPage() {
             <p className="text-muted-foreground">Artist Dashboard</p>
           </div>
           <div className="flex gap-2">
+            <a
+              href="/artist-profile-edit"
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-accent hover:bg-accent/80 transition-colors inline-flex items-center gap-2"
+            >
+              <Settings className="size-4" /> Edit Profile
+            </a>
             <a
               href="/artist-studio"
               className="px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-primary-foreground inline-flex items-center gap-2"
