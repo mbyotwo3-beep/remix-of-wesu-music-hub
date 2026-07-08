@@ -85,23 +85,24 @@ function ArtistProfileEditPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("Not authenticated");
+      if (!user || !artist) throw new Error("Not authenticated or no artist profile");
 
-      let avatarUrl = artist?.avatar_url;
-      let coverUrl = artist?.cover_url;
+      let avatarUrl = artist.avatar_url;
+      let coverUrl = artist.cover_url;
 
       try {
         // Upload avatar if changed
         if (avatarFile) {
           console.log("[Artist Profile] Uploading avatar...", {
             bucket: "artist-images",
-            userId: user.id,
+            artistId: artist.id,
             fileName: avatarFile.name,
             fileSize: avatarFile.size,
             fileType: avatarFile.type
           });
           const uploadStart = Date.now();
-          avatarUrl = await uploadFileToBucket("artist-images", user.id, avatarFile);
+          // CRITICAL: Use artist.id for artist-images bucket (RLS policy requires artist_id as folder)
+          avatarUrl = await uploadFileToBucket("artist-images", artist.id, avatarFile);
           console.log("[Artist Profile] Avatar uploaded successfully:", {
             path: avatarUrl,
             duration: Date.now() - uploadStart
@@ -112,13 +113,14 @@ function ArtistProfileEditPage() {
         if (coverFile) {
           console.log("[Artist Profile] Uploading cover...", {
             bucket: "artist-images",
-            userId: user.id,
+            artistId: artist.id,
             fileName: coverFile.name,
             fileSize: coverFile.size,
             fileType: coverFile.type
           });
           const uploadStart = Date.now();
-          coverUrl = await uploadFileToBucket("artist-images", user.id, coverFile);
+          // CRITICAL: Use artist.id for artist-images bucket (RLS policy requires artist_id as folder)
+          coverUrl = await uploadFileToBucket("artist-images", artist.id, coverFile);
           console.log("[Artist Profile] Cover uploaded successfully:", {
             path: coverUrl,
             duration: Date.now() - uploadStart
