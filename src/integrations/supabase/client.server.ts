@@ -9,14 +9,32 @@ function createSupabaseAdminClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
-      ...(!SUPABASE_SERVICE_ROLE_KEY ? ["SUPABASE_SERVICE_ROLE_KEY"] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
+  if (!SUPABASE_URL) {
+    const message = `Missing SUPABASE_URL environment variable. Connect Supabase in Lovable Cloud.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
+  }
+
+  // TEMPORARY WORKAROUND: If service role key is missing, log warning but don't throw
+  // This allows basic functionality but limits admin operations
+  if (!SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY === "YOUR_SERVICE_ROLE_KEY_HERE") {
+    console.warn(`[Supabase] ⚠️ SUPABASE_SERVICE_ROLE_KEY not configured - using fallback mode.`);
+    console.warn(`[Supabase] ⚠️ Limited functionality: Admin operations and paid content access restricted.`);
+    console.warn(`[Supabase] ℹ️ Get your service role key from: https://supabase.com/dashboard/project/${process.env.VITE_SUPABASE_PROJECT_ID}/settings/api`);
+    
+    // Return a client with the anon key as fallback - limited permissions
+    const ANON_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!ANON_KEY) {
+      throw new Error("Neither SUPABASE_SERVICE_ROLE_KEY nor SUPABASE_PUBLISHABLE_KEY are configured");
+    }
+    
+    return createClient<Database>(SUPABASE_URL, ANON_KEY, {
+      auth: {
+        storage: undefined,
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

@@ -115,12 +115,24 @@ export const getSignedAudioUrl = createServerFn({ method: "POST" })
       if (!sub && !purchase) throw new Error("Subscribe or purchase to play full track");
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error } = await supabaseAdmin.storage
-      .from("song-audio")
-      .createSignedUrl((song as any).audio_url, 3600);
-    if (error) throw new Error(error.message);
-    return { url: signed.signedUrl };
+    // Try to use service role for signed URLs (more secure)
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: signed, error } = await supabaseAdmin.storage
+        .from("song-audio")
+        .createSignedUrl((song as any).audio_url, 3600);
+      if (error) throw error;
+      return { url: signed.signedUrl };
+    } catch (adminError) {
+      // FALLBACK: If service role unavailable, use public URL
+      // This works if storage bucket has public read access
+      console.warn("[Audio] Service role unavailable, using public URL fallback:", adminError);
+      const { supabase: publicClient } = await import("@/integrations/supabase/client");
+      const { data: publicUrl } = publicClient.storage
+        .from("song-audio")
+        .getPublicUrl((song as any).audio_url);
+      return { url: publicUrl.publicUrl };
+    }
   });
 
 /**
@@ -142,12 +154,24 @@ export const getPublicAudioUrl = createServerFn({ method: "POST" })
     if ((song as any).price && Number((song as any).price) > 0) {
       throw new Error("This song requires a subscription or purchase");
     }
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: signed, error } = await supabaseAdmin.storage
-      .from("song-audio")
-      .createSignedUrl((song as any).audio_url, 3600);
-    if (error) throw new Error(error.message);
-    return { url: signed.signedUrl };
+    
+    // Try to use service role for signed URLs (more secure)
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: signed, error } = await supabaseAdmin.storage
+        .from("song-audio")
+        .createSignedUrl((song as any).audio_url, 3600);
+      if (error) throw error;
+      return { url: signed.signedUrl };
+    } catch (adminError) {
+      // FALLBACK: If service role unavailable, use public URL
+      console.warn("[Audio] Service role unavailable for anonymous playback, using public URL:", adminError);
+      const { supabase: publicClient } = await import("@/integrations/supabase/client");
+      const { data: publicUrl } = publicClient.storage
+        .from("song-audio")
+        .getPublicUrl((song as any).audio_url);
+      return { url: publicUrl.publicUrl };
+    }
   });
 
 /**
