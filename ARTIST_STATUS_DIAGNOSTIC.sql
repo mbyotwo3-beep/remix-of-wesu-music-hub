@@ -53,7 +53,7 @@ ORDER BY a.created_at DESC;
 -- 6. SQL to ensure approved artists have the artist role
 -- UNCOMMENT AND RUN ONLY IF NEEDED:
 -- INSERT INTO public.user_roles (user_id, role)
--- SELECT DISTINCT a.user_id, 'artist'::user_role
+-- SELECT DISTINCT a.user_id, 'artist'::app_role
 -- FROM public.artists a
 -- WHERE a.status = 'approved'
 -- AND NOT EXISTS (

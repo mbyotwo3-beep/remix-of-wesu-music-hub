@@ -89,7 +89,7 @@ WHERE status = 'pending';
 
 -- Step 2: Grant artist role to all approved artists
 INSERT INTO public.user_roles (user_id, role)
-SELECT DISTINCT a.user_id, 'artist'::user_role
+SELECT DISTINCT a.user_id, 'artist'::app_role
 FROM public.artists a
 WHERE a.status = 'approved'
 AND NOT EXISTS (
@@ -110,7 +110,7 @@ WHERE id = 'artist-id-here';
 
 -- Grant role (replace 'user-id-here' with the user_id from the artist)
 INSERT INTO public.user_roles (user_id, role)
-VALUES ('user-id-here', 'artist'::user_role)
+VALUES ('user-id-here', 'artist'::app_role)
 ON CONFLICT (user_id, role) DO NOTHING;
 ```
 

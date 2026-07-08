@@ -31,7 +31,7 @@ WHERE status = 'pending';
 
 -- Grant artist role to all approved artists
 INSERT INTO public.user_roles (user_id, role)
-SELECT DISTINCT a.user_id, 'artist'::user_role
+SELECT DISTINCT a.user_id, 'artist'::app_role
 FROM public.artists a
 WHERE a.status = 'approved'
 AND NOT EXISTS (
