@@ -26,6 +26,12 @@ export const inviteCollaborator = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    
+    // SECURITY: Validate split percentage
+    if (!Number.isFinite(data.split_pct) || data.split_pct < 0 || data.split_pct > 100) {
+      throw new Error("split_pct must be between 0 and 100");
+    }
+    
     const { error } = await supabase.from("song_collaborators").insert({
       song_id: data.song_id,
       artist_id: data.artist_id,

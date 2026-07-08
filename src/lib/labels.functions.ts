@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function audit(
@@ -118,10 +119,17 @@ export const inviteArtistToLabel = createServerFn({ method: "POST" })
   .validator((d: { label_id: string; artist_id: string; royalty_pct?: number }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    
+    // SECURITY: Validate royalty percentage
+    const royalty = data.royalty_pct ?? 80;
+    if (!Number.isFinite(royalty) || royalty < 0 || royalty > 100) {
+      throw new Error("royalty_pct must be between 0 and 100");
+    }
+    
     const { error } = await supabase.from("label_artists").insert({
       label_id: data.label_id,
       artist_id: data.artist_id,
-      royalty_pct: data.royalty_pct ?? 80,
+      royalty_pct: royalty,
       status: "invited",
     } as any);
     if (error) throw new Error(error.message);
@@ -253,12 +261,54 @@ export const listLabelRevenue = createServerFn({ method: "GET" })
     return { total, splits: splits ?? [] };
   });
 
+/**
+ * Calculate available balance for label payout
+ */
+async function getLabelAvailableBalance(supabase: SupabaseClient, labelId: string): Promise<number> {
+  // Get total earned from revenue splits
+  const { data: splits } = await supabase
+    .from("revenue_splits")
+    .select("amount")
+    .eq("label_id", labelId)
+    .eq("payee_role", "label");
+  
+  const totalEarned = (splits ?? []).reduce((sum, s: any) => sum + Number(s.amount || 0), 0);
+  
+  // Get total already paid or pending
+  const { data: payouts } = await supabase
+    .from("payouts")
+    .select("amount")
+    .eq("label_id", labelId)
+    .in("status", ["completed", "pending"]);
+  
+  const totalPaid = (payouts ?? []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
+  
+  return Math.max(0, totalEarned - totalPaid);
+}
+
 export const requestLabelPayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator(
     (d: { label_id: string; amount: number; method_code: string; destination: string }) => d,
   )
   .handler(async ({ context, data }) => {
+    // SECURITY: Validate amount
+    if (!Number.isFinite(data.amount) || data.amount <= 0) {
+      throw new Error("Payout amount must be a positive number");
+    }
+    
+    if (data.amount > 1000000) {
+      throw new Error("Payout amount cannot exceed $1,000,000");
+    }
+    
+    // SECURITY: Check available balance
+    const available = await getLabelAvailableBalance(context.supabase, data.label_id);
+    if (data.amount > available) {
+      throw new Error(
+        `Insufficient balance. Available: $${available.toFixed(2)}, Requested: $${data.amount.toFixed(2)}`
+      );
+    }
+    
     const { error } = await context.supabase.from("payouts").insert({
       label_id: data.label_id,
       amount: data.amount,
@@ -269,6 +319,7 @@ export const requestLabelPayout = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     await audit(context.userId, "label.payout.request", "label", data.label_id, {
       amount: data.amount,
+      available_balance: available
     });
     return { ok: true };
   });

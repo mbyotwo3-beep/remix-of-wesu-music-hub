@@ -213,17 +213,61 @@ export const listMyAlbums = createServerFn({ method: "GET" })
 
 // ---------- Payouts ----------
 
+/**
+ * Calculate available balance for artist payout
+ */
+async function getArtistAvailableBalance(supabase: SupabaseClient, artistId: string): Promise<number> {
+  // Get total earned from revenue splits
+  const { data: splits } = await supabase
+    .from("revenue_splits")
+    .select("amount")
+    .eq("artist_id", artistId)
+    .eq("payee_role", "artist");
+  
+  const totalEarned = (splits ?? []).reduce((sum, s: any) => sum + Number(s.amount || 0), 0);
+  
+  // Get total already paid or pending
+  const { data: payouts } = await supabase
+    .from("payouts")
+    .select("amount")
+    .eq("artist_id", artistId)
+    .in("status", ["completed", "pending"]);
+  
+  const totalPaid = (payouts ?? []).reduce((sum, p: any) => sum + Number(p.amount || 0), 0);
+  
+  return Math.max(0, totalEarned - totalPaid);
+}
+
 export const requestPayout = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: { amount: number; method_code: string; destination: string }) => d)
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    
+    // SECURITY: Validate amount
+    if (!Number.isFinite(data.amount) || data.amount <= 0) {
+      throw new Error("Payout amount must be a positive number");
+    }
+    
+    if (data.amount > 1000000) {
+      throw new Error("Payout amount cannot exceed $1,000,000");
+    }
+    
     const { data: artist } = await supabase
       .from("artists")
       .select("id")
       .eq("user_id", userId)
       .maybeSingle();
     if (!artist) throw new Error("Artist profile required");
+    
+    // SECURITY: Check available balance
+    const available = await getArtistAvailableBalance(supabase, (artist as any).id);
+    if (data.amount > available) {
+      throw new Error(
+        `Insufficient balance. Available: $${available.toFixed(2)}, Requested: $${data.amount.toFixed(2)}`
+      );
+    }
+    
     const { error } = await supabase.from("payouts").insert({
       artist_id: (artist as any).id,
       amount: data.amount,
@@ -231,7 +275,10 @@ export const requestPayout = createServerFn({ method: "POST" })
       destination: data.destination,
     } as any);
     if (error) throw new Error(error.message);
-    await audit(supabase, userId, "payout.request", "artist", (artist as any).id, { amount: data.amount });
+    await audit(supabase, userId, "payout.request", "artist", (artist as any).id, { 
+      amount: data.amount,
+      available_balance: available
+    });
     return { ok: true };
   });
 
