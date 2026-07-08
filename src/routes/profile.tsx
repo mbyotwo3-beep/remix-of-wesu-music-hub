@@ -53,12 +53,37 @@ function Page() {
   }, [user]);
 
   const m = useMutation({ 
-    mutationFn: update,
+    mutationFn: async (data: any) => {
+      console.log("[Profile] Updating profile with data:", data);
+      const updateStart = Date.now();
+      try {
+        const result = await update(data);
+        console.log("[Profile] Profile update completed:", {
+          result,
+          duration: Date.now() - updateStart
+        });
+        return result;
+      } catch (error) {
+        console.error("[Profile] Update failed:", {
+          error,
+          errorMessage: (error as Error).message,
+          errorStack: (error as Error).stack,
+          data
+        });
+        throw error;
+      }
+    },
     onSuccess: () => {
+      console.log("[Profile] Save successful");
       toast.success("Profile updated successfully!");
     },
     onError: (error) => {
-      toast.error(`Failed to update profile: ${(error as Error).message}`);
+      console.error("[Profile] Save failed:", error);
+      const errorMsg = (error as Error).message;
+      toast.error(`Failed to update profile: ${errorMsg}`, {
+        description: "Check the browser console (F12) for detailed error information.",
+        duration: 5000
+      });
     },
   });
 
@@ -109,12 +134,31 @@ function Page() {
             onChange={async (e) => {
               const f = e.target.files?.[0];
               if (!f || !user) return;
+              
+              console.log("[Profile] Avatar file selected:", {
+                fileName: f.name,
+                fileSize: f.size,
+                fileType: f.type
+              });
+              
               setUploading(true);
               try {
+                const uploadStart = Date.now();
                 const path = await uploadFileToBucket("user-avatars", user.id, f);
+                console.log("[Profile] Avatar uploaded successfully:", {
+                  path,
+                  duration: Date.now() - uploadStart
+                });
                 setForm((s) => ({ ...s, avatar_url: path }));
+                toast.success("Avatar uploaded successfully!");
               } catch (err) {
-                alert((err as Error).message);
+                console.error("[Profile] Avatar upload failed:", {
+                  error: err,
+                  errorMessage: (err as Error).message,
+                  fileName: f.name,
+                  fileSize: f.size
+                });
+                toast.error(`Avatar upload failed: ${(err as Error).message}`);
               } finally {
                 setUploading(false);
               }

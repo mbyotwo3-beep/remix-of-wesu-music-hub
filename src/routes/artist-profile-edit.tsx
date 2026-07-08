@@ -93,52 +93,85 @@ function ArtistProfileEditPage() {
       try {
         // Upload avatar if changed
         if (avatarFile) {
-          console.log("Uploading avatar...");
+          console.log("[Artist Profile] Uploading avatar...", {
+            bucket: "artist-images",
+            userId: user.id,
+            fileName: avatarFile.name,
+            fileSize: avatarFile.size,
+            fileType: avatarFile.type
+          });
+          const uploadStart = Date.now();
           avatarUrl = await uploadFileToBucket("artist-images", user.id, avatarFile);
-          console.log("Avatar uploaded:", avatarUrl);
+          console.log("[Artist Profile] Avatar uploaded successfully:", {
+            path: avatarUrl,
+            duration: Date.now() - uploadStart
+          });
         }
 
         // Upload cover if changed
         if (coverFile) {
-          console.log("Uploading cover...");
+          console.log("[Artist Profile] Uploading cover...", {
+            bucket: "artist-images",
+            userId: user.id,
+            fileName: coverFile.name,
+            fileSize: coverFile.size,
+            fileType: coverFile.type
+          });
+          const uploadStart = Date.now();
           coverUrl = await uploadFileToBucket("artist-images", user.id, coverFile);
-          console.log("Cover uploaded:", coverUrl);
+          console.log("[Artist Profile] Cover uploaded successfully:", {
+            path: coverUrl,
+            duration: Date.now() - uploadStart
+          });
         }
 
         // Update profile
-        console.log("Updating profile with data:", {
+        const profileData = {
           name: formData.name,
           bio: formData.bio,
           genre: formData.genre,
           avatar_url: avatarUrl,
           cover_url: coverUrl,
           social_links: formData.social_links,
-        });
-
-        const result = await updateProfile({
-          name: formData.name,
-          bio: formData.bio,
-          genre: formData.genre,
-          avatar_url: avatarUrl,
-          cover_url: coverUrl,
-          social_links: formData.social_links,
+        };
+        
+        console.log("[Artist Profile] Updating profile with data:", profileData);
+        const updateStart = Date.now();
+        
+        const result = await updateProfile(profileData);
+        
+        console.log("[Artist Profile] Profile update completed:", {
+          result,
+          duration: Date.now() - updateStart
         });
         
-        console.log("Profile update result:", result);
         return result;
       } catch (error) {
-        console.error("Error in saveMutation:", error);
+        console.error("[Artist Profile] Error in saveMutation:", {
+          error,
+          errorMessage: (error as Error).message,
+          errorStack: (error as Error).stack,
+          userId: user.id,
+          hasAvatarFile: !!avatarFile,
+          hasCoverFile: !!coverFile
+        });
         throw error;
       }
     },
     onSuccess: () => {
+      console.log("[Artist Profile] Save successful, invalidating queries");
       queryClient.invalidateQueries({ queryKey: ["my-artist-profile"] });
       queryClient.invalidateQueries({ queryKey: ["artist-overview"] });
       toast.success("Profile updated successfully!");
       navigate({ to: "/artist-dashboard" });
     },
     onError: (error) => {
-      toast.error(`Failed to update profile: ${(error as Error).message}`);
+      console.error("[Artist Profile] Save failed:", error);
+      const errorMsg = (error as Error).message;
+      toast.error(`Failed to update profile: ${errorMsg}`, {
+        description: "Check the browser console (F12) for detailed error information.",
+        duration: 5000
+      });
     },
   });
 
