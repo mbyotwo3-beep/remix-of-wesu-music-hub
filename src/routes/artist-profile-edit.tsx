@@ -5,7 +5,7 @@ import { Camera, Check, Loader2, User, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { getMyArtistProfile } from "@/lib/user.functions";
-import { updateArtistProfile, signUpload } from "@/lib/artist.functions";
+import { updateArtistProfile } from "@/lib/artist.functions";
 import { uploadFileToBucket } from "@/lib/storage";
 import { RoleGate } from "@/components/RoleGate";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ function ArtistProfileEditPage() {
   
   const fetchProfile = useServerFn(getMyArtistProfile);
   const updateProfile = useServerFn(updateArtistProfile);
-  const getSignedUpload = useServerFn(signUpload);
 
   const { data: artist, isLoading } = useQuery({
     queryKey: ["my-artist-profile", user?.id],
@@ -93,18 +92,12 @@ function ArtistProfileEditPage() {
 
       // Upload avatar if changed
       if (avatarFile) {
-        const path = `${user.id}/avatar-${Date.now()}.${avatarFile.name.split(".").pop()}`;
-        const signed = await getSignedUpload({ bucket: "artist-images", path });
-        await uploadFileToBucket(signed.signedUrl, avatarFile, signed.token);
-        avatarUrl = path;
+        avatarUrl = await uploadFileToBucket("artist-images", user.id, avatarFile);
       }
 
       // Upload cover if changed
       if (coverFile) {
-        const path = `${user.id}/cover-${Date.now()}.${coverFile.name.split(".").pop()}`;
-        const signed = await getSignedUpload({ bucket: "artist-images", path });
-        await uploadFileToBucket(signed.signedUrl, coverFile, signed.token);
-        coverUrl = path;
+        coverUrl = await uploadFileToBucket("artist-images", user.id, coverFile);
       }
 
       // Update profile
