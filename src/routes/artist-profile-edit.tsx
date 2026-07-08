@@ -90,25 +90,46 @@ function ArtistProfileEditPage() {
       let avatarUrl = artist?.avatar_url;
       let coverUrl = artist?.cover_url;
 
-      // Upload avatar if changed
-      if (avatarFile) {
-        avatarUrl = await uploadFileToBucket("artist-images", user.id, avatarFile);
-      }
+      try {
+        // Upload avatar if changed
+        if (avatarFile) {
+          console.log("Uploading avatar...");
+          avatarUrl = await uploadFileToBucket("artist-images", user.id, avatarFile);
+          console.log("Avatar uploaded:", avatarUrl);
+        }
 
-      // Upload cover if changed
-      if (coverFile) {
-        coverUrl = await uploadFileToBucket("artist-images", user.id, coverFile);
-      }
+        // Upload cover if changed
+        if (coverFile) {
+          console.log("Uploading cover...");
+          coverUrl = await uploadFileToBucket("artist-images", user.id, coverFile);
+          console.log("Cover uploaded:", coverUrl);
+        }
 
-      // Update profile
-      await updateProfile({
-        name: formData.name,
-        bio: formData.bio,
-        genre: formData.genre,
-        avatar_url: avatarUrl,
-        cover_url: coverUrl,
-        social_links: formData.social_links,
-      });
+        // Update profile
+        console.log("Updating profile with data:", {
+          name: formData.name,
+          bio: formData.bio,
+          genre: formData.genre,
+          avatar_url: avatarUrl,
+          cover_url: coverUrl,
+          social_links: formData.social_links,
+        });
+
+        const result = await updateProfile({
+          name: formData.name,
+          bio: formData.bio,
+          genre: formData.genre,
+          avatar_url: avatarUrl,
+          cover_url: coverUrl,
+          social_links: formData.social_links,
+        });
+        
+        console.log("Profile update result:", result);
+        return result;
+      } catch (error) {
+        console.error("Error in saveMutation:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-artist-profile"] });
