@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { UserCircle } from "lucide-react";
+import { toast } from "sonner";
 import { RoleGate } from "@/components/RoleGate";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +52,15 @@ function Page() {
       });
   }, [user]);
 
-  const m = useMutation({ mutationFn: update });
+  const m = useMutation({ 
+    mutationFn: update,
+    onSuccess: () => {
+      toast.success("Profile updated successfully!");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update profile: ${(error as Error).message}`);
+    },
+  });
 
   return (
     <div className="max-w-xl mx-auto px-6 py-16">

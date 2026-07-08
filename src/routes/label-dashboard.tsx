@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { Building2, Users, DollarSign, Wallet } from "lucide-react";
 import { RoleGate } from "@/components/RoleGate";
+import { toast } from "sonner";
 import {
   getMyLabel,
   listLabelRoster,
@@ -162,15 +163,33 @@ function Roster({ labelId }: { labelId: string }) {
   });
   const inviteM = useMutation({
     mutationFn: inviteFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["roster", labelId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roster", labelId] });
+      toast.success("Artist invited successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to invite artist: ${error.message}`);
+    },
   });
   const royaltyM = useMutation({
     mutationFn: royaltyFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["roster", labelId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roster", labelId] });
+      toast.success("Royalty percentage updated");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update royalty: ${error.message}`);
+    },
   });
   const removeM = useMutation({
     mutationFn: removeFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["roster", labelId] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["roster", labelId] });
+      toast.success("Artist removed from label");
+    },
+    onError: (error) => {
+      toast.error(`Failed to remove artist: ${error.message}`);
+    },
   });
 
   const [search, setSearch] = useState("");
@@ -325,7 +344,15 @@ function Revenue({ labelId }: { labelId: string }) {
 
 function Payouts({ labelId }: { labelId: string }) {
   const fn = useServerFn(requestLabelPayout);
-  const m = useMutation({ mutationFn: fn });
+  const m = useMutation({
+    mutationFn: fn,
+    onSuccess: () => {
+      toast.success("Payout request submitted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Payout request failed: ${error.message}`);
+    },
+  });
   const [form, setForm] = useState({ amount: 0, method_code: "MTN_MOMO", destination: "" });
   return (
     <form
@@ -379,7 +406,15 @@ function Payouts({ labelId }: { labelId: string }) {
 
 function Settings({ label }: { label: any }) {
   const fn = useServerFn(updateLabel);
-  const m = useMutation({ mutationFn: fn });
+  const m = useMutation({
+    mutationFn: fn,
+    onSuccess: () => {
+      toast.success("Label settings updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update settings: ${error.message}`);
+    },
+  });
   const [form, setForm] = useState({
     name: label.name,
     bio: label.bio ?? "",

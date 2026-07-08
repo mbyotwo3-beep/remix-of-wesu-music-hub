@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery, useQuery, useMutation } from "@tanstack
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useEffect } from "react";
 import { CreditCard, Smartphone, Check, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   getPaymentMethods,
   getSubscriptionPlans,
@@ -86,14 +87,17 @@ function CheckoutPage() {
         window.location.href = res.paymentUrl;
         return;
       }
-      setResultMsg(
-        res?.message ??
+      const successMsg = res?.message ??
           (res?.pendingUssd
             ? "Check your phone and approve the payment prompt."
-            : "Payment started."),
-      );
+            : "Payment started.");
+      setResultMsg(successMsg);
+      toast.success(successMsg);
     },
-    onError: (e: Error) => setResultMsg(e.message),
+    onError: (e: Error) => {
+      setResultMsg(e.message);
+      toast.error(`Payment failed: ${e.message}`);
+    },
   });
 
   if (loading || !user) return null;

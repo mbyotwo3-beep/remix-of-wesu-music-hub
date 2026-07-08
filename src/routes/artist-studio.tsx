@@ -6,6 +6,7 @@ import { Upload, Wallet, FolderPlus, Users, Building2, Star } from "lucide-react
 import { RoleGate } from "@/components/RoleGate";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadFileToBucket } from "@/lib/storage";
+import { toast } from "sonner";
 import {
   uploadSong,
   createAlbum,
@@ -88,7 +89,15 @@ function CollabsTab() {
     queryFn: () => songsFn(),
     retry: false,
   });
-  const m = useMutation({ mutationFn: inviteFn });
+  const m = useMutation({
+    mutationFn: inviteFn,
+    onSuccess: () => {
+      toast.success("Collaborator invite sent successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to send invite: ${error.message}`);
+    },
+  });
   const [form, setForm] = useState({
     song_id: "",
     artist_id: "",
@@ -205,11 +214,23 @@ function LabelTab() {
   const { data } = useQuery({ queryKey: ["my-label-invites"], queryFn: () => fn(), retry: false });
   const respondM = useMutation({
     mutationFn: respondFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-label-invites"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-label-invites"] });
+      toast.success("Label invite response recorded");
+    },
+    onError: (error) => {
+      toast.error(`Failed to respond to invite: ${error.message}`);
+    },
   });
   const leaveM = useMutation({
     mutationFn: leaveFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-label-invites"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-label-invites"] });
+      toast.success("Successfully left label");
+    },
+    onError: (error) => {
+      toast.error(`Failed to leave label: ${error.message}`);
+    },
   });
 
   return (
@@ -268,7 +289,15 @@ function LabelTab() {
 
 function FeaturesTab() {
   const fn = useServerFn(setCollabPrefs);
-  const m = useMutation({ mutationFn: fn });
+  const m = useMutation({
+    mutationFn: fn,
+    onSuccess: () => {
+      toast.success("Feature settings saved successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to save settings: ${error.message}`);
+    },
+  });
   const [form, setForm] = useState({
     accepts_collabs: true,
     allow_features: false,
@@ -342,6 +371,10 @@ function UploadTab() {
     onSuccess: () => {
       setMsg("Submitted! Awaiting moderation.");
       qc.invalidateQueries({ queryKey: ["my-songs"] });
+      toast.success("Song uploaded successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to upload song: ${error.message}`);
     },
   });
 
@@ -454,7 +487,13 @@ function AlbumTab() {
   });
   const m = useMutation({
     mutationFn: create,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-albums"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-albums"] });
+      toast.success("Album created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to create album: ${error.message}`);
+    },
   });
   const { user } = useAuth();
   const [form, setForm] = useState({ title: "", description: "", price: 0 });
@@ -550,7 +589,13 @@ function PayoutTab() {
   });
   const m = useMutation({
     mutationFn: requestFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-payouts"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-payouts"] });
+      toast.success("Payout request submitted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to request payout: ${error.message}`);
+    },
   });
   const [form, setForm] = useState({ amount: 0, method_code: "MTN_MOMO", destination: "" });
 

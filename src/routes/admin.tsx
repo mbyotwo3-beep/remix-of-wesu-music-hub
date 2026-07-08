@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Users, Music, CreditCard, Shield, BarChart3, Check, X, Building2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { RoleGate } from "@/components/RoleGate";
 import {
   getPlatformStats,
@@ -83,7 +84,14 @@ function LabelMod() {
   });
   const m = useMutation({
     mutationFn: modFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-labels"] }),
+    onSuccess: (_, variables) => {
+      const action = variables.decision === "approve" ? "approved" : "rejected";
+      toast.success(`Label ${action} successfully`);
+      qc.invalidateQueries({ queryKey: ["pending-labels"] });
+    },
+    onError: (error) => {
+      toast.error(`Failed to moderate label: ${(error as Error).message}`);
+    },
   });
   if (!data) return <div className="text-muted-foreground">Loading…</div>;
   if (data.length === 0) return <p className="text-muted-foreground">No label applications.</p>;
@@ -220,7 +228,14 @@ function SongMod() {
   const { data } = useQuery({ queryKey: ["pending-songs"], queryFn: () => list(), retry: false });
   const m = useMutation({
     mutationFn: mod,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-songs"] }),
+    onSuccess: (_, variables) => {
+      const action = variables.decision === "approve" ? "approved" : "rejected";
+      toast.success(`Song ${action} successfully`);
+      qc.invalidateQueries({ queryKey: ["pending-songs"] });
+    },
+    onError: (error) => {
+      toast.error(`Failed to moderate song: ${(error as Error).message}`);
+    },
   });
   if (!data) return <div className="text-muted-foreground">Loading…</div>;
   if (data.length === 0)
@@ -265,7 +280,14 @@ function ArtistMod() {
   const { data } = useQuery({ queryKey: ["pending-artists"], queryFn: () => list(), retry: false });
   const m = useMutation({
     mutationFn: mod,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pending-artists"] }),
+    onSuccess: (_, variables) => {
+      const action = variables.decision === "approve" ? "approved" : "rejected";
+      toast.success(`Artist ${action} successfully`);
+      qc.invalidateQueries({ queryKey: ["pending-artists"] });
+    },
+    onError: (error) => {
+      toast.error(`Failed to moderate artist: ${(error as Error).message}`);
+    },
   });
   if (!data) return <div className="text-muted-foreground">Loading…</div>;
   if (data.length === 0)

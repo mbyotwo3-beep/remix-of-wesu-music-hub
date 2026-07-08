@@ -15,6 +15,7 @@ import {
   Building2,
 } from "lucide-react";
 import { RoleGate } from "@/components/RoleGate";
+import { toast } from "sonner";
 import {
   listUsers,
   grantRole,
@@ -181,11 +182,23 @@ function FeaturedTab() {
   });
   const upsertM = useMutation({
     mutationFn: upsertFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-featured"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-featured"] });
+      toast.success("Featured slot added successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to add featured slot: ${error.message}`);
+    },
   });
   const removeM = useMutation({
     mutationFn: removeFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-featured"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-featured"] });
+      toast.success("Featured slot removed successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to remove featured slot: ${error.message}`);
+    },
   });
   const [form, setForm] = useState({
     slot_type: "home_hero",
@@ -353,11 +366,23 @@ function UsersTab() {
 
   const grantM = useMutation({
     mutationFn: grant,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-users"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-users"] });
+      toast.success("Role granted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to grant role: ${error.message}`);
+    },
   });
   const revokeM = useMutation({
     mutationFn: revoke,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-users"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-users"] });
+      toast.success("Role revoked successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to revoke role: ${error.message}`);
+    },
   });
 
   if (!users) return <div className="text-muted-foreground">Loading…</div>;
@@ -446,7 +471,13 @@ function PlansTab() {
   });
   const upsertM = useMutation({
     mutationFn: upsert,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-plans"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-plans"] });
+      toast.success("Subscription plan saved successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to save plan: ${error.message}`);
+    },
   });
 
   const [draft, setDraft] = useState({ name: "", price_zmw: 0, description: "" });
@@ -524,7 +555,13 @@ function PaymentsTab() {
   });
   const m = useMutation({
     mutationFn: toggle,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-methods"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-methods"] });
+      toast.success("Payment method updated successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to update payment method: ${error.message}`);
+    },
   });
 
   return (
@@ -566,7 +603,13 @@ function PayoutsTab() {
   const { data } = useQuery({ queryKey: ["super-payouts"], queryFn: () => list(), retry: 1 });
   const m = useMutation({
     mutationFn: decide,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-payouts"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-payouts"] });
+      toast.success("Payout decision recorded successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to process payout: ${error.message}`);
+    },
   });
 
   if (!data) return <div className="text-muted-foreground">Loading…</div>;
@@ -635,7 +678,13 @@ function SettingsTab() {
   const { data } = useQuery({ queryKey: ["super-settings"], queryFn: () => get() });
   const m = useMutation({
     mutationFn: update,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["super-settings"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["super-settings"] });
+      toast.success("Settings saved successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to save settings: ${error.message}`);
+    },
   });
   const [site, setSite] = useState<any>(null);
   const [pay, setPay] = useState<any>(null);

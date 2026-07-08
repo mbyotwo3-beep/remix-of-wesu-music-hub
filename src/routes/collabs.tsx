@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Users, Check, X } from "lucide-react";
 import { RoleGate } from "@/components/RoleGate";
 import { listMyCollabInvites, respondToCollabInvite } from "@/lib/collabs.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/collabs")({
   head: () => ({ meta: [{ title: "Collaborations — Wesu+" }] }),
@@ -23,7 +24,13 @@ function Page() {
   const { data } = useQuery({ queryKey: ["my-collabs"], queryFn: () => listFn(), retry: false });
   const m = useMutation({
     mutationFn: respondFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-collabs"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-collabs"] });
+      toast.success("Collaboration invite response recorded");
+    },
+    onError: (error) => {
+      toast.error(`Failed to respond: ${error.message}`);
+    },
   });
 
   return (

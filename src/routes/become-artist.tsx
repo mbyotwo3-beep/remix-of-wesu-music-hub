@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Mic2, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import { RoleGate } from "@/components/RoleGate";
 import { applyAsArtist } from "@/lib/artist.functions";
 import { getMyArtistOverview } from "@/lib/user.functions";
@@ -29,7 +30,13 @@ function Page() {
 
   const m = useMutation({
     mutationFn: apply,
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      toast.success("Artist application submitted successfully!");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(`Failed to submit application: ${(error as Error).message}`);
+    },
   });
   const [form, setForm] = useState({ name: "", bio: "", genre: "" });
 

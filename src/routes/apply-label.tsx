@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { toast } from "sonner";
 import { RoleGate } from "@/components/RoleGate";
 import { applyForLabel } from "@/lib/labels.functions";
 
@@ -19,7 +20,16 @@ export const Route = createFileRoute("/apply-label")({
 function Page() {
   const nav = useNavigate();
   const fn = useServerFn(applyForLabel);
-  const m = useMutation({ mutationFn: fn, onSuccess: () => nav({ to: "/label-dashboard" }) });
+  const m = useMutation({ 
+    mutationFn: fn, 
+    onSuccess: () => {
+      toast.success("Label application submitted successfully!");
+      nav({ to: "/label-dashboard" });
+    },
+    onError: (error) => {
+      toast.error(`Failed to submit application: ${(error as Error).message}`);
+    },
+  });
   const [form, setForm] = useState({ name: "", bio: "", contact_email: "", logo_url: "" });
   return (
     <div className="max-w-xl mx-auto px-6 py-12">

@@ -7,6 +7,7 @@ import { RoleGate } from "@/components/RoleGate";
 import { createPlaylist, deletePlaylist, addToPlaylist } from "@/lib/listener.functions";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/playlists")({
   head: () => ({ meta: [{ title: "My Playlists — Wesu+" }] }),
@@ -48,12 +49,22 @@ function Page() {
       qc.invalidateQueries({ queryKey: ["my-playlists"] });
       setShowCreate(false);
       setNewPlaylist({ name: "", description: "", is_public: false });
+      toast.success("Playlist created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to create playlist: ${error.message}`);
     },
   });
 
   const deleteM = useMutation({
     mutationFn: deleteFn,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-playlists"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-playlists"] });
+      toast.success("Playlist deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete playlist: ${error.message}`);
+    },
   });
 
   if (isLoading) return <div className="p-12 text-center text-muted-foreground">Loading…</div>;
