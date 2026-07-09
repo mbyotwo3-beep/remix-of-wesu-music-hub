@@ -85,7 +85,7 @@ function LabelMod() {
   const m = useMutation({
     mutationFn: modFn,
     onSuccess: (_, variables) => {
-      const action = variables.decision === "approve" ? "approved" : "rejected";
+      const action = variables.data.status === "approved" ? "approved" : "rejected";
       toast.success(`Label ${action} successfully`);
       qc.invalidateQueries({ queryKey: ["pending-labels"] });
     },
@@ -229,7 +229,7 @@ function SongMod() {
   const m = useMutation({
     mutationFn: mod,
     onSuccess: (_, variables) => {
-      const action = variables.decision === "approve" ? "approved" : "rejected";
+      const action = variables.data.status === "approved" ? "approved" : "rejected";
       toast.success(`Song ${action} successfully`);
       qc.invalidateQueries({ queryKey: ["pending-songs"] });
     },
@@ -281,7 +281,7 @@ function ArtistMod() {
   const m = useMutation({
     mutationFn: mod,
     onSuccess: (_, variables) => {
-      const action = variables.decision === "approve" ? "approved" : "rejected";
+      const action = variables.data.status === "approved" ? "approved" : "rejected";
       toast.success(`Artist ${action} successfully`);
       qc.invalidateQueries({ queryKey: ["pending-artists"] });
     },

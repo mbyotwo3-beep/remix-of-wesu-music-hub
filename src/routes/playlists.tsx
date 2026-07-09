@@ -33,14 +33,15 @@ function Page() {
   const { data: playlists, isLoading } = useQuery({
     queryKey: ["my-playlists", user?.id],
     queryFn: async () => {
+      if (!user?.id) return [];
       const { data } = await supabase
         .from("playlists")
         .select("*, playlist_songs(song_id)")
-        .eq("user_id", user?.id)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       return data ?? [];
     },
-    enabled: !!user,
+    enabled: !!user?.id,
   });
 
   const createM = useMutation({
