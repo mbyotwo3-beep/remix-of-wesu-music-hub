@@ -6,14 +6,34 @@ export const updateProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: { full_name?: string; bio?: string; avatar_url?: string; location?: string }) => d)
   .handler(async ({ context, data }) => {
-    const patch: any = {};
+    const patch: any = { user_id: context.userId };
     for (const k of ["full_name", "bio", "avatar_url", "location"] as const) {
       if (data[k] !== undefined) patch[k] = data[k];
     }
-    const { error } = await context.supabase
+    
+    // Check if profile exists
+    const { data: existing } = await context.supabase
       .from("profiles")
-      .update(patch)
-      .eq("user_id", context.userId);
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    
+    let error;
+    if (existing) {
+      // Update existing profile
+      const result = await context.supabase
+        .from("profiles")
+        .update(patch)
+        .eq("user_id", context.userId);
+      error = result.error;
+    } else {
+      // Insert new profile
+      const result = await context.supabase
+        .from("profiles")
+        .insert(patch as any);
+      error = result.error;
+    }
+    
     if (error) throw new Error(error.message);
     return { ok: true };
   });
