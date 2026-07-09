@@ -18,7 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePlayer } from "@/stores/player";
 import { useAuth } from "@/hooks/use-auth";
 import { useServerFn } from "@tanstack/react-start";
-import { getSignedAudioUrl, getPublicAudioUrl, incrementPlayCount } from "@/lib/listener.functions";
+import { getSignedAudioUrl, getPublicAudioUrl, getPreviewAudioUrl, incrementPlayCount } from "@/lib/listener.functions";
 import { Link } from "@tanstack/react-router";
 import { useIsNative } from "@/hooks/use-platform";
 import {
@@ -58,6 +58,7 @@ export function PlayerBar() {
   const isNative = useIsNative();
   const getSignedFn = useServerFn(getSignedAudioUrl);
   const getPublicFn = useServerFn(getPublicAudioUrl);
+  const getPreviewFn = useServerFn(getPreviewAudioUrl);
   const incrementFn = useServerFn(incrementPlayCount);
 
   const [loading, setLoading] = useState(false);
@@ -65,8 +66,10 @@ export function PlayerBar() {
   const [volume, setVolume] = useState(1);
   const [showAd, setShowAd] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isPreview, setIsPreview] = useState(false);
   const currentTrackId = useRef<string | null>(null);
   const nativeCleanupRef = useRef<(() => void) | null>(null);
+  const previewTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load audio when track changes
   useEffect(() => {
@@ -76,6 +79,11 @@ export function PlayerBar() {
       getAudio().pause();
       currentTrackId.current = null;
       setLoading(false);
+      setIsPreview(false);
+      if (previewTimerRef.current) {
+        clearTimeout(previewTimerRef.current);
+        previewTimerRef.current = null;
+      }
       return;
     }
     if (currentTrackId.current === track.id) return;
@@ -90,6 +98,11 @@ export function PlayerBar() {
     currentTrackId.current = track.id;
     setError(null);
     setLoading(true);
+    setIsPreview(false);
+    if (previewTimerRef.current) {
+      clearTimeout(previewTimerRef.current);
+      previewTimerRef.current = null;
+    }
 
     const audio = getAudio();
     audio.pause();
@@ -99,15 +112,27 @@ export function PlayerBar() {
     async function loadUrl() {
       try {
         let url: string;
+        let previewMode = false;
+        
         if (user) {
-          const res = await getSignedFn({ data: { song_id: track!.id } });
-          url = res.url;
+          try {
+            const res = await getSignedFn({ data: { song_id: track!.id } });
+            url = res.url;
+          } catch (err) {
+            // User doesn't have subscription/purchase, use preview
+            const res = await getPreviewFn({ data: { song_id: track!.id } });
+            url = res.url;
+            previewMode = true;
+          }
         } else {
-          // Anonymous — only free songs allowed, ads shown
-          const res = await getPublicFn({ data: { song_id: track!.id } });
+          // Anonymous — use preview
+          const res = await getPreviewFn({ data: { song_id: track!.id } });
           url = res.url;
+          previewMode = true;
           setShowAd(true);
         }
+
+        setIsPreview(previewMode);
 
         // Try native audio first on native platform (background audio support)
         if (isNative) {
@@ -120,11 +145,21 @@ export function PlayerBar() {
               await playNative(track!.id);
               setLoading(false);
               if (!playing) usePlayer.getState().togglePlay();
+              
+              // Set preview timer if in preview mode
+              if (previewMode) {
+                previewTimerRef.current = setTimeout(() => {
+                  stopNative(track!.id).catch(() => {});
+                  usePlayer.getState().togglePlay();
+                  setError("Preview ended. Subscribe or purchase to listen to the full track.");
+                }, 15000);
+              }
+              
               // Wire 'complete' event back to Zustand
               const cleanup = await onNativeComplete(() => {
                 usePlayer.getState().setTrack({ ...usePlayer.getState().track!, audioUrl: null });
                 if (usePlayer.getState().playing) usePlayer.getState().togglePlay();
-                if (track && user) {
+                if (track && user && !previewMode) {
                   incrementFn({ data: { song_id: track!.id } }).catch(() => {});
                 }
               });
@@ -140,6 +175,15 @@ export function PlayerBar() {
         await audio.play();
         setLoading(false);
         if (!playing) usePlayer.getState().togglePlay(); // sync store
+        
+        // Set preview timer if in preview mode
+        if (previewMode) {
+          previewTimerRef.current = setTimeout(() => {
+            audio.pause();
+            usePlayer.getState().togglePlay();
+            setError("Preview ended. Subscribe or purchase to listen to the full track.");
+          }, 15000);
+        }
       } catch (err) {
         if (retries < 2) {
           retries++;
@@ -384,6 +428,19 @@ export function PlayerBar() {
             </span>
             <Link to="/auth" className="font-semibold text-primary hover:underline">
               Sign up free to save music →
+            </Link>
+          </div>
+        )}
+
+        {/* Preview banner */}
+        {isPreview && (
+          <div className="flex items-center justify-between px-6 py-1.5 bg-amber-500/10 border-b border-amber-500/20 text-xs">
+            <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+              <Radio className="size-3" />
+              15-second preview
+            </span>
+            <Link to="/checkout" className="font-semibold text-amber-600 dark:text-amber-400 hover:underline">
+              Subscribe for full access →
             </Link>
           </div>
         )}

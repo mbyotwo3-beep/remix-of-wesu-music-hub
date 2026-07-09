@@ -195,6 +195,43 @@ export const getPublicAudioUrl = createServerFn({ method: "POST" })
   });
 
 /**
+ * Get a signed audio URL for preview (15-second clip) without requiring authentication.
+ * This allows users to preview any approved song regardless of price.
+ * The preview duration is enforced client-side.
+ */
+export const getPreviewAudioUrl = createServerFn({ method: "POST" })
+  .validator((d: { song_id: string }) => d)
+  .handler(async ({ data }) => {
+    const supabase = getPublicSupabase();
+    const { data: song } = await supabase
+      .from("songs")
+      .select("audio_url")
+      .eq("id", data.song_id)
+      .eq("status", "approved")
+      .single();
+    if (!song) throw new Error("Song not found");
+    
+    // Try to use service role for signed URLs (more secure)
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: signed, error } = await supabaseAdmin.storage
+        .from("song-audio")
+        .createSignedUrl((song as any).audio_url, 3600);
+      if (error) throw error;
+      return { url: signed.signedUrl };
+    } catch (adminError) {
+      // FALLBACK: If service role unavailable, use public URL
+      // This works if storage bucket has public read access
+      console.warn("[Audio] Service role unavailable for preview, using public URL:", adminError);
+      const { supabase: publicClient } = await import("@/integrations/supabase/client");
+      const { data: publicUrl } = publicClient.storage
+        .from("song-audio")
+        .getPublicUrl((song as any).audio_url);
+      return { url: publicUrl.publicUrl };
+    }
+  });
+
+/**
  * Increment the play_count for a song. Called when playback completes.
  * Requires auth to prevent anonymous abuse.
  */
